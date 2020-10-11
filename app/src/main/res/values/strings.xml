@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Damiantour</string>
+    <string name="mapbox_access_token">pk.eyJ1Ijoic2ltb25iZXR0ZW5zIiwiYSI6ImNrZzVjNW53bDBzc2kydnA0Yml4bjViZW0ifQ.VxkKMCFOFglLvZC66cfk1A</string>
 </resources>
