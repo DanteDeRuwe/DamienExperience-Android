@@ -1,7 +1,11 @@
 package com.example.damiantour
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +15,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -33,10 +38,12 @@ import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import org.json.JSONObject
 import java.io.InputStream
-import kotlin.math.log
 
 /// Documentation
 
@@ -96,7 +103,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             addLayer(style)
-            addSymbols(style);
+            addSymbols(style)
             enableLocationComponent(style)
         }
     }
@@ -153,6 +160,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     }
 
     private fun addSymbols(style: Style){
+        val symbolLayerIconFeatureList = ArrayList<Feature>()
         val obj = JSONObject(readJSONFromAsset("testwaypoints.geojson"))
         val coordsObject = obj.getJSONArray("features")
 
@@ -167,6 +175,12 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             val tupel =waypointObject.getJSONObject("coordinates")
             val lon = tupel.get("longitude") as Double
             val lat = tupel.get("latitude") as Double
+            val feature = Feature.fromGeometry(
+                Point.fromLngLat(lon, lat)
+            )
+            symbolLayerIconFeatureList.add(feature)
+
+
             //adds coordinates to the route
             val customView: View = LayoutInflater.from(context).inflate(
                 R.layout.marker_view_bubble, null
@@ -185,8 +199,37 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             }
             counter++
         }
+        style.addSource(
+            GeoJsonSource(
+                "ICONS",
+                FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
+            )
+        )
+        val icon = drawableToBitmap(getDrawable(requireContext(),R.drawable.ic_map_marker)!!)
+
+        style.addImage("map_marker", icon)
+
+        style.addLayer(
+            SymbolLayer("SYMBOL_LAYER_ID", "ICONS").withProperties(
+                iconImage("map_marker"),
+                iconOffset(arrayOf(0f, -8f))
+            )
+        )
 
 
+    }
+
+    private fun drawableToBitmap (drawable : Drawable): Bitmap {
+        if (drawable is BitmapDrawable) {
+            return drawable.bitmap
+        }
+
+        val  bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas =  Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+
+        return bitmap
     }
 
     @SuppressLint("MissingPermission")
