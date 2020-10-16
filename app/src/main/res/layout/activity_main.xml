@@ -5,14 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
-    <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/mapView"
+    <fragment
+        android:id="@+id/testFragment"
+        android:name="com.example.damiantour.MapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        mapbox:mapbox_cameraTargetLat = "37.7749"
-        mapbox:mapbox_cameraTargetLng = "-122.41"
-        mapbox:mapbox_cameraZoom="11"
-        />
+        android:layout_height="match_parent"/>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
