@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -17,6 +19,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
@@ -25,13 +28,15 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerView
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import org.json.JSONObject
 import java.io.InputStream
-import java.nio.channels.FileChannel.open
+import kotlin.math.log
 
 /// Documentation
 
@@ -52,27 +57,29 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     //the object
     private lateinit var mapBoxMap: MapboxMap
 
+    //
+    private lateinit var markerViewManager : MarkerViewManager
+
     private lateinit var permissionsManager: PermissionsManager
 
-
+    //on create fragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
 
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+    //on the create view
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.i("Fragment" ,"Goes in onCreateView")
+        Log.i("Fragment", "Goes in onCreateView")
         val root = inflater.inflate(R.layout.fragment_map, container, false)
 
         mapView = root.findViewById(R.id.mapView)
-
         mapView.onCreate(savedInstanceState)
-        Log.i("Fragment" ,"getMapAsync")
+        Log.i("Fragment", "getMapAsync")
         mapView.getMapAsync(this)
-
         return root
 
     }
@@ -84,64 +91,104 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * [MapView] that defines the callback.
      */
     override fun onMapReady(mapboxMap: MapboxMap) {
-        Log.i("Fragment" ,"Goes in onMapReady")
+        Log.i("Fragment", "Goes in onMapReady")
         this.mapBoxMap = mapboxMap
+        markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+            addLayer(style)
+            addSymbols(style);
+            enableLocationComponent(style)
+        }
+    }
 
-            // initRouteCoordinates()
-            val obj = JSONObject(readJSONFromAsset())
-//            println( ( obj.getJSONArray("features").getJSONObject(0)
-//                .getJSONObject("geometry").getJSONArray("coordinates")
-//                    ))
+    //adds the layer
+    private fun addLayer(style: Style){
+        // initRouteCoordinates()
+        val obj = JSONObject(readJSONFromAsset("testroute.geojson"))
 
-            //Get coords from json object, returns jsonarray
-            //in the form of [[long,lat],[long,lat], ... , [long,lat]]
-            val coordsObject = obj.getJSONArray("features").getJSONObject(0)
-                .getJSONObject("geometry").getJSONArray("coordinates")
+        //Get coords from json object, returns jsonarray
+        //in the form of [[long,lat],[long,lat], ... , [long,lat]]
+        val coordsObject = obj.getJSONArray("features").getJSONObject(0)
+            .getJSONObject("geometry").getJSONArray("coordinates")
 
-            val length = coordsObject.length()
-            val routeCoordinates = ArrayList<Point>()
-            var counter = 0
-            //Loops over all the coordinates
-            while (counter < length) {
-                val tupel = coordsObject.getJSONArray(counter)
-
-                val lon = tupel.get(0) as Double
-                val lat = tupel.get(1) as Double
-                println(lon)
-                //adds coordinates to the route
-                routeCoordinates.add(Point.fromLngLat(lon, lat))
-                counter++
-            }
-
-            // Create the LineString from the list of coordinates and then make a GeoJSON
-            // FeatureCollection so we can add the line to our map as a layer.
-            style.addSource(
-                GeoJsonSource(
-                    "line-source",
-                    FeatureCollection.fromFeatures(
-                        arrayOf(
-                            Feature.fromGeometry(
-                                LineString.fromLngLats(routeCoordinates)
-                            )
+        val length = coordsObject.length()
+        val routeCoordinates = ArrayList<Point>()
+        var counter = 0
+        //Loops over all the coordinates
+        while (counter < length) {
+            val tupel = coordsObject.getJSONArray(counter)
+            val lon = tupel.get(0) as Double
+            val lat = tupel.get(1) as Double
+            println(lon)
+            //adds coordinates to the route
+            routeCoordinates.add(Point.fromLngLat(lon, lat))
+            counter++
+        }
+        // Create the LineString from the list of coordinates and then make a GeoJSON
+        // FeatureCollection so we can add the line to our map as a layer.
+        style.addSource(
+            GeoJsonSource(
+                "line-source",
+                FeatureCollection.fromFeatures(
+                    arrayOf(
+                        Feature.fromGeometry(
+                            LineString.fromLngLats(routeCoordinates)
                         )
                     )
                 )
             )
+        )
 
-            // The layer properties for our line. This is where we make the line dotted, set the
-            // color, etc.
-            style.addLayer(
-                LineLayer("linelayer", "line-source").withProperties(
-                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                    PropertyFactory.lineWidth(5f),
-                    PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
-                )
+        // The layer properties for our line. This is where we make the line dotted, set the
+        // color, etc.
+        style.addLayer(
+            LineLayer("linelayer", "line-source").withProperties(
+                PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                PropertyFactory.lineWidth(5f),
+                PropertyFactory.lineColor(Color.parseColor("#e55e5e")),
+                PropertyFactory.fillOpacity(0.4f)
             )
-            enableLocationComponent(style)
-        }
+        )
     }
+
+    private fun addSymbols(style: Style){
+        val obj = JSONObject(readJSONFromAsset("testwaypoints.geojson"))
+        val coordsObject = obj.getJSONArray("features")
+
+        val length = coordsObject.length()
+        var counter = 0
+        //Loops over all the coordinates
+        while (counter < length) {
+            val waypointObject = coordsObject.getJSONObject(counter)
+            val title = waypointObject.get("title") as String
+            val description = waypointObject.get("description") as String
+
+            val tupel =waypointObject.getJSONObject("coordinates")
+            val lon = tupel.get("longitude") as Double
+            val lat = tupel.get("latitude") as Double
+            //adds coordinates to the route
+            val customView: View = LayoutInflater.from(context).inflate(
+                R.layout.marker_view_bubble, null
+            )
+            customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+
+            val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
+            titleTextView.text = title
+
+            val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
+            snippetTextView.text = description
+
+            val marker = MarkerView(LatLng(lat, lon), customView)
+            marker.let {
+                markerViewManager.addMarker(it)
+            }
+            counter++
+        }
+
+
+    }
+
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
         // Check if permissions are enabled and if not request
@@ -189,7 +236,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     }
 
     override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-        Toast.makeText(requireContext(), R.string.user_location_permission_explanation, Toast.LENGTH_LONG)
+        Toast.makeText(
+            requireContext(),
+            R.string.user_location_permission_explanation,
+            Toast.LENGTH_LONG
+        )
             .show()
     }
 
@@ -197,15 +248,18 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         if (granted) {
             enableLocationComponent(mapBoxMap.style!!)
         } else {
-            Toast.makeText(requireContext(), R.string.user_location_permission_not_granted, Toast.LENGTH_LONG)
+            Toast.makeText(
+                requireContext(),
+                R.string.user_location_permission_not_granted,
+                Toast.LENGTH_LONG
+            )
                 .show()
             activity?.finish()
         }
     }
     //Test method
     //Gets the JSON file from assets
-    fun readJSONFromAsset(): String {
-        val file_name = "testroute.geojson"
+    fun readJSONFromAsset(file_name: String): String {
         val json :String
         try {
             val assets = activity?.assets
