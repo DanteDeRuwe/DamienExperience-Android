@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Damiantour</string>
+    <string name="email_input">Email...</string>
+    <string name="password_input">Wachtwoord...</string>
+    <string name="login">INLOGGEN</string>
+    <string name="lost_password">Wachtwoord vergeten</string>
+    <string name="damiaan_logo_login_description">Logo van de Damiaan Experience</string>
+    <string name="login_background_description">Background login screen</string>
+    <string name="password_hint">Wachtwoord</string>
 </resources>
