@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
     <fragment
         android:id="@+id/testFragment"
-        android:name="com.example.damiantour.MapFragment"
+        android:name="com.example.damiantour.map.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

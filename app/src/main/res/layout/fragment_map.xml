@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapFragment">
+    tools:context=".map.MapFragment">
 
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        mapbox:mapbox_cameraTargetLat = "37.7749"
-        mapbox:mapbox_cameraTargetLng = "-122.41"
+        mapbox:mapbox_cameraTargetLat = "50.9944"
+        mapbox:mapbox_cameraTargetLng = "4.7088"
         mapbox:mapbox_cameraZoom="11"
         />
 

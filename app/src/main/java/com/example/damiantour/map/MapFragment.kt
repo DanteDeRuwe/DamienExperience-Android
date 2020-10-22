@@ -1,4 +1,4 @@
-package com.example.damiantour
+package com.example.damiantour.map
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
+import com.example.damiantour.R
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -131,6 +132,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             routeCoordinates.add(Point.fromLngLat(lon, lat))
             counter++
         }
+
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
         style.addSource(
@@ -146,8 +148,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             )
         )
 
-        // The layer properties for our line. This is where we make the line dotted, set the
-        // color, etc.
+        // adds styling to the line connecting the coordstuppels
         style.addLayer(
             LineLayer("linelayer", "line-source").withProperties(
                 PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
@@ -168,47 +169,53 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         var counter = 0
         //Loops over all the coordinates
         while (counter < length) {
+            //get properties
             val waypointObject = coordsObject.getJSONObject(counter)
             val title = waypointObject.get("title") as String
             val description = waypointObject.get("description") as String
-
+            //get coords
             val tupel =waypointObject.getJSONObject("coordinates")
             val lon = tupel.get("longitude") as Double
             val lat = tupel.get("latitude") as Double
+            //make a point to present on the map
             val feature = Feature.fromGeometry(
                 Point.fromLngLat(lon, lat)
             )
             symbolLayerIconFeatureList.add(feature)
 
 
-            //adds coordinates to the route
+            //get and make custom view for markers
             val customView: View = LayoutInflater.from(context).inflate(
                 R.layout.marker_view_bubble, null
             )
             customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-
+            // title for the view
             val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
             titleTextView.text = title
-
+            // description for the view
             val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
             snippetTextView.text = description
-
+            // make the view
             val marker = MarkerView(LatLng(lat, lon), customView)
+            //add it to the map
             marker.let {
                 markerViewManager.addMarker(it)
             }
+
             counter++
         }
+        //add every point to the map
         style.addSource(
             GeoJsonSource(
                 "ICONS",
                 FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
             )
         )
-        val icon = drawableToBitmap(getDrawable(requireContext(),R.drawable.ic_map_marker)!!)
-
-        style.addImage("map_marker", icon)
-
+        // gets the icon
+        val icon = drawableToBitmap(getDrawable(requireContext(), R.drawable.ic_map_marker)!!)
+        // adds the image to the style
+        style.addImage("map_marker", icon, false)
+        //adds the icon to the map at every coordstupel
         style.addLayer(
             SymbolLayer("SYMBOL_LAYER_ID", "ICONS").withProperties(
                 iconImage("map_marker"),
@@ -218,20 +225,24 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
 
     }
-
-    private fun drawableToBitmap (drawable : Drawable): Bitmap {
+    // gets the icon
+    private fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
         }
 
-        val  bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val  bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
         val canvas =  Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
 
         return bitmap
     }
-
+    //activate location
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
         // Check if permissions are enabled and if not request
@@ -302,7 +313,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     }
     //Test method
     //Gets the JSON file from assets
-    fun readJSONFromAsset(file_name: String): String {
+    private fun readJSONFromAsset(file_name: String): String {
         val json :String
         try {
             val assets = activity?.assets
@@ -320,6 +331,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
         return json
     }
+
+    // ------------- life cycle methods
     override fun onStart() {
         super.onStart()
         mapView.onStart()
