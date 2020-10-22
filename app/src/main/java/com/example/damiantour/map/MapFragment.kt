@@ -56,7 +56,11 @@ import java.io.InputStream
 // https://docs.mapbox.com/android/java/overview/geojson/#geometries
 // https://docs.mapbox.com/android/java/examples/show-directions-on-a-map/
 
-///
+/**
+ * @author  Jonas and Simon
+ * 
+ */
+//Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     //the view
