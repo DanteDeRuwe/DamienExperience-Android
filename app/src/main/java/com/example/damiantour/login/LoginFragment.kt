@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
 import kotlinx.android.synthetic.main.fragment_login.*
@@ -51,9 +54,11 @@ class LoginFragment : Fragment() {
         val pw = password_input.text.toString()
         if(email=="ruben.naudts@student.hogent.be"&&pw=="testpass"){
             Toast.makeText(context, "Login gebeurd", Toast.LENGTH_SHORT).show()
+            view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
         }
         else{
             Toast.makeText(context, "Login ging mis", Toast.LENGTH_SHORT).show()
+
         }
     }
 
