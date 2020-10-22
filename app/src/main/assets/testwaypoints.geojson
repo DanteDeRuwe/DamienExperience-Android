@@ -1,0 +1,29 @@
+{
+"features" : [
+      {
+        "title": "Delhaize Tremelo",
+        "description": "Gratis blikje frisdrank en snoepreep bij vertoon van een geldige coupon.",
+        "coordinates": {
+          "longitude": 4.705204,
+          "latitude": 50.990410
+        }
+      },
+      {
+        "title": "Bevoorrading 1",
+        "description": "Hier krijg je een appeltje voor de dorst!",
+        "coordinates": {
+          "longitude": 4.708955,
+          "latitude": 50.994423
+        }
+      },
+      {
+        "title": "Voetbalveld",
+        "description": "Wachtpost rode kruis",
+        "coordinates": {
+          "longitude": 4.702002,
+          "latitude": 50.986546
+        }
+      }
+    ]
+  }
+}
