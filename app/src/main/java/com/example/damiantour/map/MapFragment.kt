@@ -66,6 +66,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     //the view
     private lateinit var mapView: MapView
 
+    //TODO feedback week 5: dit object kan je verplaatsen naar de viewmodel
     //the object
     private lateinit var mapBoxMap: MapboxMap
 

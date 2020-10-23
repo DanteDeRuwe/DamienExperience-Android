@@ -29,6 +29,7 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        //TODO feedback week 5: hier kan je FragmentLoginBinding.inflate.. gebruiken
         binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_login,
@@ -43,6 +44,7 @@ class LoginFragment : Fragment() {
         binding.setLifecycleOwner(this)
 
         binding.loginButton.setOnClickListener{
+            //TODO feedback week 5: hier zou je dan de viewModel moeten laten weten dat er op een button geklikt is. Dus het eevent doorgeven aan de viewmodel
             login()
         }
 
