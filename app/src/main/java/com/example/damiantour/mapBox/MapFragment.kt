@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,7 +43,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import org.json.JSONObject
 import timber.log.Timber
 import java.io.InputStream
 
@@ -132,7 +130,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 )
             )
         )
-
         // adds styling to the line connecting the coordstuppels
         style.addLayer(
             LineLayer("linelayer", "line-source").withProperties(
@@ -147,6 +144,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     private fun addSymbols(style: Style){
         val symbolLayerIconFeatureList = ArrayList<Feature>()
+        //this call reads the json and put everthing in een arraylist<Waypoint>
         mapViewModel.readWaypointFile()
         var counter : Int = 0
         //Must be a int
@@ -154,13 +152,13 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         //Loops over all the coordinates
         while (counter < listSize) {
             //get properties
-            mapViewModel.getIconData(counter)
+            val wp = mapViewModel.waypoints[counter]
             //make a point to present on the map
-            val title : String = mapViewModel.title
-            val description :String = mapViewModel.description
+            val title : String = wp.title
+            val description :String = wp.description
             //get coords
-            val lon : Double = mapViewModel.lon
-            val lat : Double = mapViewModel.lat
+            val lon : Double = wp.longitude
+            val lat : Double = wp.latitude
             val feature = Feature.fromGeometry(
                 Point.fromLngLat(lon, lat)
             )
@@ -183,7 +181,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             marker.let {
                 markerViewManager.addMarker(it)
             }
-
             counter++
         }
         //add every point to the map
@@ -207,7 +204,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
 
     }
-    // gets the icon
+    // Gets the icon
     private fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
@@ -225,6 +222,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         return bitmap
     }
 
+
+    // ------------- Permissions
     //activate location
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
@@ -280,7 +279,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
             .show()
     }
-
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
             enableLocationComponent(mapViewModel.mapBoxMap.style!!)

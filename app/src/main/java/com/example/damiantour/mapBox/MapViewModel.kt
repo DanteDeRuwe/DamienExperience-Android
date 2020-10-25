@@ -11,39 +11,37 @@ class MapViewModel : ViewModel() {
 
     //the object
     lateinit var mapBoxMap: MapboxMap
+
     //routes needed in fragment
     //cannot put in MutableData
     //Don't think it is necessary
-    var routeCoordinates : ArrayList<Point>
+    var routeCoordinates: ArrayList<Point>
 
     // Important !!!
     //temp property, contains jsonObject of waypoints
     private lateinit var coordsObject: JSONArray
 
-    var listSize : Int = 0
+    // Important !!!
+    //not sure if this right
+    //not sure if this needs to be mutablelivedata...
+    var waypoints : ArrayList<Waypoint>
 
-    var title : String  = ""
-
-   var description : String = ""
-
-    var lat : Double = 0.0
-
-    var lon : Double = 0.0
+    var listSize: Int = 0
 
     init {
         Timber.i("InitMethod")
-        routeCoordinates =  ArrayList()
+        routeCoordinates = ArrayList()
+        waypoints = ArrayList()
     }
+
     //adds one line on the map
-    fun addPath(){
+    fun addPath() {
         // initRouteCoordinates()
         val obj = JSONObject(getRoute())
-
         //Get coords from json object, returns jsonarray
         //in the form of [[long,lat],[long,lat], ... , [long,lat]]
         val coordsObject = obj.getJSONArray("features").getJSONObject(0)
             .getJSONObject("geometry").getJSONArray("coordinates")
-
         val length = coordsObject.length()
         var counter = 0
         //Loops over all the coordinates
@@ -60,28 +58,35 @@ class MapViewModel : ViewModel() {
 
     // Important !!!!
     // temp method
-    fun readWaypointFile(){
+    fun readWaypointFile() {
         val obj = JSONObject(getWaypoints());
         coordsObject = obj.getJSONArray("features")
         listSize = coordsObject.length()
+        getWaypointData()
     }
 
     // Important !!!!
     //temp method
     //gets the data in the jsonarray
-    fun getIconData(index : Int){
-        val waypointObject = coordsObject.getJSONObject(index)
-        title = waypointObject.get("title") as String
-        description = waypointObject.get("description") as String
-        //get coords
-        val tupel =waypointObject.getJSONObject("coordinates")
-        lon = tupel.get("longitude") as Double
-        lat = tupel.get("latitude") as Double
+    private fun getWaypointData() {
+        var counter = 0
+        while (counter< listSize) {
+            val waypointObject = coordsObject.getJSONObject(counter)
 
+            val title = waypointObject.get("title") as String
+            val description = waypointObject.get("description") as String
+            //get coords
+            val tupel = waypointObject.getJSONObject("coordinates")
+            val lon = tupel.get("longitude") as Double
+            val lat = tupel.get("latitude") as Double
+            val wp = Waypoint(title,description,lon,lat)
+            waypoints.add(wp)
+            counter++
+        }
     }
 
     // dummy data
-    private fun getRoute() :String{
+    private fun getRoute(): String {
         return "{\n" +
                 "    \"type\": \"FeatureCollection\"," +
                 "    \"features\": [" +
@@ -329,7 +334,8 @@ class MapViewModel : ViewModel() {
                 "    ]" +
                 "  }"
     }
-    private fun getWaypoints():String{
+
+    private fun getWaypoints(): String {
         return "{\n" +
                 "\"features\" : [\n" +
                 "      {\n" +
