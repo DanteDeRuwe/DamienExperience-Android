@@ -3,7 +3,9 @@ package com.example.damiantour.mapBox
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.damiantour.findClosestPoint
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.json.JSONArray
 import org.json.JSONObject
@@ -25,6 +27,10 @@ class MapViewModel : ViewModel() {
     private var _waypoints = MutableLiveData<List<Waypoint>>()
     val waypoints : LiveData<List<Waypoint>>
         get() = _waypoints
+
+    private var _waypoint = MutableLiveData<Waypoint>()
+    val waypoint : LiveData<Waypoint>
+        get() = _waypoint
     //
     private var _listSize =  MutableLiveData<Int>()
     val listSize : LiveData<Int>
@@ -33,6 +39,7 @@ class MapViewModel : ViewModel() {
     init {
         Timber.i("InitMethod")
         _listSize.value = 0
+
     }
 
     //adds one line on the map
@@ -58,6 +65,15 @@ class MapViewModel : ViewModel() {
         }
         _routeCoordinates.value = routeCoordinatesList
 
+    }
+
+    fun onClickMap(latLng: LatLng) {
+        val clickPoint = Point.fromLngLat(latLng.longitude,latLng.latitude)
+        val list = _waypoints.value
+        if(list!=null) {
+            val wp = findClosestPoint(clickPoint, list)
+            _waypoint.value = wp;
+        }
     }
 
     // Important !!!!
@@ -372,6 +388,7 @@ class MapViewModel : ViewModel() {
                 "  }\n" +
                 "}"
     }
+
 
 
 }

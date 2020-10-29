@@ -16,7 +16,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -58,7 +60,7 @@ import java.io.InputStream
 
 /**
  * @author  Jonas and Simon
- * 
+ *
  */
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
@@ -68,9 +70,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     //the view
     private lateinit var mapView: MapView
 
-    private lateinit var mapViewModel : MapViewModel
+    private lateinit var mapViewModel: MapViewModel
 
     private lateinit var permissionsManager: PermissionsManager
+
+    private var marker: MarkerView? = null
 
     //on create fragment
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +82,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
 
     }
+
     //on the create view
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -92,9 +97,20 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         Timber.i("getMapAsync")
         mapView.getMapAsync(this)
+
+        mapViewModel.waypoint.observe(viewLifecycleOwner, Observer { waypoint ->
+            Timber.i("observe call")
+            if (waypoint != null) {
+                addMarkersView(waypoint)
+            } else {
+                removeMarkersView()
+            }
+        })
+
         return root
 
     }
+
 
     /**
      * Called when the map is ready to be used.
@@ -105,6 +121,14 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         Timber.i("Goes in onMapReady")
         mapViewModel.mapBoxMap = mapboxMap
+
+        mapboxMap.addOnMapClickListener { point ->
+            Timber.i("ClickMap")
+            removeMarkersView();
+            mapViewModel.onClickMap(point)
+            true
+        }
+
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             addLayer(style)
@@ -114,7 +138,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     }
 
     //adds the layer
-    private fun addLayer(style: Style){
+    private fun addLayer(style: Style) {
         mapViewModel.addPath()
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
@@ -142,18 +166,18 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
     }
 
-    private fun addSymbols(style: Style){
+    private fun addSymbols(style: Style) {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
         //this call reads the json and put everthing in een arraylist<Waypoint>
         mapViewModel.readWaypointFile()
-        var counter : Int = 0
+        var counter: Int = 0
         //Must be a int
         val listSize = mapViewModel.listSize.value
         //Loops over all the coordinates
         while (counter < listSize!!) {
             //get properties
             val wp = mapViewModel.waypoints.value?.get(counter)
-            if(wp != null) {
+            if (wp != null) {
                 //make a point to present on the map
                 val title: String = wp.title
                 val description: String = wp.description
@@ -164,24 +188,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                     Point.fromLngLat(lon, lat)
                 )
                 symbolLayerIconFeatureList.add(feature)
-
-                //get and make custom view for markers
-                val customView: View = LayoutInflater.from(context).inflate(
-                    R.layout.marker_view_bubble, null
-                )
-                customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-                // title for the view
-                val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
-                titleTextView.text = title
-                // description for the view
-                val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
-                snippetTextView.text = description
-                // make the view
-                val marker = MarkerView(LatLng(lat, lon), customView)
-                //add it to the map
-                marker.let {
-                    markerViewManager.addMarker(it)
-                }
             }
             counter++
         }
@@ -206,18 +212,61 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
 
     }
+
+    private fun removeMarkersView() {
+        Timber.i("remove marker call")
+        if (marker != null) {
+            marker.let {
+                markerViewManager.removeMarker(it!!)
+            }
+            Timber.i("remove marker call not null")
+            marker = null;
+        }
+        Timber.i("remove marker call is null")
+
+    }
+
+    private fun addMarkersView(wp: Waypoint) {
+        Timber.i("add marker call")
+
+        val title: String = wp.title
+        val description: String = wp.description
+        //get coords
+        val lon: Double = wp.longitude
+        val lat: Double = wp.latitude
+        //get and make custom view for markers
+        val customView: View = LayoutInflater.from(context).inflate(
+            R.layout.marker_view_bubble, null
+        )
+        customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        // title for the view
+        val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
+        titleTextView.text = title
+        // description for the view
+        val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
+        snippetTextView.text = description
+        // make the view
+        marker = MarkerView(LatLng(lat, lon), customView)
+        //add it to the map
+        marker.let {
+            if (it != null) {
+                markerViewManager.addMarker(it)
+            }
+        }
+    }
+
     // Gets the icon
     private fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
         }
 
-        val  bitmap = Bitmap.createBitmap(
+        val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,
             drawable.intrinsicHeight,
             Bitmap.Config.ARGB_8888
         )
-        val canvas =  Canvas(bitmap)
+        val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
 
@@ -281,6 +330,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
             .show()
     }
+
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
             enableLocationComponent(mapViewModel.mapBoxMap.style!!)
@@ -294,15 +344,15 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             activity?.finish()
         }
     }
+
     //Test method
     //Gets the JSON file from assets
     private fun readJSONFromAsset(file_name: String): String {
-        val json :String
+        val json: String
         try {
             val assets = activity?.assets
-            if (assets != null)
-            {
-            val inputStream: InputStream =  assets.open(file_name)
+            if (assets != null) {
+                val inputStream: InputStream = assets.open(file_name)
                 json = inputStream.bufferedReader().use { it.readText() }
             } else {
                 throw Exception("Cannot get assets")
@@ -350,11 +400,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         super.onDestroyView()
         mapView.onDestroy()
     }
-
-
-
-
-
 
 
 }

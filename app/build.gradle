@@ -42,6 +42,7 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.11.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-core:3.1.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-markerview-v9:0.4.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.5.0'
     implementation ('com.mapbox.mapboxsdk:mapbox-android-sdk:9.5.0'){
         exclude group: 'group_name', module: 'module_name'
     }
