@@ -11,7 +11,9 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-/*
+/**
+ * @author: Ruben Naudts
+ */
 interface DamianApiService {
     @POST("login")
     suspend fun login(
@@ -43,4 +45,3 @@ interface DamianApiService {
     }
 }
 
-*/
