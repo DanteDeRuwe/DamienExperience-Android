@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/qr_code"
+        android:icon="@drawable/ic_qrcode_scan"
+        android:title="@string/qr_code_reader"
+        />
+
+    <item
+        android:id="@+id/chat"
+        android:icon="@drawable/ic_bx_message_alt"
+        android:title="@string/chat"
+        />
+
+    <item
+        android:id="@+id/map"
+        android:icon="@drawable/ic_bx_map_alt"
+        android:title="@string/map"
+        />
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_solid"
+        android:title="@string/instellingen"
+        />
+
+    <item
+        android:id="@+id/sos"
+        android:icon="@drawable/ic_sos_button"
+        android:title="@string/sos"
+        />
+
+</menu>

@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.damiantour.map.MapFragment"
+        android:name="com.example.damiantour.mapBox.MapFragment"
         android:label="fragment_map"
         tools:layout="@layout/fragment_map" />
 </navigation>
