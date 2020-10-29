@@ -124,7 +124,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 FeatureCollection.fromFeatures(
                     arrayOf(
                         Feature.fromGeometry(
-                            LineString.fromLngLats(mapViewModel.routeCoordinates)
+                            mapViewModel.routeCoordinates.value?.let { LineString.fromLngLats(it) }
                         )
                     )
                 )
@@ -148,38 +148,40 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapViewModel.readWaypointFile()
         var counter : Int = 0
         //Must be a int
-        val listSize = mapViewModel.listSize
+        val listSize = mapViewModel.listSize.value
         //Loops over all the coordinates
-        while (counter < listSize) {
+        while (counter < listSize!!) {
             //get properties
-            val wp = mapViewModel.waypoints[counter]
-            //make a point to present on the map
-            val title : String = wp.title
-            val description :String = wp.description
-            //get coords
-            val lon : Double = wp.longitude
-            val lat : Double = wp.latitude
-            val feature = Feature.fromGeometry(
-                Point.fromLngLat(lon, lat)
-            )
-            symbolLayerIconFeatureList.add(feature)
+            val wp = mapViewModel.waypoints.value?.get(counter)
+            if(wp != null) {
+                //make a point to present on the map
+                val title: String = wp.title
+                val description: String = wp.description
+                //get coords
+                val lon: Double = wp.longitude
+                val lat: Double = wp.latitude
+                val feature = Feature.fromGeometry(
+                    Point.fromLngLat(lon, lat)
+                )
+                symbolLayerIconFeatureList.add(feature)
 
-            //get and make custom view for markers
-            val customView: View = LayoutInflater.from(context).inflate(
-                R.layout.marker_view_bubble, null
-            )
-            customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-            // title for the view
-            val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
-            titleTextView.text = title
-            // description for the view
-            val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
-            snippetTextView.text = description
-            // make the view
-            val marker = MarkerView(LatLng(lat, lon), customView)
-            //add it to the map
-            marker.let {
-                markerViewManager.addMarker(it)
+                //get and make custom view for markers
+                val customView: View = LayoutInflater.from(context).inflate(
+                    R.layout.marker_view_bubble, null
+                )
+                customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+                // title for the view
+                val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
+                titleTextView.text = title
+                // description for the view
+                val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
+                snippetTextView.text = description
+                // make the view
+                val marker = MarkerView(LatLng(lat, lon), customView)
+                //add it to the map
+                marker.let {
+                    markerViewManager.addMarker(it)
+                }
             }
             counter++
         }

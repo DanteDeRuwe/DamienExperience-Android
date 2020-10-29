@@ -1,5 +1,7 @@
 package com.example.damiantour.mapBox
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -11,32 +13,32 @@ class MapViewModel : ViewModel() {
 
     //the object
     lateinit var mapBoxMap: MapboxMap
-
-    //routes needed in fragment
-    //cannot put in MutableData
-    //Don't think it is necessary
-    var routeCoordinates: ArrayList<Point>
-
     // Important !!!
     //temp property, contains jsonObject of waypoints
     private lateinit var coordsObject: JSONArray
 
-    // Important !!!
-    //not sure if this right
-    //not sure if this needs to be mutablelivedata...
-    var waypoints : ArrayList<Waypoint>
-
-    var listSize: Int = 0
+    // coords to show the line
+    private var _routeCoordinates = MutableLiveData<List<Point>>()
+    val routeCoordinates : LiveData<List<Point>>
+        get() = _routeCoordinates
+    //waypoints on the line
+    private var _waypoints = MutableLiveData<List<Waypoint>>()
+    val waypoints : LiveData<List<Waypoint>>
+        get() = _waypoints
+    //
+    private var _listSize =  MutableLiveData<Int>()
+    val listSize : LiveData<Int>
+        get() = _listSize
 
     init {
         Timber.i("InitMethod")
-        routeCoordinates = ArrayList()
-        waypoints = ArrayList()
+        _listSize.value = 0
     }
 
     //adds one line on the map
     fun addPath() {
         // initRouteCoordinates()
+        val routeCoordinatesList = ArrayList<Point>()
         val obj = JSONObject(getRoute())
         //Get coords from json object, returns jsonarray
         //in the form of [[long,lat],[long,lat], ... , [long,lat]]
@@ -51,9 +53,11 @@ class MapViewModel : ViewModel() {
             val lat = tupel.get(1) as Double
             println(lon)
             //adds coordinates to the route
-            routeCoordinates.add(Point.fromLngLat(lon, lat))
+            routeCoordinatesList.add(Point.fromLngLat(lon, lat))
             counter++
         }
+        _routeCoordinates.value = routeCoordinatesList
+
     }
 
     // Important !!!!
@@ -61,7 +65,7 @@ class MapViewModel : ViewModel() {
     fun readWaypointFile() {
         val obj = JSONObject(getWaypoints());
         coordsObject = obj.getJSONArray("features")
-        listSize = coordsObject.length()
+        _listSize.value = coordsObject.length()
         getWaypointData()
     }
 
@@ -69,8 +73,9 @@ class MapViewModel : ViewModel() {
     //temp method
     //gets the data in the jsonarray
     private fun getWaypointData() {
+        val waypointsList = ArrayList<Waypoint>()
         var counter = 0
-        while (counter< listSize) {
+        while (counter< listSize.value!!) {
             val waypointObject = coordsObject.getJSONObject(counter)
 
             val title = waypointObject.get("title") as String
@@ -80,9 +85,10 @@ class MapViewModel : ViewModel() {
             val lon = tupel.get("longitude") as Double
             val lat = tupel.get("latitude") as Double
             val wp = Waypoint(title,description,lon,lat)
-            waypoints.add(wp)
+            waypointsList.add(wp)
             counter++
         }
+        _waypoints.value = waypointsList
     }
 
     // dummy data
