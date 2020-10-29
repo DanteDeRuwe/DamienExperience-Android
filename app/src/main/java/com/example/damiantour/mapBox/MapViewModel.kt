@@ -15,25 +15,28 @@ class MapViewModel : ViewModel() {
 
     //the object
     lateinit var mapBoxMap: MapboxMap
+
     // Important !!!
     //temp property, contains jsonObject of waypoints
     private lateinit var coordsObject: JSONArray
 
     // coords to show the line
     private var _routeCoordinates = MutableLiveData<List<Point>>()
-    val routeCoordinates : LiveData<List<Point>>
+    val routeCoordinates: LiveData<List<Point>>
         get() = _routeCoordinates
+
     //waypoints on the line
     private var _waypoints = MutableLiveData<List<Waypoint>>()
-    val waypoints : LiveData<List<Waypoint>>
+    val waypoints: LiveData<List<Waypoint>>
         get() = _waypoints
 
     private var _waypoint = MutableLiveData<Waypoint>()
-    val waypoint : LiveData<Waypoint>
+    val waypoint: LiveData<Waypoint>
         get() = _waypoint
+
     //
-    private var _listSize =  MutableLiveData<Int>()
-    val listSize : LiveData<Int>
+    private var _listSize = MutableLiveData<Int>()
+    val listSize: LiveData<Int>
         get() = _listSize
 
     init {
@@ -68,12 +71,20 @@ class MapViewModel : ViewModel() {
     }
 
     fun onClickMap(latLng: LatLng) {
-        val clickPoint = Point.fromLngLat(latLng.longitude,latLng.latitude)
+        val clickPoint = Point.fromLngLat(latLng.longitude, latLng.latitude)
+        val lastwp = _waypoint.value
         val list = _waypoints.value
-        if(list!=null) {
+        if (list != null) {
             val wp = findClosestPoint(clickPoint, list)
+            if(lastwp != null && wp != null){
+                if (wp.longitude == lastwp.longitude && wp.latitude == lastwp.latitude){
+                    _waypoint.value = null
+                    return
+                }
+            }
             _waypoint.value = wp;
         }
+
     }
 
     // Important !!!!
@@ -91,7 +102,7 @@ class MapViewModel : ViewModel() {
     private fun getWaypointData() {
         val waypointsList = ArrayList<Waypoint>()
         var counter = 0
-        while (counter< listSize.value!!) {
+        while (counter < listSize.value!!) {
             val waypointObject = coordsObject.getJSONObject(counter)
 
             val title = waypointObject.get("title") as String
@@ -100,7 +111,7 @@ class MapViewModel : ViewModel() {
             val tupel = waypointObject.getJSONObject("coordinates")
             val lon = tupel.get("longitude") as Double
             val lat = tupel.get("latitude") as Double
-            val wp = Waypoint(title,description,lon,lat)
+            val wp = Waypoint(title, description, lon, lat)
             waypointsList.add(wp)
             counter++
         }
@@ -388,7 +399,6 @@ class MapViewModel : ViewModel() {
                 "  }\n" +
                 "}"
     }
-
 
 
 }
