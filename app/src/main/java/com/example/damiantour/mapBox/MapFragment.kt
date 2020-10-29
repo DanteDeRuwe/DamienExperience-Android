@@ -18,8 +18,8 @@ import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -106,10 +106,13 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 removeMarkersView()
             }
         })
+        val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
+        bottomNavigationView.selectedItemId = R.id.map
 
         return root
 
     }
+
 
 
     /**
