@@ -5,6 +5,12 @@
 
     <!--TODO feedback week 5: Algemene feedback: gebruik de resource files om resources aan te maken voor bv kleure, paddings,...-->
 
+    <data>
+        <variable
+            name="loginViewModel"
+            type="com.example.damiantour.login.LoginViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -74,6 +80,7 @@
 
         <Button
             android:id="@+id/lost_password_button"
+            android:onClick="@{() -> loginViewModel.forgotPassword()}"
             android:layout_width="200dp"
             android:layout_height="50dp"
             android:layout_marginTop="16dp"

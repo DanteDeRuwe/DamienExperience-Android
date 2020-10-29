@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -21,7 +22,7 @@ class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
 
-    //private lateinit var viewModel: LoginViewModel
+    private lateinit var viewModel: LoginViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,39 +30,23 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        binding = DataBindingUtil.inflate<FragmentLoginBinding>(
-            inflater,
-            R.layout.fragment_login,
-            container,
-            false
-        ).apply {
-            lifecycleOwner = viewLifecycleOwner
-        }
+        binding = FragmentLoginBinding.inflate(inflater, container, false)
 
-        //viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
-        //binding.LoginViewModel = viewModel
+
+        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
+        binding.loginViewModel = viewModel
 
         binding.loginButton.setOnClickListener{
             //TODO feedback week 5: hier zou je dan de viewModel moeten laten weten dat er op een button geklikt is. Dus het eevent doorgeven aan de viewmodel
             //Doe tis zodra we login opnemen
-            login()
+            viewModel.login(binding.emailInput.text.toString(), binding.passwordInput.text.toString())
+            Toast.makeText(context, "Login gebeurd", Toast.LENGTH_SHORT).show()
+            view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
         }
 
         return binding.root
     }
 
-    private fun login(){
-        val email = email_input.text.toString()
-        val pw = password_input.text.toString()
-        if(email=="ruben.naudts@student.hogent.be"&&pw=="testpass"){
-            Toast.makeText(context, "Login gebeurd", Toast.LENGTH_SHORT).show()
-            view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
-        }
-        else{
-            Toast.makeText(context, "Login ging mis", Toast.LENGTH_SHORT).show()
-
-        }
-    }
 
 
 }
