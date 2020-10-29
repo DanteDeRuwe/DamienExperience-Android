@@ -1,4 +1,4 @@
-package com.example.damiantour.map
+package com.example.damiantour.mapBox
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.example.damiantour.R
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -43,7 +43,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import org.json.JSONObject
+import timber.log.Timber
 import java.io.InputStream
 
 /// Documentation
@@ -63,14 +63,12 @@ import java.io.InputStream
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
+    private lateinit var markerViewManager: MarkerViewManager
+
     //the view
     private lateinit var mapView: MapView
 
-    //the object
-    private lateinit var mapBoxMap: MapboxMap
-
-    //
-    private lateinit var markerViewManager : MarkerViewManager
+    private lateinit var mapViewModel : MapViewModel
 
     private lateinit var permissionsManager: PermissionsManager
 
@@ -85,12 +83,14 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.i("Fragment", "Goes in onCreateView")
+        mapViewModel = ViewModelProviders.of(this).get(MapViewModel::class.java)
+
+        Timber.i("Goes in onCreateView")
         val root = inflater.inflate(R.layout.fragment_map, container, false)
 
         mapView = root.findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        Log.i("Fragment", "getMapAsync")
+        Timber.i("getMapAsync")
         mapView.getMapAsync(this)
         return root
 
@@ -103,8 +103,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * [MapView] that defines the callback.
      */
     override fun onMapReady(mapboxMap: MapboxMap) {
-        Log.i("Fragment", "Goes in onMapReady")
-        this.mapBoxMap = mapboxMap
+        Timber.i("Goes in onMapReady")
+        mapViewModel.mapBoxMap = mapboxMap
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             addLayer(style)
@@ -115,28 +115,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     //adds the layer
     private fun addLayer(style: Style){
-        // initRouteCoordinates()
-        val obj = JSONObject(readJSONFromAsset("testroute.geojson"))
-
-        //Get coords from json object, returns jsonarray
-        //in the form of [[long,lat],[long,lat], ... , [long,lat]]
-        val coordsObject = obj.getJSONArray("features").getJSONObject(0)
-            .getJSONObject("geometry").getJSONArray("coordinates")
-
-        val length = coordsObject.length()
-        val routeCoordinates = ArrayList<Point>()
-        var counter = 0
-        //Loops over all the coordinates
-        while (counter < length) {
-            val tupel = coordsObject.getJSONArray(counter)
-            val lon = tupel.get(0) as Double
-            val lat = tupel.get(1) as Double
-            println(lon)
-            //adds coordinates to the route
-            routeCoordinates.add(Point.fromLngLat(lon, lat))
-            counter++
-        }
-
+        mapViewModel.addPath()
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
         style.addSource(
@@ -145,13 +124,12 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 FeatureCollection.fromFeatures(
                     arrayOf(
                         Feature.fromGeometry(
-                            LineString.fromLngLats(routeCoordinates)
+                            mapViewModel.routeCoordinates.value?.let { LineString.fromLngLats(it) }
                         )
                     )
                 )
             )
         )
-
         // adds styling to the line connecting the coordstuppels
         style.addLayer(
             LineLayer("linelayer", "line-source").withProperties(
@@ -166,46 +144,45 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     private fun addSymbols(style: Style){
         val symbolLayerIconFeatureList = ArrayList<Feature>()
-        val obj = JSONObject(readJSONFromAsset("testwaypoints.geojson"))
-        val coordsObject = obj.getJSONArray("features")
-
-        val length = coordsObject.length()
-        var counter = 0
+        //this call reads the json and put everthing in een arraylist<Waypoint>
+        mapViewModel.readWaypointFile()
+        var counter : Int = 0
+        //Must be a int
+        val listSize = mapViewModel.listSize.value
         //Loops over all the coordinates
-        while (counter < length) {
+        while (counter < listSize!!) {
             //get properties
-            val waypointObject = coordsObject.getJSONObject(counter)
-            val title = waypointObject.get("title") as String
-            val description = waypointObject.get("description") as String
-            //get coords
-            val tupel =waypointObject.getJSONObject("coordinates")
-            val lon = tupel.get("longitude") as Double
-            val lat = tupel.get("latitude") as Double
-            //make a point to present on the map
-            val feature = Feature.fromGeometry(
-                Point.fromLngLat(lon, lat)
-            )
-            symbolLayerIconFeatureList.add(feature)
+            val wp = mapViewModel.waypoints.value?.get(counter)
+            if(wp != null) {
+                //make a point to present on the map
+                val title: String = wp.title
+                val description: String = wp.description
+                //get coords
+                val lon: Double = wp.longitude
+                val lat: Double = wp.latitude
+                val feature = Feature.fromGeometry(
+                    Point.fromLngLat(lon, lat)
+                )
+                symbolLayerIconFeatureList.add(feature)
 
-
-            //get and make custom view for markers
-            val customView: View = LayoutInflater.from(context).inflate(
-                R.layout.marker_view_bubble, null
-            )
-            customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-            // title for the view
-            val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
-            titleTextView.text = title
-            // description for the view
-            val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
-            snippetTextView.text = description
-            // make the view
-            val marker = MarkerView(LatLng(lat, lon), customView)
-            //add it to the map
-            marker.let {
-                markerViewManager.addMarker(it)
+                //get and make custom view for markers
+                val customView: View = LayoutInflater.from(context).inflate(
+                    R.layout.marker_view_bubble, null
+                )
+                customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+                // title for the view
+                val titleTextView: TextView = customView.findViewById(R.id.marker_window_title)
+                titleTextView.text = title
+                // description for the view
+                val snippetTextView: TextView = customView.findViewById(R.id.marker_window_snippet)
+                snippetTextView.text = description
+                // make the view
+                val marker = MarkerView(LatLng(lat, lon), customView)
+                //add it to the map
+                marker.let {
+                    markerViewManager.addMarker(it)
+                }
             }
-
             counter++
         }
         //add every point to the map
@@ -229,7 +206,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
 
     }
-    // gets the icon
+    // Gets the icon
     private fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
@@ -246,6 +223,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
         return bitmap
     }
+
+
+    // ------------- Permissions
     //activate location
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
@@ -264,7 +244,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                     .build()
 
             // Get an instance of the LocationComponent and then adjust its settings
-            mapBoxMap.locationComponent.apply {
+            mapViewModel.mapBoxMap.locationComponent.apply {
 
                 // Activate the LocationComponent with options
                 activateLocationComponent(locationComponentActivationOptions)
@@ -301,10 +281,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
             .show()
     }
-
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
-            enableLocationComponent(mapBoxMap.style!!)
+            enableLocationComponent(mapViewModel.mapBoxMap.style!!)
         } else {
             Toast.makeText(
                 requireContext(),
