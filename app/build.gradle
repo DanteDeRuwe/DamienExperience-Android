@@ -39,11 +39,11 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
 
 
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.11.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-core:3.1.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-markerview-v9:0.4.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.5.0'
-    implementation ('com.mapbox.mapboxsdk:mapbox-android-sdk:9.5.0'){
+    implementation "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:$mapbox_plugin_locationlayer"
+    implementation "com.mapbox.mapboxsdk:mapbox-android-core:$mapbox_core"
+    implementation "com.mapbox.mapboxsdk:mapbox-android-plugin-markerview-v9:$mapbox_plugin_markerview"
+    implementation "com.mapbox.mapboxsdk:mapbox-sdk-turf:$mapbox_turf"
+    implementation ("com.mapbox.mapboxsdk:mapbox-android-sdk:$mapbox_android_sdk"){
         exclude group: 'group_name', module: 'module_name'
     }
 

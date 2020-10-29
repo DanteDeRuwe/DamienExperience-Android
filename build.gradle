@@ -3,6 +3,11 @@ buildscript {
     ext{
         kotlin_version="1.4.10"
         version_navigation = "2.3.1"
+        mapbox_plugin_locationlayer = "0.11.0"
+        mapbox_core = "3.1.0"
+        mapbox_plugin_markerview = "0.4.0"
+        mapbox_turf = "5.5.0"
+        mapbox_android_sdk = "9.5.0"
     }
     repositories {
         google()

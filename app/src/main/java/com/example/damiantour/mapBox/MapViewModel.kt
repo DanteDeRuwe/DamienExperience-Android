@@ -10,14 +10,17 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-
+/***
+ * @author Simon
+ */
 class MapViewModel : ViewModel() {
 
     //the object
     lateinit var mapBoxMap: MapboxMap
 
     // Important !!!
-    //temp property, contains jsonObject of waypoints
+    //temp property
+    //contains jsonObject of waypoints
     private lateinit var coordsObject: JSONArray
 
     // coords to show the line
@@ -30,15 +33,17 @@ class MapViewModel : ViewModel() {
     val waypoints: LiveData<List<Waypoint>>
         get() = _waypoints
 
+    //selected waypoint
     private var _waypoint = MutableLiveData<Waypoint>()
     val waypoint: LiveData<Waypoint>
         get() = _waypoint
 
-    //
+    //size of the list
     private var _listSize = MutableLiveData<Int>()
     val listSize: LiveData<Int>
         get() = _listSize
 
+    //kinda constructor  but not really
     init {
         Timber.i("InitMethod")
         _listSize.value = 0
@@ -66,10 +71,13 @@ class MapViewModel : ViewModel() {
             routeCoordinatesList.add(Point.fromLngLat(lon, lat))
             counter++
         }
+        //sets the value
         _routeCoordinates.value = routeCoordinatesList
-
     }
 
+    //tries to get select the closest Waypoint from the selected point
+    //if the every waypoint is further than 500m the method returns 'null' (in  method findClosestPoint(clickPoint, list))
+    //if the closest waypoint is the same as the selected waypoint,the selected waypoint will be deselected
     fun onClickMap(latLng: LatLng) {
         val clickPoint = Point.fromLngLat(latLng.longitude, latLng.latitude)
         val lastwp = _waypoint.value
@@ -82,7 +90,7 @@ class MapViewModel : ViewModel() {
                     return
                 }
             }
-            _waypoint.value = wp;
+            _waypoint.value = wp
         }
 
     }
@@ -90,7 +98,7 @@ class MapViewModel : ViewModel() {
     // Important !!!!
     // temp method
     fun readWaypointFile() {
-        val obj = JSONObject(getWaypoints());
+        val obj = JSONObject(getWaypoints())
         coordsObject = obj.getJSONArray("features")
         _listSize.value = coordsObject.length()
         getWaypointData()
