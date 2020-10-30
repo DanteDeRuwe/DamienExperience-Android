@@ -18,6 +18,9 @@ import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -106,8 +109,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 removeMarkersView()
             }
         })
+
         val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
-        bottomNavigationView.selectedItemId = R.id.map
+        val navController = findNavController()
+        bottomNavigationView.setupWithNavController(navController)
+
 
         return root
 
@@ -127,7 +133,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
         mapboxMap.addOnMapClickListener { point ->
             Timber.i("ClickMap")
-            removeMarkersView();
+            removeMarkersView()
             mapViewModel.onClickMap(point)
             true
         }
@@ -173,7 +179,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
         //this call reads the json and put everthing in een arraylist<Waypoint>
         mapViewModel.readWaypointFile()
-        var counter: Int = 0
+        var counter = 0
         //Must be a int
         val listSize = mapViewModel.listSize.value
         //Loops over all the coordinates
@@ -181,9 +187,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             //get properties
             val wp = mapViewModel.waypoints.value?.get(counter)
             if (wp != null) {
-                //make a point to present on the map
-                val title: String = wp.title
-                val description: String = wp.description
                 //get coords
                 val lon: Double = wp.longitude
                 val lat: Double = wp.latitude
@@ -223,7 +226,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 markerViewManager.removeMarker(it!!)
             }
             Timber.i("remove marker call not null")
-            marker = null;
+            marker = null
         }
         Timber.i("remove marker call is null")
 
