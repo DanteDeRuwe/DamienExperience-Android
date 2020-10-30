@@ -1,15 +1,16 @@
 package com.example.damiantour.network
 
+import com.example.damiantour.login.model.LoginFields
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Query
+import java.util.logging.XMLFormatter
 
 /**
  * @author: Ruben Naudts
@@ -17,12 +18,11 @@ import retrofit2.http.Query
 interface DamianApiService {
     @POST("login")
     suspend fun login(
-        @Body email: String,
-        @Body password: String
+        @Body login : LoginData,
     )
 
     companion object{
-        private const val BASE_URL = "https://localhost:5001/api/"
+        private const val BASE_URL = "https://damiantourapi.azurewebsites.net/api/"
 
         fun create(): DamianApiService{
             val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
