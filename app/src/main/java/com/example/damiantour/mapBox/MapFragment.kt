@@ -6,23 +6,27 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.location.Location
 import android.os.Bundle
+import android.os.Looper.getMainLooper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -48,8 +52,10 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import timber.log.Timber
-import java.io.InputStream
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 /// Documentation
 
@@ -67,23 +73,29 @@ import java.io.InputStream
  */
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
-
     private lateinit var markerViewManager: MarkerViewManager
 
     //the view
     private lateinit var mapView: MapView
+    lateinit var mapViewModel: MapViewModel
+    private var locationEngine: LocationEngine? = null
 
-    private lateinit var mapViewModel: MapViewModel
+    // every 30 seconds
+    private var RECORDTEMPLOCATION_MS = 30000L
 
+    // every 1 minute
+    private var RECORDLOCATION_MS = 60000L
+
+    //every 5 minute
+    private var WRITELOCATION_MS = 300000L
     private lateinit var permissionsManager: PermissionsManager
-
+    private var timerContinue: Boolean = true;
     private var marker: MarkerView? = null
 
     //on create fragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
-
     }
 
     //on the create view
@@ -92,34 +104,36 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel::class.java)
-
-        Timber.i("Goes in onCreateView")
         val root = inflater.inflate(R.layout.fragment_map, container, false)
-
         mapView = root.findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        Timber.i("getMapAsync")
         mapView.getMapAsync(this)
-
         mapViewModel.waypoint.observe(viewLifecycleOwner, Observer { waypoint ->
-            Timber.i("observe call")
             if (waypoint != null) {
                 addMarkersView(waypoint)
             } else {
                 removeMarkersView()
             }
         })
-
-        val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
+        mapViewModel.tempLocations.observe(viewLifecycleOwner, Observer { templocationList ->
+            val last = templocationList.size - 1
+            if (last >= 0) {
+                val location = templocationList[last];
+                println("Temp location : " + location.latitude.toString() + " , " + location.longitude.toString())
+            }
+        })
+        mapViewModel.locations.observe(viewLifecycleOwner, Observer { locationList ->
+            val last = locationList.size - 1
+            if (last >= 0) {
+                val location = locationList[last];
+                println("Location : " + location.latitude.toString() + " , " + location.longitude.toString())
+            }
+        })
+        val bottomNavigationView: BottomNavigationView = root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
-
-
         return root
-
     }
-
-
 
     /**
      * Called when the map is ready to be used.
@@ -128,22 +142,20 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * [MapView] that defines the callback.
      */
     override fun onMapReady(mapboxMap: MapboxMap) {
-        Timber.i("Goes in onMapReady")
         mapViewModel.mapBoxMap = mapboxMap
-
         mapboxMap.addOnMapClickListener { point ->
-            Timber.i("ClickMap")
             removeMarkersView()
             mapViewModel.onClickMap(point)
             true
         }
-
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             addLayer(style)
             addSymbols(style)
             enableLocationComponent(style)
         }
+        Log.i("MapFragment", "Going in writeLocation")
+        startWriteLocationCoRoutine()
     }
 
     //adds the layer
@@ -169,8 +181,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                 PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                 PropertyFactory.lineWidth(5f),
-                PropertyFactory.lineColor(Color.parseColor("#e55e5e")),
-                PropertyFactory.fillOpacity(0.4f)
+                PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
             )
         )
     }
@@ -215,26 +226,18 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 iconOffset(arrayOf(0f, -8f))
             )
         )
-
-
     }
 
     private fun removeMarkersView() {
-        Timber.i("remove marker call")
         if (marker != null) {
             marker.let {
                 markerViewManager.removeMarker(it!!)
             }
-            Timber.i("remove marker call not null")
             marker = null
         }
-        Timber.i("remove marker call is null")
-
     }
 
     private fun addMarkersView(wp: Waypoint) {
-        Timber.i("add marker call")
-
         val title: String = wp.title
         val description: String = wp.description
         //get coords
@@ -261,12 +264,44 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
+    private fun startWriteLocationCoRoutine() {
+        Log.i("MapFragment", "Before launch")
+        GlobalScope.launch {
+            Log.i("MapFragment", "In launch")
+            writeLocationCoRoutine()
+        }
+    }
+
+    private suspend fun writeLocationCoRoutine() {
+        var time = 1;
+        while (timerContinue) {
+
+            //TODO
+            //argument for change instead of two times 30 sec, one time 1 min (drop everything with templocation)
+
+            delay(RECORDTEMPLOCATION_MS)
+            println("30 sec passed")
+            mapViewModel.setCurrentTempLocations()
+            delay(RECORDTEMPLOCATION_MS)
+            println("1 min passed")
+            mapViewModel.setCurrentLocations()
+            mapViewModel.setCurrentTempLocations()
+            time++
+            if (time == 5) {
+                //TODO
+                println("5 min passed")
+                mapViewModel.resetCurrentTempLocations()
+                time = 1
+            }
+        }
+    }
+
+
     // Gets the icon
     private fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
         }
-
         val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,
             drawable.intrinsicHeight,
@@ -279,37 +314,29 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         return bitmap
     }
 
-
     // ------------- Permissions
     //activate location
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
         // Check if permissions are enabled and if not request
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
-
             // Create and customize the LocationComponent's options
             val customLocationComponentOptions = LocationComponentOptions.builder(requireContext())
                 .trackingGesturesManagement(true)
                 .accuracyColor(ContextCompat.getColor(requireContext(), R.color.mapbox_blue))
                 .build()
-
             val locationComponentActivationOptions =
                 LocationComponentActivationOptions.builder(requireContext(), loadedMapStyle)
                     .locationComponentOptions(customLocationComponentOptions)
                     .build()
-
             // Get an instance of the LocationComponent and then adjust its settings
             mapViewModel.mapBoxMap.locationComponent.apply {
-
                 // Activate the LocationComponent with options
                 activateLocationComponent(locationComponentActivationOptions)
-
                 // Enable to make the LocationComponent visible
                 isLocationComponentEnabled = true
-
                 // Set the LocationComponent's camera mode
                 cameraMode = CameraMode.TRACKING
-
                 // Set the LocationComponent's render mode
                 renderMode = RenderMode.COMPASS
             }
@@ -351,25 +378,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
-    //Test method
-    //Gets the JSON file from assets
-    private fun readJSONFromAsset(file_name: String): String {
-        val json: String
-        try {
-            val assets = activity?.assets
-            if (assets != null) {
-                val inputStream: InputStream = assets.open(file_name)
-                json = inputStream.bufferedReader().use { it.readText() }
-            } else {
-                throw Exception("Cannot get assets")
-            }
-
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            return ""
-        }
-        return json
-    }
 
     // ------------- life cycle methods
     override fun onStart() {

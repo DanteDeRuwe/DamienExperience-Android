@@ -1,12 +1,16 @@
 package com.example.damiantour.mapBox
 
+import android.location.Location
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.damiantour.findClosestPoint
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
@@ -38,6 +42,16 @@ class MapViewModel : ViewModel() {
     val waypoint: LiveData<Waypoint>
         get() = _waypoint
 
+    //30 second locations
+    private var _tempLocations = MutableLiveData<List<Tuple>>()
+    val tempLocations: LiveData<List<Tuple>>
+        get() = _tempLocations
+
+    //1 min locations
+    private var _locations = MutableLiveData<List<Tuple>>()
+    val locations: LiveData<List<Tuple>>
+        get() = _locations
+
     //size of the list
     private var _listSize = MutableLiveData<Int>()
     val listSize: LiveData<Int>
@@ -45,9 +59,9 @@ class MapViewModel : ViewModel() {
 
     //kinda constructor  but not really
     init {
-        Timber.i("InitMethod")
         _listSize.value = 0
-
+        _locations.value = ArrayList<Tuple>();
+        _tempLocations.value = ArrayList<Tuple>();
     }
 
     //adds one line on the map
@@ -66,7 +80,6 @@ class MapViewModel : ViewModel() {
             val tupel = coordsObject.getJSONArray(counter)
             val lon = tupel.get(0) as Double
             val lat = tupel.get(1) as Double
-            println(lon)
             //adds coordinates to the route
             routeCoordinatesList.add(Point.fromLngLat(lon, lat))
             counter++
@@ -93,6 +106,30 @@ class MapViewModel : ViewModel() {
             _waypoint.value = wp
         }
 
+    }
+
+    fun setCurrentTempLocations(){
+        val location : Location? = mapBoxMap.locationComponent.lastKnownLocation
+        if(location != null){
+            println("Doet iets ... ")
+            _tempLocations.postValue(_tempLocations.value?.plus(Tuple(location.longitude,location.latitude)))
+        }else{
+            println("Grote fout \n \n \n woeps")
+        }
+    }
+    fun setCurrentLocations(){
+        val location : Location? = mapBoxMap.locationComponent.lastKnownLocation
+        if(location != null){
+            println("Doet iets ... ")
+            _locations.postValue(_locations.value?.plus(Tuple(location.longitude,location.latitude)))
+        }else{
+            println("Grote fout \n \n \n woeps")
+        }
+    }
+
+    fun resetCurrentTempLocations(){
+        println("reset list")
+        _tempLocations.postValue(ArrayList<Tuple>())
     }
 
     // Important !!!!
