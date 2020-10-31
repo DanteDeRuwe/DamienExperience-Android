@@ -8,6 +8,7 @@ buildscript {
         mapbox_plugin_markerview = "0.4.0"
         mapbox_turf = "5.5.0"
         mapbox_android_sdk = "9.5.0"
+        version_room = "2.2.5"
     }
     repositories {
         google()

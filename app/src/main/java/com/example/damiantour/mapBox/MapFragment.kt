@@ -20,11 +20,13 @@ import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
+import com.example.damiantour.database.TupleDatabase
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -77,19 +79,20 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     //the view
     private lateinit var mapView: MapView
-    lateinit var mapViewModel: MapViewModel
+    private lateinit var mapViewModel: MapViewModel
+    private lateinit var _style: Style
     private var locationEngine: LocationEngine? = null
 
-    // every 30 seconds
-    private var RECORDTEMPLOCATION_MS = 30000L
+    // every 5 seconds
+    private var RECORDTEMPLOCATION_MS = 5000L
 
-    // every 1 minute
+    // every 30 seconds
     private var RECORDLOCATION_MS = 60000L
 
     //every 5 minute
     private var WRITELOCATION_MS = 300000L
     private lateinit var permissionsManager: PermissionsManager
-    private var timerContinue: Boolean = true;
+    private var timerContinue: Boolean = true
     private var marker: MarkerView? = null
 
     //on create fragment
@@ -103,11 +106,21 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        mapViewModel = ViewModelProviders.of(this).get(MapViewModel::class.java)
+        //get viewmodel from factory
+        val application = requireNotNull(this.activity).application
+        val dataSource = TupleDatabase.getInstance(application).tupleDatabaseDao
+        val viewModelFactory = MapViewModelFactory(dataSource,application)
+        mapViewModel = ViewModelProviders.of(this,viewModelFactory).get(MapViewModel::class.java)
+        // inflate view
         val root = inflater.inflate(R.layout.fragment_map, container, false)
+        //get map
         mapView = root.findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
+        /***
+         * Observers
+         */
+        //shows or hides the waypoints
         mapViewModel.waypoint.observe(viewLifecycleOwner, Observer { waypoint ->
             if (waypoint != null) {
                 addMarkersView(waypoint)
@@ -115,25 +128,34 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 removeMarkersView()
             }
         })
+        // test
         mapViewModel.tempLocations.observe(viewLifecycleOwner, Observer { templocationList ->
             val last = templocationList.size - 1
             if (last >= 0) {
-                val location = templocationList[last];
+                val location = templocationList[last]
                 println("Temp location : " + location.latitude.toString() + " , " + location.longitude.toString())
+                drawWalkedLine()
             }
         })
+        //draws or redraws
         mapViewModel.locations.observe(viewLifecycleOwner, Observer { locationList ->
             val last = locationList.size - 1
             if (last >= 0) {
-                val location = locationList[last];
+                val location = locationList[last]
                 println("Location : " + location.latitude.toString() + " , " + location.longitude.toString())
+                drawWalkedLine()
             }
         })
+
+        /***
+         * Navigation
+         */
         val bottomNavigationView: BottomNavigationView = root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
         return root
     }
+
 
     /**
      * Called when the map is ready to be used.
@@ -150,15 +172,17 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+
             addLayer(style)
             addSymbols(style)
             enableLocationComponent(style)
+            _style = style
         }
         Log.i("MapFragment", "Going in writeLocation")
         startWriteLocationCoRoutine()
     }
 
-    //adds the layer
+    //adds the layer an Symbols
     private fun addLayer(style: Style) {
         mapViewModel.addPath()
         // Create the LineString from the list of coordinates and then make a GeoJSON
@@ -181,7 +205,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                 PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                 PropertyFactory.lineWidth(5f),
-                PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
+                PropertyFactory.lineColor(Color.parseColor("#ff0040"))
             )
         )
     }
@@ -228,6 +252,38 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
     }
 
+
+    private fun drawWalkedLine() {
+        val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
+        if(this::_style.isInitialized) {
+            _style.removeLayer("walkedlinelayer")
+            _style.removeSource("walkedline-source")
+            println(walkedCoordinatesList.toString())
+            _style.addSource(
+                GeoJsonSource(
+                    "walkedline-source",
+                    FeatureCollection.fromFeatures(
+                        arrayOf(
+                            Feature.fromGeometry(
+                                walkedCoordinatesList.let { LineString.fromLngLats(it) }
+                            )
+                        )
+                    )
+                )
+            )
+            // adds styling to the line connecting the coordstuppels
+            _style.addLayer(
+                LineLayer("walkedlinelayer", "walkedline-source").withProperties(
+                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                    PropertyFactory.lineWidth(6f),
+                    PropertyFactory.lineColor(Color.parseColor("#3bb7a9"))
+                )
+            )
+        }
+    }
+
+    // adds or/and removes Markers
     private fun removeMarkersView() {
         if (marker != null) {
             marker.let {
@@ -264,33 +320,34 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
+
     private fun startWriteLocationCoRoutine() {
-        Log.i("MapFragment", "Before launch")
         GlobalScope.launch {
-            Log.i("MapFragment", "In launch")
             writeLocationCoRoutine()
         }
     }
 
     private suspend fun writeLocationCoRoutine() {
-        var time = 1;
+        var time = 1
         while (timerContinue) {
-
             //TODO
             //argument for change instead of two times 30 sec, one time 1 min (drop everything with templocation)
-
-            delay(RECORDTEMPLOCATION_MS)
-            println("30 sec passed")
-            mapViewModel.setCurrentTempLocations()
-            delay(RECORDTEMPLOCATION_MS)
+            var counter = 0
+            while (counter < 60) {
+                println("How many secs passed : $counter")
+                mapViewModel.setCurrentTempLocation()
+                delay(RECORDTEMPLOCATION_MS)
+                counter += 2
+                println("After recount $counter")
+            }
             println("1 min passed")
-            mapViewModel.setCurrentLocations()
-            mapViewModel.setCurrentTempLocations()
-            time++
+            mapViewModel.setCurrentLocationList()
+            time += 1
             if (time == 5) {
                 //TODO
                 println("5 min passed")
-                mapViewModel.resetCurrentTempLocations()
+                //mapViewModel.resetCurrentTempLocations()
+                println("API POST")
                 time = 1
             }
         }
