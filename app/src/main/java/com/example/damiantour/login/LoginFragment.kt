@@ -69,7 +69,9 @@ class LoginFragment : Fragment() {
             Log.i("LoginFragment", token)
             view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
         } catch (e : Exception){
-            Toast.makeText(context, "Deze login bestaat niet", Toast.LENGTH_SHORT).show()
+            binding.loginErrorfield.text = getString(R.string.login_error)
+            binding.loginErrorfield.visibility = View.VISIBLE
+            //Toast.makeText(context, "Deze login bestaat niet", Toast.LENGTH_SHORT).show()
         }
     }
 
