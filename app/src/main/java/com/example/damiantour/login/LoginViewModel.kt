@@ -9,6 +9,7 @@ import com.example.damiantour.login.model.LoginFields
 
 /**
  * @author: Ruben Naudts
+ * ViewModel voor het login fragment.
  */
 class LoginViewModel : ViewModel(){
 

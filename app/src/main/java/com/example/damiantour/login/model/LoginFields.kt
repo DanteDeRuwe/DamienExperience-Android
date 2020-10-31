@@ -4,6 +4,7 @@ import androidx.databinding.BaseObservable
 
 /**
  * @author: Ruben Naudts
+ * Bevat de inhoud van de email en passwoord invulvelden.
  */
 class LoginFields : BaseObservable() {
 

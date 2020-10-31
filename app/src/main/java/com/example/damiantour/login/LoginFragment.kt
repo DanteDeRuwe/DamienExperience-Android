@@ -12,10 +12,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
-import com.example.damiantour.login.model.LoginFields
 import com.example.damiantour.network.DamianApiService
 import com.example.damiantour.network.LoginData
 import kotlinx.coroutines.launch
+import java.lang.Exception
+
 
 /**
  * @author Ruben Naudts
@@ -44,24 +45,32 @@ class LoginFragment : Fragment() {
 
         viewModel.getButtonClick()!!.observe(viewLifecycleOwner,
             { loginModel ->
-
-                lifecycleScope.launch{
+                lifecycleScope.launch {
                     println("pre request")
-                    val loginData = LoginData(loginModel.getEmail().toString(), loginModel.getPassword().toString())
-                    val result = sendLoginRequest(loginData)
-                    println(result.toString())
-                    //Log.i("LoginFragment", "token: "+ result.toString())
+                    val loginData = LoginData(
+                        loginModel.getEmail().toString(),
+                        loginModel.getPassword().toString()
+                    )
+                    sendLoginRequest(loginData)
                 }
-
-                view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
             })
 
         return binding.root
     }
 
-    suspend fun sendLoginRequest(loginData: LoginData){
-        return apiService.login(loginData)
-        //Log.i("LoginFragment","na sendloginRequest "+ loginData.email)
+    /**
+     * @author: Ruben Naudts
+     * Verstuurt de login request naar de API. Toont een melding wanneer de login faalt
+     */
+    private suspend fun sendLoginRequest(loginData: LoginData){
+        try {
+            //TODO: save token for later use.
+            val token =  apiService.login(loginData)
+            Log.i("LoginFragment", token)
+            view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
+        } catch (e : Exception){
+            Toast.makeText(context, "Deze login bestaat niet", Toast.LENGTH_SHORT).show()
+        }
     }
 
 }
