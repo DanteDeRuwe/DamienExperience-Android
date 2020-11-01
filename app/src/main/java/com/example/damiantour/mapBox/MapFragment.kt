@@ -50,8 +50,7 @@ import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.coroutines.GlobalScope
@@ -137,16 +136,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 drawWalkedLine()
             }
         })
-        //draws or redraws
-        mapViewModel.locations.observe(viewLifecycleOwner, Observer { locationList ->
-            val last = locationList.size - 1
-            if (last >= 0) {
-                val location = locationList[last]
-                println("Location : " + location.latitude.toString() + " , " + location.longitude.toString())
-                drawWalkedLine()
-            }
-        })
-
         /***
          * Navigation
          */
@@ -155,7 +144,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         bottomNavigationView.setupWithNavController(navController)
         return root
     }
-
 
     /**
      * Called when the map is ready to be used.
@@ -202,10 +190,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         // adds styling to the line connecting the coordstuppels
         style.addLayer(
             LineLayer("linelayer", "line-source").withProperties(
-                PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                PropertyFactory.lineWidth(5f),
-                PropertyFactory.lineColor(Color.parseColor("#ff0040"))
+                lineCap(Property.LINE_CAP_ROUND),
+                lineJoin(Property.LINE_JOIN_ROUND),
+                lineWidth(5f),
+                lineColor(Color.parseColor("#ff0040")),
+                symbolSortKey(5f)
             )
         )
     }
@@ -247,7 +236,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         style.addLayer(
             SymbolLayer("SYMBOL_LAYER_ID", "ICONS").withProperties(
                 iconImage("map_marker"),
-                iconOffset(arrayOf(0f, -8f))
+                iconOffset(arrayOf(0f, -8f)),
+                symbolSortKey(1f)
             )
         )
     }
@@ -274,10 +264,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             // adds styling to the line connecting the coordstuppels
             _style.addLayer(
                 LineLayer("walkedlinelayer", "walkedline-source").withProperties(
-                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                    PropertyFactory.lineWidth(6f),
-                    PropertyFactory.lineColor(Color.parseColor("#3bb7a9"))
+                    lineCap(Property.LINE_CAP_ROUND),
+                    lineJoin(Property.LINE_JOIN_ROUND),
+                    lineWidth(6f),
+                    lineColor(Color.parseColor("#3bb7a9")),
+                    symbolSortKey(3f)
                 )
             )
         }

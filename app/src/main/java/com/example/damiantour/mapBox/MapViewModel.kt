@@ -8,11 +8,8 @@ import com.example.damiantour.findClosestPoint
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import timber.log.Timber
 
 /***
  * @author Simon
@@ -43,25 +40,30 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     val waypoint: LiveData<Waypoint>
         get() = _waypoint
 
-    //30 second locations
+    //List of 30 records (coordstuple every 2 seconds)
     private var _tempLocations = MutableLiveData<List<Tuple>>()
     val tempLocations: LiveData<List<Tuple>>
         get() = _tempLocations
 
-    //1 min locations
+    //1 min locations (7 coordstuples every 1 min)
     private var _locations = database.getAllTuples()
     val locations: LiveData<List<Tuple>>
         get() = _locations
 
-    fun getMixListLoations(): List<Tuple>? {
+    /**
+     * a method to mix both lists to form a nice line on the map
+     * only used to show the users path
+     * needs to check if the list of location of every 1 min is initialized and that it has values
+     * needs to check if the list of templocation of every 2 sec is initialized and that it has values
+     */
+    private fun getMixListLocations(): List<Tuple>? {
         val listTempLoc = _tempLocations.value
         val listLoc = _locations.value
         if(listLoc!=null && listLoc.isNotEmpty()){
-            if(listTempLoc!=null && listTempLoc.isNotEmpty()){
-                return listLoc + listTempLoc
-            }
-            else{
-                return listLoc
+            return if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+                listLoc + listTempLoc
+            } else{
+                listLoc
             }
         }else{
             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
@@ -106,9 +108,11 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         _routeCoordinates.value = routeCoordinatesList
     }
 
-    //tries to get select the closest Waypoint from the selected point
-    //if the every waypoint is further than 500m the method returns 'null' (in  method findClosestPoint(clickPoint, list))
-    //if the closest waypoint is the same as the selected waypoint,the selected waypoint will be deselected
+    /**
+     * tries to get select the closest Waypoint from the selected point
+     * if the every waypoint is further than 500m the method returns 'null' (in  method findClosestPoint(clickPoint, list))
+     * if the closest waypoint is the same as the selected waypoint,the selected waypoint will be deselected
+     */
     fun onClickMap(latLng: LatLng) {
         val clickPoint = Point.fromLngLat(latLng.longitude, latLng.latitude)
         val lastwp = _waypoint.value
@@ -126,20 +130,27 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
 
     }
 
+    /**
+     * adds coordstuple every 2 seconds to list
+     * must check is location is enabled (if not it must wait until it is)
+     * gets that location and adds it to the list
+     *
+     * this is not saved in the local database or will not be send to the backend (this is temporay data)
+     * will be clear every minute
+     */
     suspend fun setCurrentTempLocation() {
         var isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
-        println("is activated : " + isActivated)
         while (!isActivated) {
-            println("Wachten op activation \n \n \n woeps")
+            println("Wachten op activation van locationComponent")
 
             // ! important !
-            //must change
-            deleteLocation()
+            //must change location
+            deleteLocations()
             isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
         }
         val location: Location? = mapBoxMap.locationComponent.lastKnownLocation
         if (location != null) {
-            println("Doet iets ... ")
+            println("Plaatst een coordstuple op de lijst")
             _tempLocations.postValue(
                 _tempLocations.value?.plus(
                     Tuple(
@@ -149,9 +160,17 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
                 )
             )
         } else {
-            println("Locatie niet gevonden \n \n\n")
+            println("Locatie nog niet gevonden (locatie component)")
         }
     }
+
+    /**
+     * is called every minute
+     * gets 7 records out of the list  at positions (0,5,10,15,20,25,30)
+     * this is than saved in the database and later on send to the backend
+     *
+     * needs 7 records to have a nice forming line on the screen (angular and android)
+     */
     suspend fun setCurrentLocationList() {
         val tempLocations = _tempLocations.value
         var counter = 0
@@ -167,17 +186,28 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
 
         resetCurrentTempLocations()
     }
-    private suspend fun deleteLocation(){
+
+    /**
+     * clear both the local database and the temporay list of locations
+     */
+    private suspend fun deleteLocations(){
         database.clear()
+        resetCurrentTempLocations()
     }
 
+    /**
+     * clears the temporay list of locations
+     */
     private fun resetCurrentTempLocations() {
         println("reset list")
-        _tempLocations.postValue(ArrayList<Tuple>())
+        _tempLocations.postValue(ArrayList())
     }
 
+    /**
+     * makes from the mixlist of location a list of point that can be mapped on the map
+     */
     fun createLineSourceFromWalkedRoute(): ArrayList<Point> {
-        val routeList = getMixListLoations()
+        val routeList = getMixListLocations()
         val walkedCoordinatesList = ArrayList<Point>()
         var counter = 0
         val length = routeList?.size
