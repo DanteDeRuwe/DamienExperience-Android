@@ -1,5 +1,7 @@
 package com.example.damiantour.login
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -66,6 +68,12 @@ class LoginFragment : Fragment() {
         try {
             //TODO: save token for later use.
             val token =  apiService.login(loginData)
+
+            val preferencestest : SharedPreferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
+            preferencestest.edit().putString("TOKEN",token).apply()
+
+            val JWTtoken : String = preferencestest.getString("TOKEN", null).toString()
+
             Log.i("LoginFragment", token)
             view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
         } catch (e : Exception){

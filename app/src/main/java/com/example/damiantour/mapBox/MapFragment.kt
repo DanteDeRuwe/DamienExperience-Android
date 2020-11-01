@@ -127,7 +127,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 removeMarkersView()
             }
         })
-        // test
+        //draws or redraws
         mapViewModel.tempLocations.observe(viewLifecycleOwner, Observer { templocationList ->
             val last = templocationList.size - 1
             if (last >= 0) {
@@ -194,7 +194,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 lineJoin(Property.LINE_JOIN_ROUND),
                 lineWidth(5f),
                 lineColor(Color.parseColor("#ff0040")),
-                symbolSortKey(5f)
+                lineSortKey(5f)
             )
         )
     }
@@ -237,7 +237,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             SymbolLayer("SYMBOL_LAYER_ID", "ICONS").withProperties(
                 iconImage("map_marker"),
                 iconOffset(arrayOf(0f, -8f)),
-                symbolSortKey(1f)
+                symbolSortKey(5f)
             )
         )
     }
@@ -268,7 +268,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                     lineJoin(Property.LINE_JOIN_ROUND),
                     lineWidth(6f),
                     lineColor(Color.parseColor("#3bb7a9")),
-                    symbolSortKey(3f)
+                    lineSortKey(3f)
                 )
             )
         }
@@ -324,12 +324,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             //TODO
             //argument for change instead of two times 30 sec, one time 1 min (drop everything with templocation)
             var counter = 0
-            while (counter < 60) {
+            while (counter <= 60) {
                 println("How many secs passed : $counter")
                 mapViewModel.setCurrentTempLocation()
                 delay(RECORDTEMPLOCATION_MS)
                 counter += 2
-                println("After recount $counter")
             }
             println("1 min passed")
             mapViewModel.setCurrentLocationList()

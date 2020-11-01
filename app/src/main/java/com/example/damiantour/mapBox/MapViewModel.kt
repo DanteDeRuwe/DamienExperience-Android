@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Collections.addAll
 
 /***
  * @author Simon
@@ -45,7 +46,7 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     val tempLocations: LiveData<List<Tuple>>
         get() = _tempLocations
 
-    //1 min locations (7 coordstuples every 1 min)
+    //1 min locations (6 coordstuples every 1 min)
     private var _locations = database.getAllTuples()
     val locations: LiveData<List<Tuple>>
         get() = _locations
@@ -60,13 +61,17 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         val listTempLoc = _tempLocations.value
         val listLoc = _locations.value
         if(listLoc!=null && listLoc.isNotEmpty()){
+            println("listLoc : " + listLoc.size)
             return if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+                println("extra listTempLoc : " + listTempLoc.size)
                 listLoc + listTempLoc
+
             } else{
                 listLoc
             }
         }else{
             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+                println("listTempLoc : " + listTempLoc.size)
                 return listTempLoc
             }
             return ArrayList()
@@ -166,7 +171,7 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
 
     /**
      * is called every minute
-     * gets 7 records out of the list  at positions (0,5,10,15,20,25,30)
+     * gets 6 records out of the list  at positions (0,5,10,15,20,25)
      * this is than saved in the database and later on send to the backend
      *
      * needs 7 records to have a nice forming line on the screen (angular and android)
@@ -183,6 +188,8 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
             counter += 5
             println(counter)
         }
+        val allTuples = database.getAllTuples()
+        println("Database saved state : "+allTuples)
 
         resetCurrentTempLocations()
     }
@@ -192,7 +199,6 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
      */
     private suspend fun deleteLocations(){
         database.clear()
-        resetCurrentTempLocations()
     }
 
     /**
@@ -200,7 +206,10 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
      */
     private fun resetCurrentTempLocations() {
         println("reset list")
-        _tempLocations.postValue(ArrayList())
+        val list = _tempLocations.value
+        if(list!=null) {
+            _tempLocations.postValue(list - list)
+        }
     }
 
     /**
