@@ -1,67 +1,78 @@
 package com.example.damiantour.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
-import kotlinx.android.synthetic.main.fragment_login.*
+import com.example.damiantour.network.DamianApiService
+import com.example.damiantour.network.LoginData
+import kotlinx.coroutines.launch
+import java.lang.Exception
+
 
 /**
- * @author Ruben
+ * @author Ruben Naudts
  */
 class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
 
-    //private lateinit var viewModel: LoginViewModel
+    private lateinit var viewModel: LoginViewModel
+
+    private val apiService : DamianApiService = DamianApiService.create()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        binding = FragmentLoginBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
 
-        binding = DataBindingUtil.inflate<FragmentLoginBinding>(
-            inflater,
-            R.layout.fragment_login,
-            container,
-            false
-        ).apply {
-            lifecycleOwner = viewLifecycleOwner
+        if (savedInstanceState == null) {
+            viewModel.init()
         }
 
-        //viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
-        //binding.LoginViewModel = viewModel
+        binding.loginViewModel = viewModel
 
-        binding.loginButton.setOnClickListener{
-            //TODO feedback week 5: hier zou je dan de viewModel moeten laten weten dat er op een button geklikt is. Dus het eevent doorgeven aan de viewmodel
-            //Doe tis zodra we login opnemen
-            login()
-        }
+        viewModel.getButtonClick()!!.observe(viewLifecycleOwner,
+            { loginModel ->
+                lifecycleScope.launch {
+                    println("pre request")
+                    val loginData = LoginData(
+                        loginModel.getEmail().toString(),
+                        loginModel.getPassword().toString()
+                    )
+                    sendLoginRequest(loginData)
+                }
+            })
 
         return binding.root
     }
 
-    private fun login(){
-        val email = email_input.text.toString()
-        val pw = password_input.text.toString()
-        if(email=="ruben.naudts@student.hogent.be"&&pw=="testpass"){
-            Toast.makeText(context, "Login gebeurd", Toast.LENGTH_SHORT).show()
+    /**
+     * @author: Ruben Naudts
+     * Verstuurt de login request naar de API. Toont een melding wanneer de login faalt
+     */
+    private suspend fun sendLoginRequest(loginData: LoginData){
+        try {
+            //TODO: save token for later use.
+            val token =  apiService.login(loginData)
+            Log.i("LoginFragment", token)
             view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
-        }
-        else{
-            Toast.makeText(context, "Login ging mis", Toast.LENGTH_SHORT).show()
-
+        } catch (e : Exception){
+            binding.loginErrorfield.text = getString(R.string.login_error)
+            binding.loginErrorfield.visibility = View.VISIBLE
+            //Toast.makeText(context, "Deze login bestaat niet", Toast.LENGTH_SHORT).show()
         }
     }
-
 
 }
