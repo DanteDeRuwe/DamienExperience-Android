@@ -1,5 +1,6 @@
 package com.example.damiantour.login
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -22,6 +23,8 @@ import kotlinx.coroutines.launch
  * @author Ruben Naudts
  */
 class LoginFragment : Fragment() {
+    private lateinit var preferences: SharedPreferences
+
     private lateinit var binding: FragmentLoginBinding
 
     private lateinit var viewModel: LoginViewModel
@@ -33,6 +36,8 @@ class LoginFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
+
 
 
         binding = FragmentLoginBinding.inflate(inflater, container, false)
@@ -57,6 +62,13 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        if(preferences.getString("TOKEN", null) != null){
+            navigateToMapFragment()
+        }
+        super.onActivityCreated(savedInstanceState)
+    }
+
     /**
      * @author: Ruben Naudts
      * @param loginData: a data class containing email and password fields
@@ -70,7 +82,7 @@ class LoginFragment : Fragment() {
             val token =  apiService.login(loginData)
 
             //Save token for later use.
-            val preferences : SharedPreferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
+            //val preferences : SharedPreferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
             preferences.edit().putString("TOKEN", token).apply()
 
             //Code to request JWT token
