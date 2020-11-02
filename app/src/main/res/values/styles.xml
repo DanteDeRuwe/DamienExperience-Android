@@ -6,6 +6,9 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-
+    <style name="login_textfield">
+        <item name="android:background">@drawable/textfield_shape</item>
+        <item name="android:ems">10</item>
+    </style>
 
 </resources>

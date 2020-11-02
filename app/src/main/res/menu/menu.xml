@@ -2,31 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/qr_code"
+        android:id="@+id/qr_codeFragment"
         android:icon="@drawable/ic_qrcode_scan"
         android:title="@string/qr_code_reader"
         />
 
     <item
-        android:id="@+id/chat"
+        android:id="@+id/chatFragment"
         android:icon="@drawable/ic_bx_message_alt"
         android:title="@string/chat"
         />
 
     <item
-        android:id="@+id/map"
+        android:id="@+id/mapFragment"
         android:icon="@drawable/ic_bx_map_alt"
         android:title="@string/map"
         />
 
     <item
-        android:id="@+id/settings"
+        android:id="@+id/settingsFragment"
         android:icon="@drawable/ic_settings_solid"
         android:title="@string/instellingen"
         />
 
     <item
-        android:id="@+id/sos"
+        android:id="@+id/sosFragment"
         android:icon="@drawable/ic_sos_button"
         android:title="@string/sos"
         />
