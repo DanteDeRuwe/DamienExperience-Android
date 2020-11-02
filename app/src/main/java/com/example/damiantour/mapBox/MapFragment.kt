@@ -84,6 +84,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private var timerContinue: Boolean = true
     private var marker: MarkerView? = null
 
+    private lateinit var _style : Style
     private var job = Job()
     private val coroutineScope = CoroutineScope(job + Dispatchers.Main)
 
@@ -162,7 +163,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-
+            _style = style
             drawRouteLayer(style)
             drawWaypointSymbols(style)
             enableLocationComponent(style)
@@ -258,31 +259,32 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private fun drawWalkedLine() {
         val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
-        val style = mapViewModel.mapBoxMap.style!!
-        style.removeLayer("walkedlinelayer")
-        style.removeSource("walkedline-source")
-        style.addSource(
-            GeoJsonSource(
-                "walkedline-source",
-                FeatureCollection.fromFeatures(
-                    arrayOf(
-                        Feature.fromGeometry(
-                            walkedCoordinatesList.let { LineString.fromLngLats(it) }
+        if(this::_style.isInitialized) {
+            _style.removeLayer("walkedlinelayer")
+            _style.removeSource("walkedline-source")
+            _style.addSource(
+                GeoJsonSource(
+                    "walkedline-source",
+                    FeatureCollection.fromFeatures(
+                        arrayOf(
+                            Feature.fromGeometry(
+                                walkedCoordinatesList.let { LineString.fromLngLats(it) }
+                            )
                         )
                     )
                 )
             )
-        )
-        // adds styling to the line connecting the coordstuppels
-        style.addLayer(
-            LineLayer("walkedlinelayer", "walkedline-source").withProperties(
-                lineCap(Property.LINE_CAP_ROUND),
-                lineJoin(Property.LINE_JOIN_ROUND),
-                lineWidth(6f),
-                lineColor(Color.parseColor("#3bb7a9")),
-                lineSortKey(3f)
+            // adds styling to the line connecting the coordstuppels
+            _style.addLayer(
+                LineLayer("walkedlinelayer", "walkedline-source").withProperties(
+                    lineCap(Property.LINE_CAP_ROUND),
+                    lineJoin(Property.LINE_JOIN_ROUND),
+                    lineWidth(6f),
+                    lineColor(Color.parseColor("#3bb7a9")),
+                    lineSortKey(3f)
+                )
             )
-        )
+        }
 
     }
 
