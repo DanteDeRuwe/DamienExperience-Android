@@ -20,7 +20,7 @@ class ChatFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val root = inflater.inflate(R.layout.fragment_wip, container, false)
+        val root = inflater.inflate(R.layout.fragment_chat, container, false)
         val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)

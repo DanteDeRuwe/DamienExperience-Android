@@ -18,18 +18,18 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.example.damiantour.mapBox.MapFragment"
-        android:label="fragment_map"
-        tools:layout="@layout/fragment_map" >
+        android:label="MapFragment"
+        tools:layout="@layout/fragment_map">
         <action
-            android:id="@+id/action_mapFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            android:id="@+id/action_mapFragment_to_chatFragment2"
+            app:destination="@id/chatFragment2" />
     </fragment>
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.damiantour.settings.SettingsFragment"
-        android:label="SettingsFragment" >
+        android:id="@+id/chatFragment2"
+        android:name="com.example.damiantour.chat.ChatFragment"
+        android:label="ChatFragment">
         <action
-            android:id="@+id/action_settingsFragment_to_mapFragment"
+            android:id="@+id/action_chatFragment2_to_mapFragment"
             app:destination="@id/mapFragment" />
     </fragment>
 </navigation>

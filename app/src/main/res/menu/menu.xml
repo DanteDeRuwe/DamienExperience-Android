@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/qr_codeFragment"
+        android:id="@+id/qrCodeFragment"
         android:icon="@drawable/ic_qrcode_scan"
         android:title="@string/qr_code_reader"
         />
 
     <item
-        android:id="@+id/chatFragment"
+        android:id="@+id/chatFragment2"
         android:icon="@drawable/ic_bx_message_alt"
         android:title="@string/chat"
         />

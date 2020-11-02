@@ -460,6 +460,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        markerViewManager.onDestroy()
         mapView.onDestroy()
     }
 
