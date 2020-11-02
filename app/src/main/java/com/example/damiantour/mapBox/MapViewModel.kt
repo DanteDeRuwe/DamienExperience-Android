@@ -5,6 +5,7 @@ import android.location.Location
 import androidx.lifecycle.*
 import com.example.damiantour.database.TupleDatabaseDao
 import com.example.damiantour.findClosestPoint
+import com.example.damiantour.network.RouteData
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -93,21 +94,16 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     }
 
     //adds one line on the map
-    fun addPath() {
-        // initRouteCoordinates()
+    fun addPath(routeData : RouteData) {
         val routeCoordinatesList = ArrayList<Point>()
-        val obj = JSONObject(getRoute())
-        //Get coords from json object, returns jsonarray
-        //in the form of [[long,lat],[long,lat], ... , [long,lat]]
-        val coordsObject = obj.getJSONArray("features").getJSONObject(0)
-            .getJSONObject("geometry").getJSONArray("coordinates")
-        val length = coordsObject.length()
+        val coordsList = routeData.coordinates
+        val length = coordsList.size
         var counter = 0
         //Loops over all the coordinates
         while (counter < length) {
-            val tupel = coordsObject.getJSONArray(counter)
-            val lon = tupel.get(0) as Double
-            val lat = tupel.get(1) as Double
+            val tupel = coordsList[counter]
+            val lon = tupel[0]
+            val lat = tupel[1]
             //adds coordinates to the route
             routeCoordinatesList.add(Point.fromLngLat(lon, lat))
             counter++

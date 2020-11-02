@@ -1,6 +1,8 @@
 package com.example.damiantour.mapBox
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -22,6 +24,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
+import com.example.damiantour.network.DamianApiService
+import com.example.damiantour.network.RouteData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -48,6 +52,10 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.coroutines.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.lang.Exception
 
 /// Documentation
 
@@ -84,9 +92,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private var timerContinue: Boolean = true
     private var marker: MarkerView? = null
 
-    private lateinit var _style : Style
+    private lateinit var _style: Style
     private var job = Job()
     private val coroutineScope = CoroutineScope(job + Dispatchers.Main)
+
+    private val apiService: DamianApiService = DamianApiService.create()
 
     /**
      * @author Simon Bettens & Jonas Haenbalcke
@@ -164,7 +174,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             _style = style
-            drawRouteLayer(style)
             drawWaypointSymbols(style)
             enableLocationComponent(style)
         }
@@ -174,36 +183,49 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
+    private suspend fun sendRouteRequest() {
+        try {
+            val preferences: SharedPreferences =
+                requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
+            val JWTtoken: String = preferences.getString("TOKEN", null).toString()
+            val routeResult = apiService.getRoute(JWTtoken, "TestTourOne")
+            mapViewModel.addPath(routeResult)
+        } catch (e: Exception) {
+            println("Fout" + e.localizedMessage)
+        }
+    }
+
     /**
      * @author Simon Bettens & Jonas Haenbalcke
      * draw the Route on the map
      */
-    private fun drawRouteLayer(style: Style) {
-        mapViewModel.addPath()
+    private fun drawRouteLayer() {
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
-        style.addSource(
-            GeoJsonSource(
-                "line-source",
-                FeatureCollection.fromFeatures(
-                    arrayOf(
-                        Feature.fromGeometry(
-                            mapViewModel.routeCoordinates.value?.let { LineString.fromLngLats(it) }
+        if (this::_style.isInitialized) {
+            _style.addSource(
+                GeoJsonSource(
+                    "line-source",
+                    FeatureCollection.fromFeatures(
+                        arrayOf(
+                            Feature.fromGeometry(
+                                mapViewModel.routeCoordinates.value?.let { LineString.fromLngLats(it) }
+                            )
                         )
                     )
                 )
             )
-        )
-        // adds styling to the line connecting the coordstuppels
-        style.addLayer(
-            LineLayer("linelayer", "line-source").withProperties(
-                lineCap(Property.LINE_CAP_ROUND),
-                lineJoin(Property.LINE_JOIN_ROUND),
-                lineWidth(5f),
-                lineColor(Color.parseColor("#ff0040")),
-                lineSortKey(5f)
+            // adds styling to the line connecting the coordstuppels
+            _style.addLayer(
+                LineLayer("linelayer", "line-source").withProperties(
+                    lineCap(Property.LINE_CAP_ROUND),
+                    lineJoin(Property.LINE_JOIN_ROUND),
+                    lineWidth(5f),
+                    lineColor(Color.parseColor("#ff0040")),
+                    lineSortKey(5f)
+                )
             )
-        )
+        }
     }
 
     /**
@@ -259,7 +281,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private fun drawWalkedLine() {
         val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
-        if(this::_style.isInitialized) {
+        if (this::_style.isInitialized) {
             _style.removeLayer("walkedlinelayer")
             _style.removeSource("walkedline-source")
             _style.addSource(
@@ -338,6 +360,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private fun startWriteLocationCoRoutine() {
         coroutineScope.launch {
+            sendRouteRequest()
+            drawRouteLayer()
             writeLocationCoRoutine()
         }
     }
@@ -461,6 +485,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             activity?.finish()
         }
     }
+
     override fun onStart() {
         super.onStart()
         mapView.onStart()
