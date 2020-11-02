@@ -11,23 +11,30 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import java.util.logging.XMLFormatter
 
 /**
- * @author: Ruben Naudts
+ * @author: Ruben Naudts and Simon Bettens
  */
 interface DamianApiService {
+
     @POST("login")
     suspend fun login(
         @Body login : LoginData,
     ) : String
 
+    @GET("route")
+    suspend fun getRoute(
+        @Body routeName : String
+    ) : Call<RouteData>
+
 
 
     companion object{
         private const val BASE_URL = "https://damiantourapi.azurewebsites.net/api/"
-
+        private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
         fun create(): DamianApiService{
             val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
 
@@ -38,7 +45,7 @@ interface DamianApiService {
             return Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build()
                 .create(DamianApiService::class.java)
         }

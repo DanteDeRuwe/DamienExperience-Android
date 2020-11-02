@@ -53,9 +53,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
 /// Documentation
@@ -75,15 +73,15 @@ import java.lang.ref.WeakReference
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private lateinit var markerViewManager: MarkerViewManager
-
+    private var coroutinesActive : Boolean = false
     //the view
     private lateinit var mapView: MapView
     private lateinit var mapViewModel: MapViewModel
     private lateinit var _style: Style
     private var locationEngine: LocationEngine? = null
 
-    // every 5 seconds
-    private var RECORDTEMPLOCATION_MS = 5000L
+    // every 2 seconds
+    private var RECORDTEMPLOCATION_MS = 2000L
 
     // every 30 seconds
     private var RECORDLOCATION_MS = 60000L
@@ -94,6 +92,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private var timerContinue: Boolean = true
     private var marker: MarkerView? = null
 
+    private var job = Job()
+    private val coroutineScope = CoroutineScope(job + Dispatchers.Main)
     //on create fragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,6 +136,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 drawWalkedLine()
             }
         })
+        mapViewModel.locations.observe(viewLifecycleOwner, Observer { templocationList ->
+                drawWalkedLine()
+        })
         /***
          * Navigation
          */
@@ -167,7 +170,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             _style = style
         }
         Log.i("MapFragment", "Going in writeLocation")
-        startWriteLocationCoRoutine()
+        if(!coroutinesActive) {
+            coroutinesActive = true
+            startWriteLocationCoRoutine()
+        }
     }
 
     //adds the layer an Symbols
@@ -248,7 +254,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         if(this::_style.isInitialized) {
             _style.removeLayer("walkedlinelayer")
             _style.removeSource("walkedline-source")
-            println(walkedCoordinatesList.toString())
             _style.addSource(
                 GeoJsonSource(
                     "walkedline-source",
@@ -313,21 +318,21 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
 
     private fun startWriteLocationCoRoutine() {
-        GlobalScope.launch {
+        coroutineScope.launch {
             writeLocationCoRoutine()
         }
     }
 
     private suspend fun writeLocationCoRoutine() {
         var time = 1
+        // should not happen here
+        mapViewModel.deleteLocations()
         while (timerContinue) {
-            //TODO
-            //argument for change instead of two times 30 sec, one time 1 min (drop everything with templocation)
             var counter = 0
             while (counter <= 60) {
                 println("How many secs passed : $counter")
-                mapViewModel.setCurrentTempLocation()
                 delay(RECORDTEMPLOCATION_MS)
+                mapViewModel.setCurrentTempLocation()
                 counter += 2
             }
             println("1 min passed")
@@ -455,11 +460,14 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         mapView.onDestroy()
+        coroutinesActive = false
+        coroutineScope.cancel()
     }
 
 

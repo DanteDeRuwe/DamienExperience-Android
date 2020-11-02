@@ -42,8 +42,8 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         get() = _waypoint
 
     //List of 30 records (coordstuple every 2 seconds)
-    private var _tempLocations = MutableLiveData<List<Tuple>>()
-    val tempLocations: LiveData<List<Tuple>>
+    private var _tempLocations = MutableLiveData<MutableList<Tuple>>()
+    val tempLocations: LiveData<MutableList<Tuple>>
         get() = _tempLocations
 
     //1 min locations (6 coordstuples every 1 min)
@@ -62,12 +62,14 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         val listLoc = _locations.value
         if(listLoc!=null && listLoc.isNotEmpty()){
             println("listLoc : " + listLoc.size)
-            return if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
                 println("extra listTempLoc : " + listTempLoc.size)
-                listLoc + listTempLoc
+                 val mix =  listLoc + listTempLoc
+                 println("mix list : " +  mix.size)
+                 return mix
 
             } else{
-                listLoc
+                 return listLoc
             }
         }else{
             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
@@ -143,27 +145,18 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
      * this is not saved in the local database or will not be send to the backend (this is temporay data)
      * will be clear every minute
      */
-    suspend fun setCurrentTempLocation() {
+    fun setCurrentTempLocation() {
         var isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
         while (!isActivated) {
             println("Wachten op activation van locationComponent")
-
-            // ! important !
-            //must change location
-            deleteLocations()
             isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
         }
         val location: Location? = mapBoxMap.locationComponent.lastKnownLocation
         if (location != null) {
             println("Plaatst een coordstuple op de lijst")
-            _tempLocations.postValue(
-                _tempLocations.value?.plus(
-                    Tuple(
-                        longitude = location.longitude,
-                        latitude = location.latitude
-                    )
-                )
-            )
+            val list = _tempLocations.value!!
+            list.add(Tuple(longitude = location.longitude,latitude = location.latitude))
+            _tempLocations.postValue( list)
         } else {
             println("Locatie nog niet gevonden (locatie component)")
         }
@@ -180,24 +173,18 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         val tempLocations = _tempLocations.value
         var counter = 0
         while (counter < 30) {
-            val tempLoc = tempLocations?.get(counter)
-            println(tempLoc.toString())
-            if (tempLoc != null) {
-                database.insert(Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude))
-            }
+            val tempLoc = tempLocations!![counter]
+            val loc = Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
+            database.insert(loc)
             counter += 5
-            println(counter)
         }
-        val allTuples = database.getAllTuples()
-        println("Database saved state : "+allTuples)
-
         resetCurrentTempLocations()
     }
 
     /**
      * clear both the local database and the temporay list of locations
      */
-    private suspend fun deleteLocations(){
+    suspend fun deleteLocations(){
         database.clear()
     }
 
@@ -208,7 +195,7 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         println("reset list")
         val list = _tempLocations.value
         if(list!=null) {
-            _tempLocations.postValue(list - list)
+            _tempLocations.value!!.clear()
         }
     }
 
