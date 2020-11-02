@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //set the view of the activity
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
     }
 
 }

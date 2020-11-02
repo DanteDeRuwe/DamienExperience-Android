@@ -94,6 +94,7 @@ class LoginFragment : Fragment() {
             //Navigate to map
             navigateToMapFragment()
         } catch (e: Exception){
+
             binding.loginErrorfield.text = getString(R.string.login_error)
             binding.loginErrorfield.visibility = View.VISIBLE
         }
