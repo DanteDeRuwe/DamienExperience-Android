@@ -1,26 +1,21 @@
-package com.example.damiantour.settings
+package com.example.damiantour.qr
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
-import com.example.damiantour.mapBox.MapViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.mapbox.mapboxsdk.Mapbox
-import timber.log.Timber
 
-class SettingsFragment :Fragment(){
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    //on the create view
+/**
+ * A simple [Fragment] subclass.
+ * Use the [QrCodeFragment.newInstance] factory method to
+ * create an instance of this fragment.
+ */
+class QrCodeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -30,6 +25,5 @@ class SettingsFragment :Fragment(){
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
         return root
-
     }
 }
