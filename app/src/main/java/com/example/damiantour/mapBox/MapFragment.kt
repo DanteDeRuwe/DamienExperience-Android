@@ -6,27 +6,22 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.location.Location
 import android.os.Bundle
-import android.os.Looper.getMainLooper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
-import com.example.damiantour.database.TupleDatabase
+import com.example.damiantour.database.DamianDatabase
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -49,12 +44,10 @@ import com.mapbox.mapboxsdk.plugins.markerview.MarkerView
 import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.coroutines.*
-import java.lang.ref.WeakReference
 
 /// Documentation
 
@@ -73,43 +66,49 @@ import java.lang.ref.WeakReference
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private lateinit var markerViewManager: MarkerViewManager
-    private var coroutinesActive : Boolean = false
+    private var coroutinesActive: Boolean = false
+
     //the view
     private lateinit var mapView: MapView
     private lateinit var mapViewModel: MapViewModel
-    private lateinit var _style: Style
     private var locationEngine: LocationEngine? = null
 
     // every 2 seconds
     private var RECORDTEMPLOCATION_MS = 2000L
 
-    // every 30 seconds
-    private var RECORDLOCATION_MS = 60000L
+    // every 5 minutes
+    private var SENDLOCATIONS = 5
+    private var WANTSTOSENDLOCATION = true
 
-    //every 5 minute
-    private var WRITELOCATION_MS = 300000L
     private lateinit var permissionsManager: PermissionsManager
     private var timerContinue: Boolean = true
     private var marker: MarkerView? = null
 
     private var job = Job()
     private val coroutineScope = CoroutineScope(job + Dispatchers.Main)
-    //on create fragment
+
+    /**
+     * @author Simon Bettens & Jonas Haenbalcke
+     * on create fragment
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
     }
 
-    //on the create view
+    /**
+     * @author Simon Bettens & Jonas Haenbalcke
+     * Creates the view and prepares the fragment and viewmodel
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         //get viewmodel from factory
         val application = requireNotNull(this.activity).application
-        val dataSource = TupleDatabase.getInstance(application).tupleDatabaseDao
-        val viewModelFactory = MapViewModelFactory(dataSource,application)
-        mapViewModel = ViewModelProviders.of(this,viewModelFactory).get(MapViewModel::class.java)
+        val dataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
+        val viewModelFactory = MapViewModelFactory(dataSource, application)
+        mapViewModel = ViewModelProviders.of(this, viewModelFactory).get(MapViewModel::class.java)
         // inflate view
         val root = inflater.inflate(R.layout.fragment_map, container, false)
         //get map
@@ -122,9 +121,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         //shows or hides the waypoints
         mapViewModel.waypoint.observe(viewLifecycleOwner, Observer { waypoint ->
             if (waypoint != null) {
-                addMarkersView(waypoint)
+                addMarkersOnMap(waypoint)
             } else {
-                removeMarkersView()
+                removeMarkersOnMap()
             }
         })
         //draws or redraws
@@ -136,8 +135,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 drawWalkedLine()
             }
         })
-        mapViewModel.locations.observe(viewLifecycleOwner, Observer { templocationList ->
-                drawWalkedLine()
+        mapViewModel.locations.observe(viewLifecycleOwner, Observer { locationList ->
+            drawWalkedLine()
         })
         /***
          * Navigation
@@ -157,27 +156,28 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapViewModel.mapBoxMap = mapboxMap
         mapboxMap.addOnMapClickListener { point ->
-            removeMarkersView()
+            removeMarkersOnMap()
             mapViewModel.onClickMap(point)
             true
         }
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
 
-            addLayer(style)
-            addSymbols(style)
+            drawRouteLayer(style)
+            drawWaypointSymbols(style)
             enableLocationComponent(style)
-            _style = style
         }
-        Log.i("MapFragment", "Going in writeLocation")
-        if(!coroutinesActive) {
+        if (!coroutinesActive) {
             coroutinesActive = true
             startWriteLocationCoRoutine()
         }
     }
 
-    //adds the layer an Symbols
-    private fun addLayer(style: Style) {
+    /**
+     * @author Simon Bettens & Jonas Haenbalcke
+     * draw the Route on the map
+     */
+    private fun drawRouteLayer(style: Style) {
         mapViewModel.addPath()
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
@@ -205,7 +205,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
     }
 
-    private fun addSymbols(style: Style) {
+    /**
+     * @author Simon Bettens & Jonas Haenbalcke
+     * draws the waypoints symbol on the map
+     */
+    private fun drawWaypointSymbols(style: Style) {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
         //this call reads the json and put everthing in een arraylist<Waypoint>
         mapViewModel.readWaypointFile()
@@ -248,39 +252,45 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         )
     }
 
-
+    /**
+     * @author Simon Bettens
+     * draws the line where the user has walked
+     */
     private fun drawWalkedLine() {
         val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
-        if(this::_style.isInitialized) {
-            _style.removeLayer("walkedlinelayer")
-            _style.removeSource("walkedline-source")
-            _style.addSource(
-                GeoJsonSource(
-                    "walkedline-source",
-                    FeatureCollection.fromFeatures(
-                        arrayOf(
-                            Feature.fromGeometry(
-                                walkedCoordinatesList.let { LineString.fromLngLats(it) }
-                            )
+        val style = mapViewModel.mapBoxMap.style!!
+        style.removeLayer("walkedlinelayer")
+        style.removeSource("walkedline-source")
+        style.addSource(
+            GeoJsonSource(
+                "walkedline-source",
+                FeatureCollection.fromFeatures(
+                    arrayOf(
+                        Feature.fromGeometry(
+                            walkedCoordinatesList.let { LineString.fromLngLats(it) }
                         )
                     )
                 )
             )
-            // adds styling to the line connecting the coordstuppels
-            _style.addLayer(
-                LineLayer("walkedlinelayer", "walkedline-source").withProperties(
-                    lineCap(Property.LINE_CAP_ROUND),
-                    lineJoin(Property.LINE_JOIN_ROUND),
-                    lineWidth(6f),
-                    lineColor(Color.parseColor("#3bb7a9")),
-                    lineSortKey(3f)
-                )
+        )
+        // adds styling to the line connecting the coordstuppels
+        style.addLayer(
+            LineLayer("walkedlinelayer", "walkedline-source").withProperties(
+                lineCap(Property.LINE_CAP_ROUND),
+                lineJoin(Property.LINE_JOIN_ROUND),
+                lineWidth(6f),
+                lineColor(Color.parseColor("#3bb7a9")),
+                lineSortKey(3f)
             )
-        }
+        )
+
     }
 
-    // adds or/and removes Markers
-    private fun removeMarkersView() {
+    /**
+     * @author Simon Bettens
+     * removes the marker overlay currently on the map
+     */
+    private fun removeMarkersOnMap() {
         if (marker != null) {
             marker.let {
                 markerViewManager.removeMarker(it!!)
@@ -289,7 +299,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
-    private fun addMarkersView(wp: Waypoint) {
+    /**
+     * @author Simon Bettens
+     * adds the markers overlay of the closest waypoint from where the user has ticked
+     */
+    private fun addMarkersOnMap(wp: Waypoint) {
         val title: String = wp.title
         val description: String = wp.description
         //get coords
@@ -316,13 +330,23 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
-
+    /**
+     * @author Simon Bettens
+     * start the coroutine
+     */
     private fun startWriteLocationCoRoutine() {
         coroutineScope.launch {
             writeLocationCoRoutine()
         }
     }
 
+    /**
+     * @author Simon Bettens
+     * this runs on a separate thread
+     * gets location every 2 seconds and places it on the list
+     * every 1 min 6 locations will be placed in the database and the list is cleared
+     * SENDLOCATIONS specifies the amount of the before the locations is send to the backend
+     */
     private suspend fun writeLocationCoRoutine() {
         var time = 1
         // should not happen here
@@ -338,7 +362,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             println("1 min passed")
             mapViewModel.setCurrentLocationList()
             time += 1
-            if (time == 5) {
+            if (WANTSTOSENDLOCATION && time == SENDLOCATIONS) {
                 //TODO
                 println("5 min passed")
                 //mapViewModel.resetCurrentTempLocations()
@@ -349,7 +373,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     }
 
 
-    // Gets the icon
+    /**
+     * @author Simon & Jonas
+     * Gets the icon for the marker
+     */
     private fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
@@ -366,8 +393,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         return bitmap
     }
 
-    // ------------- Permissions
-    //activate location
+    /**
+     * enables location component
+     */
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
         // Check if permissions are enabled and if not request
@@ -398,7 +426,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
-    //Requests permission from user
+    /**
+     * Requests permission from user
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -429,9 +459,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             activity?.finish()
         }
     }
-
-
-    // ------------- life cycle methods
     override fun onStart() {
         super.onStart()
         mapView.onStart()

@@ -4,11 +4,11 @@ import com.example.damiantour.mapBox.Waypoint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 
-/***
+/**
  * @author Simon
+ * finds the closest point in a list and within a 500m
+ * http://turfjs.org/docs/#distance
  */
-// http://turfjs.org/docs/#distance
-// finds the closest point in a list and within a 500m
 fun findClosestPoint(clickPoint : Point, listOfWayPoints :List<Waypoint>) : Waypoint? {
     var closestPoint : Waypoint? = null
     var closestDistance : Double = Double.MAX_VALUE

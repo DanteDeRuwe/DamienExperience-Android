@@ -52,6 +52,7 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
         get() = _locations
 
     /**
+     * @author Simon
      * a method to mix both lists to form a nice line on the map
      * only used to show the users path
      * needs to check if the list of location of every 1 min is initialized and that it has values
@@ -116,6 +117,7 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     }
 
     /**
+     * @author Simon
      * tries to get select the closest Waypoint from the selected point
      * if the every waypoint is further than 500m the method returns 'null' (in  method findClosestPoint(clickPoint, list))
      * if the closest waypoint is the same as the selected waypoint,the selected waypoint will be deselected
@@ -138,6 +140,7 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     }
 
     /**
+     * @author Simon
      * adds coordstuple every 2 seconds to list
      * must check is location is enabled (if not it must wait until it is)
      * gets that location and adds it to the list
@@ -163,11 +166,12 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     }
 
     /**
+     * @author Simon
      * is called every minute
      * gets 6 records out of the list  at positions (0,5,10,15,20,25)
      * this is than saved in the database and later on send to the backend
      *
-     * needs 7 records to have a nice forming line on the screen (angular and android)
+     * needs 6 records to have a nice forming line on the screen (angular and android)
      */
     suspend fun setCurrentLocationList() {
         val tempLocations = _tempLocations.value
@@ -182,13 +186,15 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     }
 
     /**
-     * clear both the local database and the temporay list of locations
+     * @author Simon
+     * clear both the local database
      */
     suspend fun deleteLocations(){
         database.clear()
     }
 
     /**
+     * @author Simon
      * clears the temporay list of locations
      */
     private fun resetCurrentTempLocations() {
@@ -200,7 +206,8 @@ class MapViewModel(val database: TupleDatabaseDao, application: Application) :
     }
 
     /**
-     * makes from the mixlist of location a list of point that can be mapped on the map
+     * @author Simon
+     *  return a list of point from the mixlist of locations  that can be mapped on the map
      */
     fun createLineSourceFromWalkedRoute(): ArrayList<Point> {
         val routeList = getMixListLocations()
