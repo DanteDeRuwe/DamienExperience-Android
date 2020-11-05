@@ -8,7 +8,7 @@ import com.example.damiantour.database.TupleDatabaseDao
 /**
  * This is pretty much boiler plate code for a ViewModel Factory.
  *
- * Provides the SleepDatabaseDao and context to the ViewModel.
+ * Provides the TupleDatabaseDao and context to the ViewModel.
  */
 class MapViewModelFactory(
     private val dataSource: TupleDatabaseDao,

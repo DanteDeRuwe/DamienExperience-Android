@@ -28,9 +28,11 @@ import com.example.damiantour.mapBox.Tuple
  *
  * This pattern is pretty much the same for any database,
  * so you can reuse it.
+ *
+ * with every update of the database up the version number
  */
-@Database(entities = [Tuple::class], version = 1, exportSchema = false)
-abstract class TupleDatabase : RoomDatabase() {
+@Database(entities = [Tuple::class], version = 2, exportSchema = false)
+abstract class DamianDatabase : RoomDatabase() {
 
     /**
      * Connects the database to the DAO.
@@ -54,7 +56,7 @@ abstract class TupleDatabase : RoomDatabase() {
          *  thread to shared data are visible to other threads.
          */
         @Volatile
-        private var INSTANCE: TupleDatabase? = null
+        private var INSTANCE: DamianDatabase? = null
 
         /**
          * Helper function to get the database.
@@ -73,7 +75,7 @@ abstract class TupleDatabase : RoomDatabase() {
          *
          * @param context The application context Singleton, used to get access to the filesystem.
          */
-        fun getInstance(context: Context): TupleDatabase {
+        fun getInstance(context: Context): DamianDatabase {
             // Multiple threads can ask for the database at the same time, ensure we only initialize
             // it once by using synchronized. Only one thread may enter a synchronized block at a
             // time.
@@ -85,7 +87,7 @@ abstract class TupleDatabase : RoomDatabase() {
                 if (instance == null) {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
-                        TupleDatabase::class.java,
+                        DamianDatabase::class.java,
                         "tuple_database"
                     )
                         // Wipes and rebuilds instead of migrating if no Migration object.

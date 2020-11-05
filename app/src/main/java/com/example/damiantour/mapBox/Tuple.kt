@@ -4,6 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * @author Simon Bettens
+ */
 @Entity(tableName = "tuple_table")
 data class Tuple(
     @PrimaryKey(autoGenerate = true)
@@ -15,7 +18,9 @@ data class Tuple(
     @ColumnInfo(name = "latitude")
     val latitude: Double =0.0
 ) {
-    //get the tuple in DoubleArray form
+    /**
+     *     get the tuple in DoubleArray form
+     */
     fun getTupleArray(): DoubleArray {
         return doubleArrayOf(longitude, latitude)
     }
