@@ -1,0 +1,42 @@
+Index: app/src/main/res/navigation/navigation.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<navigation xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:id=\"@+id/navigation.xml\"\r\n    app:startDestination=\"@id/loginFragment\">\r\n\r\n    <fragment\r\n        android:id=\"@+id/loginFragment\"\r\n        android:name=\"com.example.damiantour.login.LoginFragment\"\r\n        android:label=\"LoginFragment\" >\r\n        <action\r\n            android:id=\"@+id/action_loginFragment_to_mapFragment\"\r\n            app:destination=\"@id/mapFragment\"\r\n            app:popUpTo=\"@id/loginFragment\"\r\n            app:popUpToInclusive=\"true\" />\r\n    </fragment>\r\n    <fragment\r\n        android:id=\"@+id/mapFragment\"\r\n        android:name=\"com.example.damiantour.mapBox.MapFragment\"\r\n        android:label=\"MapFragment\"\r\n        tools:layout=\"@layout/fragment_map\">\r\n        <action\r\n            android:id=\"@+id/action_mapFragment_to_chatFragment2\"\r\n            app:destination=\"@id/chatFragment2\" />\r\n    </fragment>\r\n    <fragment\r\n        android:id=\"@+id/chatFragment2\"\r\n        android:name=\"com.example.damiantour.chat.ChatFragment\"\r\n        android:label=\"ChatFragment\">\r\n        <action\r\n            android:id=\"@+id/action_chatFragment2_to_mapFragment\"\r\n            app:destination=\"@id/mapFragment\" />\r\n    </fragment>\r\n</navigation>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/navigation/navigation.xml	(revision 5de4833077df2e46e73f53be8bb9045b496e1702)
++++ app/src/main/res/navigation/navigation.xml	(date 1604586924276)
+@@ -19,17 +19,21 @@
+         android:id="@+id/mapFragment"
+         android:name="com.example.damiantour.mapBox.MapFragment"
+         android:label="MapFragment"
+-        tools:layout="@layout/fragment_map">
+-        <action
+-            android:id="@+id/action_mapFragment_to_chatFragment2"
+-            app:destination="@id/chatFragment2" />
+-    </fragment>
++        tools:layout="@layout/fragment_map"/>
+     <fragment
+         android:id="@+id/chatFragment2"
+         android:name="com.example.damiantour.chat.ChatFragment"
+-        android:label="ChatFragment">
+-        <action
+-            android:id="@+id/action_chatFragment2_to_mapFragment"
+-            app:destination="@id/mapFragment" />
+-    </fragment>
++        android:label="ChatFragment"/>
++    <fragment
++        android:id="@+id/qrCodeFragment2"
++        android:name="com.example.damiantour.qr.QrCodeFragment"
++        android:label="QrCodeFragment" />
++    <fragment
++        android:id="@+id/settingsFragment2"
++        android:name="com.example.damiantour.settings.SettingsFragment"
++        android:label="SettingsFragment" />
++    <fragment
++        android:id="@+id/sosFragment2"
++        android:name="com.example.damiantour.sos.SosFragment"
++        android:label="SosFragment" />
+ </navigation>
+\ No newline at end of file

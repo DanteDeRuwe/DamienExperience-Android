@@ -20,12 +20,12 @@ import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.network.DamianApiService
-import com.example.damiantour.network.RouteData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -52,10 +52,8 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.lang.Exception
+import kotlin.properties.Delegates
 
 /// Documentation
 
@@ -74,7 +72,7 @@ import java.lang.Exception
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private lateinit var markerViewManager: MarkerViewManager
-    private var coroutinesActive: Boolean = false
+    private var coroutinesActive by Delegates.notNull<Boolean>()
 
     //the view
     private lateinit var mapView: MapView
@@ -90,11 +88,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     private lateinit var permissionsManager: PermissionsManager
     private var timerContinue: Boolean = true
+    private var isInBackground : Boolean = false
     private var marker: MarkerView? = null
 
     private lateinit var _style: Style
-    private var job = Job()
-    private val coroutineScope = CoroutineScope(job + Dispatchers.Main)
 
     private val apiService: DamianApiService = DamianApiService.create()
 
@@ -105,6 +102,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
+        coroutinesActive = false
     }
 
     /**
@@ -179,6 +177,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
         if (!coroutinesActive) {
             coroutinesActive = true
+            println("cocourtine gestart")
             startWriteLocationCoRoutine()
         }
     }
@@ -280,32 +279,38 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * draws the line where the user has walked
      */
     private fun drawWalkedLine() {
-        val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
-        if (this::_style.isInitialized) {
-            _style.removeLayer("walkedlinelayer")
-            _style.removeSource("walkedline-source")
-            _style.addSource(
-                GeoJsonSource(
-                    "walkedline-source",
-                    FeatureCollection.fromFeatures(
-                        arrayOf(
-                            Feature.fromGeometry(
-                                walkedCoordinatesList.let { LineString.fromLngLats(it) }
+        if(!isInBackground) {
+            val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
+            if (this::_style.isInitialized) {
+                try {
+                    _style.removeLayer("walkedlinelayer")
+                    _style.removeSource("walkedline-source")
+                    _style.addSource(
+                        GeoJsonSource(
+                            "walkedline-source",
+                            FeatureCollection.fromFeatures(
+                                arrayOf(
+                                    Feature.fromGeometry(
+                                        walkedCoordinatesList.let { LineString.fromLngLats(it) }
+                                    )
+                                )
                             )
                         )
                     )
-                )
-            )
-            // adds styling to the line connecting the coordstuppels
-            _style.addLayer(
-                LineLayer("walkedlinelayer", "walkedline-source").withProperties(
-                    lineCap(Property.LINE_CAP_ROUND),
-                    lineJoin(Property.LINE_JOIN_ROUND),
-                    lineWidth(6f),
-                    lineColor(Color.parseColor("#3bb7a9")),
-                    lineSortKey(3f)
-                )
-            )
+                    // adds styling to the line connecting the coordstuppels
+                    _style.addLayer(
+                        LineLayer("walkedlinelayer", "walkedline-source").withProperties(
+                            lineCap(Property.LINE_CAP_ROUND),
+                            lineJoin(Property.LINE_JOIN_ROUND),
+                            lineWidth(6f),
+                            lineColor(Color.parseColor("#3bb7a9")),
+                            lineSortKey(3f)
+                        )
+                    )
+                }catch( e: Exception){
+                    println("Exception throw : " +e.localizedMessage)
+                }
+            }
         }
 
     }
@@ -359,7 +364,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * start the coroutine
      */
     private fun startWriteLocationCoRoutine() {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             sendRouteRequest()
             drawRouteLayer()
             writeLocationCoRoutine()
@@ -493,11 +498,14 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     override fun onPause() {
         super.onPause()
+        isInBackground = true
         mapView.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        isInBackground = false
+
         mapView.onResume()
     }
 
@@ -519,9 +527,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        markerViewManager.onDestroy()
         mapView.onDestroy()
         coroutinesActive = false
-        coroutineScope.cancel()
     }
 
 

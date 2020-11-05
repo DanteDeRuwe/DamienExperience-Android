@@ -16,8 +16,9 @@ import java.util.Collections.addAll
 /***
  * @author Simon
  */
-class MapViewModel(val database: TupleDatabaseDao, application: Application) :
+class MapViewModel(private val database: TupleDatabaseDao, application: Application) :
     AndroidViewModel(application) {
+
 
     //the object
     lateinit var mapBoxMap: MapboxMap

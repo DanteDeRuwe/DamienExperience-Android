@@ -15,5 +15,9 @@
     <string name="map">Map</string>
     <string name="instellingen">Instellingen</string>
     <string name="sos">SOS</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="wip_text">Work In Progress</string>
     <string name="login_error">Het e-mailadres of paswoord is ongeldig</string>
 </resources>
