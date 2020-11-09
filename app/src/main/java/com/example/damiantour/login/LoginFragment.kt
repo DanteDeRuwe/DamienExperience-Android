@@ -101,7 +101,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToMapFragment(){
-        view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
+        view?.findNavController()?.navigate(R.id.action_loginFragment_to_startRouteSuccess)
     }
 
 }
