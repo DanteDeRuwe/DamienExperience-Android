@@ -31,15 +31,22 @@ class LoginFragment : Fragment() {
 
     private val apiService : DamianApiService = DamianApiService.create()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
+        if(preferences.getString("TOKEN", null).toString() != null){
+            lifecycleScope.launch {
+                navigateToStartRoute()
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-
-
-
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
 
@@ -64,7 +71,9 @@ class LoginFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         if(preferences.getString("TOKEN", null) != null){
-            navigateToMapFragment()
+            lifecycleScope.launch {
+                navigateToStartRoute()
+            }
         }
         super.onActivityCreated(savedInstanceState)
     }
@@ -83,7 +92,7 @@ class LoginFragment : Fragment() {
 
             //Save token for later use.
             //val preferences : SharedPreferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-            preferences.edit().putString("TOKEN", token).apply()
+            preferences.edit().putString("TOKEN", "Bearer " + token).apply()
 
             //Code to request JWT token
             /*
@@ -92,7 +101,8 @@ class LoginFragment : Fragment() {
             */
 
             //Navigate to map
-            navigateToMapFragment()
+            val bigpp = preferences.getString("TOKEN", null).toString()
+            navigateToStartRoute()
         } catch (e: Exception){
 
             binding.loginErrorfield.text = getString(R.string.login_error)
@@ -100,8 +110,18 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun navigateToMapFragment(){
-        view?.findNavController()?.navigate(R.id.action_loginFragment_to_startRouteSuccess)
+    private suspend fun navigateToStartRoute(){
+        val token = preferences.getString("TOKEN", null).toString()
+        try{
+            val hasRegistration = apiService.isRegistered(token)
+            if(hasRegistration){
+                view?.findNavController()?.navigate(R.id.action_loginFragment_to_startRouteSuccess)
+            }else{
+                view?.findNavController()?.navigate(R.id.action_loginFragment_to_startRouteNotRegistered)
+            }
+        }catch(e : Exception){
+            println(e)
+        }
     }
 
 }

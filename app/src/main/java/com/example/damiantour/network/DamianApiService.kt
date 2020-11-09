@@ -34,6 +34,13 @@ interface DamianApiService {
         @Path("routeName") routeName : String
     ) : RouteData
 
+    @GET("routeregistration/checkcurrentregistered")
+    suspend fun isRegistered(
+        @Header("Authorization") token: String
+    ) : Boolean
+
+
+
 
 
     companion object{

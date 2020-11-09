@@ -20,6 +20,8 @@
     <string name="login_error">Het e-mailadres of paswoord is ongeldig</string>
     <string name="start_route_success_text">U kan nu de wandeling starten. \nVeel succes!</string>
     <string name="start_route">Start route</string>
+    <string name="start_route_not_registered_text">U bent nog niet voor een wandeling geregistreerd. \nKlik op onderstaande knop om je in te schrijven!</string>
+    <string name="inschrijven">Schrijf me in</string>
 
 
 </resources>
