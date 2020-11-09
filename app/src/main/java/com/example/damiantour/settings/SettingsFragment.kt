@@ -1,20 +1,22 @@
 package com.example.damiantour.settings
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
-import com.example.damiantour.mapBox.MapViewModel
+import com.example.damiantour.databinding.FragmentSettingsBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.mapbox.mapboxsdk.Mapbox
-import timber.log.Timber
 
 class SettingsFragment :Fragment(){
+    private lateinit var preferences: SharedPreferences
+    private lateinit var binding: FragmentSettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,11 +27,23 @@ class SettingsFragment :Fragment(){
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val root = inflater.inflate(R.layout.fragment_wip, container, false)
-        val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
+        preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
+        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+
+        val bottomNavigationView : BottomNavigationView = binding.root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
-        return root
 
+        val button : Button = binding.root.findViewById(R.id.logoutButton)
+        button.setOnClickListener {
+            logout()
+        }
+
+
+        return binding.root
+
+    }
+    private fun logout(){
+        preferences.edit().remove("TOKEN").apply()
     }
 }
