@@ -48,6 +48,8 @@ interface DamianApiService {
 
 
 
+
+
     companion object{
         private const val BASE_URL = "https://damiantourapi.azurewebsites.net/api/"
         private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).add(Date::class.java, Rfc3339DateJsonAdapter().nullSafe()).build()

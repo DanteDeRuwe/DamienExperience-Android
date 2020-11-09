@@ -25,7 +25,6 @@ class StartRouteSuccess : Fragment() {
     private lateinit var preferences: SharedPreferences
     private val apiService : DamianApiService = DamianApiService.create()
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
@@ -74,6 +73,10 @@ class StartRouteSuccess : Fragment() {
             override fun onFinish() {
                 binding.startTV.setText(R.string.start_route_success_start)
                 toggleButton(true)
+                lifecycleScope.launch{
+                    val token = preferences.getString("TOKEN", null).toString()
+                    apiService.startWalk(token)
+                }
             }
         }
         timer.start()
