@@ -23,6 +23,6 @@
     <string name="start_route">Start route</string>
     <string name="start_route_not_registered_text">U bent nog niet voor een wandeling geregistreerd. \nKlik op onderstaande knop om je in te schrijven!</string>
     <string name="inschrijven">Schrijf me in</string>
-
+    <string name="opnieuwProberen">retry connection</string>
 
 </resources>

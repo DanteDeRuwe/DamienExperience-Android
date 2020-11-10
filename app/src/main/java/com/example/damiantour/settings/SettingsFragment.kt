@@ -45,5 +45,6 @@ class SettingsFragment :Fragment(){
     }
     private fun logout(){
         preferences.edit().remove("TOKEN").apply()
+        //navigate to login
     }
 }

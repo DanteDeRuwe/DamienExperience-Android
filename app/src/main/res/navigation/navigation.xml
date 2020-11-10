@@ -48,7 +48,7 @@
         android:id="@+id/startRouteSuccess"
         android:name="com.example.damiantour.startRoute.StartRouteSuccess"
         android:label="fragment_start_route_countdown"
-        tools:layout="@layout/fragment_start_route_countdown" >
+        tools:layout="@layout/fragment_start_route_success" >
         <action
             android:id="@+id/action_startRouteSuccess_to_mapFragment"
             app:destination="@id/mapFragment"
