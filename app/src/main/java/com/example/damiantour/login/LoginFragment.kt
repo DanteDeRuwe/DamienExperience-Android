@@ -12,8 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
+import com.example.damiantour.network.Connection
 import com.example.damiantour.network.DamianApiService
 import com.example.damiantour.network.LoginData
 import kotlinx.coroutines.launch
@@ -33,7 +35,6 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         if(preferences.getString("TOKEN", null).toString() != null){
             lifecycleScope.launch {
@@ -55,6 +56,8 @@ class LoginFragment : Fragment() {
         }
 
         binding.loginViewModel = viewModel
+
+        navigateOnNoConnection()
 
         viewModel.getButtonClick()!!.observe(viewLifecycleOwner,
             { loginModel ->
@@ -121,6 +124,13 @@ class LoginFragment : Fragment() {
             }
         }catch(e : Exception){
             println(e)
+        }
+    }
+
+    private fun navigateOnNoConnection(){
+        val hasConnection = Connection.isOnline(requireContext())
+        if(!hasConnection){
+            findNavController().navigate(R.id.action_loginFragment_to_noConnection)
         }
     }
 
