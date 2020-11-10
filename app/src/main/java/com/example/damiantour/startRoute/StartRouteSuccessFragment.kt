@@ -75,8 +75,6 @@ class StartRouteSuccessFragment : Fragment() {
                 toggleButton(true)
                 lifecycleScope.launch{
                     val token = preferences.getString("TOKEN", null).toString()
-                    //onderstaande gooit error omdat het een jsonobject verwacht. Nog te zien wat we in BE gaan doen
-                    //apiService.startWalk(token)
                 }
             }
         }

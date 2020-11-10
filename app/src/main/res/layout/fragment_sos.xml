@@ -6,12 +6,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/wip_text"
-        />
-
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav_bar"
             android:layout_width="wrap_content"
@@ -19,6 +13,77 @@
             android:layout_alignParentBottom="true"
             android:background="?android:attr/windowBackground"
             app:menu="@menu/menu" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/nav_bar"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="-2dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp">
+
+                <Button
+                    android:id="@+id/call_organisation_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/primary_button_shape"
+                    android:text="@string/call_organisation"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/call_112_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/primary_button_shape"
+                    android:text="@string/bel_112"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp">
+
+                <ImageButton
+                    android:id="@+id/open_112_app_imgbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="200dp"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/banner_112" />
+
+                <Button
+                    android:id="@+id/open_112_app_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:width="50dp"
+                    android:background="@drawable/primary_button_shape"
+                    android:text="@string/open_112_app"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
     </RelativeLayout>
 
 </layout>
