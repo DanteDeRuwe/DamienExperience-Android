@@ -23,4 +23,8 @@
     <string name="call_organisation">Bel de organisatie</string>
     <string name="bel_112">Bel 112</string>
     <string name="open_112_app">Open de 112 app</string>
+    <string name="organisation_phonenumber">+32 123 456 789</string>
+    <string name="_112_app_name">be.Nextel.EmergencyApp112</string>
+
+    <string name="sos_phonenumber">112</string>     <!-- TODO: CHANGE THIS!!! -->
 </resources>
