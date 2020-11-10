@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -20,7 +20,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
@@ -35,11 +34,10 @@
             app:layout_constraintBottom_toTopOf="@+id/hoursTV"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.551"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/logo_start_route"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
@@ -47,17 +45,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/damiaan_logo_start_route" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/countdown_days"
             style="@style/countdown_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="380dp"
-            android:text="DAYS"
+            android:text="@string/days"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textView8"
+            app:layout_constraintEnd_toStartOf="@+id/countdown_hours"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -66,8 +65,8 @@
             style="@style/countdown_time_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0"
-            app:layout_constraintBottom_toTopOf="@+id/textView8"
+            android:text="@string/nullNumber"
+            app:layout_constraintBottom_toTopOf="@+id/countdown_hours"
             app:layout_constraintEnd_toStartOf="@+id/minutesTV"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/daysTV"
@@ -75,28 +74,28 @@
             app:layout_constraintVertical_bias="0.987" />
 
         <TextView
-            android:id="@+id/textView8"
+            android:id="@+id/countdown_hours"
             style="@style/countdown_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="380dp"
-            android:text="HOURS"
+            android:text="@string/hours"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textView9"
+            app:layout_constraintEnd_toStartOf="@+id/countdown_min"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/textView2" />
+            app:layout_constraintStart_toEndOf="@+id/countdown_days" />
 
         <TextView
-            android:id="@+id/textView9"
+            android:id="@+id/countdown_min"
             style="@style/countdown_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="380dp"
-            android:text="MINUTES"
+            android:text="@string/minutes"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textView7"
+            app:layout_constraintEnd_toStartOf="@+id/countdown_sec"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/textView8" />
+            app:layout_constraintStart_toEndOf="@+id/countdown_hours" />
 
         <TextView
             android:id="@+id/daysTV"
@@ -104,8 +103,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:text="0"
-            app:layout_constraintBottom_toTopOf="@+id/textView2"
+            android:text="@string/nullNumber"
+            app:layout_constraintBottom_toTopOf="@+id/countdown_days"
             app:layout_constraintEnd_toStartOf="@+id/hoursTV"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -118,8 +117,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="0"
-            app:layout_constraintBottom_toTopOf="@+id/textView9"
+            android:text="@string/nullNumber"
+            app:layout_constraintBottom_toTopOf="@+id/countdown_min"
             app:layout_constraintEnd_toStartOf="@+id/secondsTV"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/hoursTV"
@@ -127,16 +126,16 @@
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/countdown_sec"
             style="@style/countdown_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="380dp"
-            android:text="SECONDS"
+            android:text="@string/seconds"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/textView9" />
+            app:layout_constraintStart_toEndOf="@+id/countdown_min" />
 
         <TextView
             android:id="@+id/secondsTV"
@@ -144,8 +143,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:text="0"
-            app:layout_constraintBottom_toTopOf="@+id/textView7"
+            android:text="@string/nullNumber"
+            app:layout_constraintBottom_toTopOf="@+id/countdown_sec"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/minutesTV"

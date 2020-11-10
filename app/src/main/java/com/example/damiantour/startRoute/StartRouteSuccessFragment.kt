@@ -16,6 +16,7 @@ import androidx.navigation.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
 import com.example.damiantour.databinding.FragmentStartRouteSuccessBinding
+import com.example.damiantour.login.LoginFragmentDirections
 import com.example.damiantour.login.LoginViewModel
 import com.example.damiantour.network.DamianApiService
 import kotlinx.coroutines.launch
@@ -37,7 +38,7 @@ class StartRouteSuccessFragment : Fragment() {
         })
         binding.startTV.setText(R.string.start_route_success_wait)
 
-        return binding.root;
+        return binding.root
     }
 
    private fun navigateToMapFragment(){
@@ -50,14 +51,18 @@ class StartRouteSuccessFragment : Fragment() {
            }
        }
        //check date en location
-       view?.findNavController()?.navigate(R.id.action_startRouteSuccess_to_mapFragment)
+       val action = StartRouteSuccessFragmentDirections.actionStartRouteSuccessToMapFragment()
+       view?.findNavController()?.navigate(action)
    }
 
     private fun toggleButton(bool: Boolean){
+        /* Feedback
+
         binding.startRouteButton.isClickable = bool
         binding.startRouteButton.isEnabled = bool
-
         if(bool) binding.startRouteButton.visibility = View.VISIBLE else binding.startRouteButton.visibility = View.INVISIBLE
+        */
+        binding.startRouteButton.visibility = if(bool) View.VISIBLE else View.INVISIBLE
     }
 
     private fun initCountdown(){

@@ -22,9 +22,7 @@ class StartRouteNotRegisteredFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_start_route_not_registered, container, false
-        )
+        binding = FragmentStartRouteNotRegisteredBinding.inflate(inflater, container, false)
         binding.registerButton.setOnClickListener(View.OnClickListener {
             navigateToWeb()
         })

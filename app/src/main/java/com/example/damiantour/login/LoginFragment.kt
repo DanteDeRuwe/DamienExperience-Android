@@ -104,7 +104,6 @@ class LoginFragment : Fragment() {
             */
 
             //Navigate to map
-            val bigpp = preferences.getString("TOKEN", null).toString()
             navigateToStartRoute()
         } catch (e: Exception){
 
@@ -115,13 +114,14 @@ class LoginFragment : Fragment() {
 
     private suspend fun navigateToStartRoute(){
         val token = preferences.getString("TOKEN", null).toString()
+
         try{
             val hasRegistration = apiService.isRegistered(token)
+            var action = LoginFragmentDirections.actionLoginFragmentToStartRouteNotRegistered()
             if(hasRegistration){
-                view?.findNavController()?.navigate(R.id.action_loginFragment_to_startRouteSuccess)
-            }else{
-                view?.findNavController()?.navigate(R.id.action_loginFragment_to_startRouteNotRegistered)
+                 action = LoginFragmentDirections.actionLoginFragmentToStartRouteSuccess()
             }
+            view?.findNavController()?.navigate(action)
         }catch(e : Exception){
             println(e)
         }

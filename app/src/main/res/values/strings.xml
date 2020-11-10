@@ -30,5 +30,11 @@
     <string name="organisation_phonenumber">+32 123 456 789</string>
     <string name="_112_app_name">be.Nextel.EmergencyApp112</string>
 
-    <string name="sos_phonenumber">112</string>  
+    <string name="sos_phonenumber">112</string>
+    <string name="days">DAYS</string>
+    <string name="hours">HOURS</string>
+    <string name="minutes">MINUTES</string>
+    <string name="nullNumber">0</string>
+    <string name="seconds">SECONDS</string>
+    <string name="damiaan_logo_start_route">description_damiaan_logo_start_route</string>
 </resources>

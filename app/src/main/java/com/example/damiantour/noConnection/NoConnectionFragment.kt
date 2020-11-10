@@ -21,13 +21,14 @@ class NoConnectionFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(
-                   inflater, R.layout.fragment_no_connection, container, false)
+        binding = FragmentNoConnectionBinding.inflate(
+                   inflater, container, false)
 
         binding.retryConnectionButton.setOnClickListener { view ->
-            view.findNavController().navigate(R.id.action_noConnection_to_loginFragment)
+            val action = NoConnectionFragmentDirections.actionNoConnectionToLoginFragment()
+            view.findNavController().navigate(action)
         }
-        return inflater.inflate(R.layout.fragment_no_connection, container, false)
+        return binding.root
     }
 
 
