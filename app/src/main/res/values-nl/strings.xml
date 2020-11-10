@@ -1,24 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- algemene info over de app -->
     <string name="app_name">Damiantour</string>
     <string name="mapbox_access_token">pk.eyJ1Ijoic2ltb25iZXR0ZW5zIiwiYSI6ImNrZzVjNW53bDBzc2kydnA0Yml4bjViZW0ifQ.VxkKMCFOFglLvZC66cfk1A</string>
     <string name="user_location_permission_explanation">Deze app gebruikt uw locatie</string>
     <string name="user_location_permission_not_granted">U heeft de locatie niet gedeeld.</string>
+
+
+    <!-- login -->
     <string name="email_input">Email</string>
     <string name="password_input">Wachtwoord</string>
     <string name="login">Inloggen</string>
     <string name="lost_password">Wachtwoord vergeten</string>
     <string name="damiaan_logo_login_description">Logo van de Damiaan Experience</string>
-    <string name="login_background_description">Background login screen</string>
+    <string name="login_background_description">Background login scherm</string>
     <string name="password_hint">Wachtwoord</string>
+    <string name="login_error">Het e-mailadres of paswoord is ongeldig</string>
+
+    <!-- navigatie -->
     <string name="qr_code_reader">QR</string>
     <string name="chat">Chat</string>
-    <string name="map">Map</string>
+    <string name="map">Kaart</string>
     <string name="instellingen">Instellingen</string>
     <string name="sos">SOS</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="wip_text">Work In Progress</string>
-    <string name="login_error">Het e-mailadres of paswoord is ongeldig</string>
 </resources>
-
