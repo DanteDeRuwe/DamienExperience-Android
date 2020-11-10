@@ -46,7 +46,7 @@
         android:label="SosFragment" />
     <fragment
         android:id="@+id/startRouteSuccess"
-        android:name="com.example.damiantour.startRoute.StartRouteSuccess"
+        android:name="com.example.damiantour.startRoute.StartRouteSuccessFragment"
         android:label="fragment_start_route_countdown"
         tools:layout="@layout/fragment_start_route_success" >
         <action
@@ -57,11 +57,11 @@
     </fragment>
     <fragment
         android:id="@+id/startRouteNotRegistered"
-        android:name="com.example.damiantour.startRoute.StartRouteNotRegistered"
+        android:name="com.example.damiantour.startRoute.StartRouteNotRegisteredFragment"
         android:label="StartRouteNotRegistered" />
     <fragment
         android:id="@+id/noConnection"
-        android:name="com.example.damiantour.noConnection.NoConnection"
+        android:name="com.example.damiantour.noConnection.NoConnectionFragment"
         android:label="fragment_no_connection"
         tools:layout="@layout/fragment_no_connection" >
         <action

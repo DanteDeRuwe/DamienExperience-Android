@@ -20,7 +20,7 @@ import com.example.damiantour.login.LoginViewModel
 import com.example.damiantour.network.DamianApiService
 import kotlinx.coroutines.launch
 
-class StartRouteSuccess : Fragment() {
+class StartRouteSuccessFragment : Fragment() {
     private lateinit var binding: FragmentStartRouteSuccessBinding
     private lateinit var preferences: SharedPreferences
     private val apiService : DamianApiService = DamianApiService.create()

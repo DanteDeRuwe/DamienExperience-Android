@@ -13,7 +13,7 @@ import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentStartRouteNotRegisteredBinding
 
 
-class StartRouteNotRegistered : Fragment() {
+class StartRouteNotRegisteredFragment : Fragment() {
 
     private lateinit var binding: FragmentStartRouteNotRegisteredBinding
 
