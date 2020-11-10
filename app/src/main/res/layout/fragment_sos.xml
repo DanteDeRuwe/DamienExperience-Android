@@ -35,23 +35,23 @@
                 android:paddingBottom="20dp">
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/call_organisation_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/primary_button_shape"
-                    android:text="Bel de organisatie"
+                    android:text="@string/call_organisation"
                     android:textColor="@color/white" />
 
                 <Button
-                    android:id="@+id/button3"
+                    android:id="@+id/call_112_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/primary_button_shape"
-                    android:text="Bel 112"
+                    android:text="@string/bel_112"
                     android:textColor="@color/white" />
 
             </LinearLayout>
@@ -64,20 +64,20 @@
                 android:paddingBottom="20dp">
 
                 <ImageButton
-                    android:id="@+id/imageButton"
+                    android:id="@+id/open_112_app_imgbtn"
                     android:layout_width="wrap_content"
                     android:layout_height="200dp"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/banner_112" />
 
                 <Button
-                    android:id="@+id/button6"
+                    android:id="@+id/open_112_app_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:width="50dp"
                     android:background="@drawable/primary_button_shape"
-                    android:text="Open de 112 app"
+                    android:text="@string/open_112_app"
                     android:textColor="@color/white" />
             </LinearLayout>
 

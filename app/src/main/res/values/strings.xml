@@ -20,4 +20,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="wip_text">Work In Progress</string>
     <string name="login_error">Het e-mailadres of paswoord is ongeldig</string>
+    <string name="call_organisation">Bel de organisatie</string>
+    <string name="bel_112">Bel 112</string>
+    <string name="open_112_app">Open de 112 app</string>
 </resources>
