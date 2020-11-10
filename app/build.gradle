@@ -10,7 +10,7 @@ android {
     ndkVersion "21.3.6528147"
     defaultConfig {
         applicationId "com.example.damiantour"
-        minSdkVersion 19
+        minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"

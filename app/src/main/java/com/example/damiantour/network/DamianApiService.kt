@@ -2,6 +2,8 @@ package com.example.damiantour.network
 
 import com.example.damiantour.login.model.LoginFields
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.JsonReader
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Deferred
@@ -34,11 +36,38 @@ interface DamianApiService {
         @Path("routeName") routeName : String
     ) : RouteData
 
+    @GET("routeregistration/checkcurrentregistered")
+    suspend fun isRegistered(
+        @Header("Authorization") token: String
+    ) : Boolean
+
+    @POST("walk/startwalk")
+    suspend fun startWalk(
+        @Header("Authorization") token: String
+    ) : String
+
+
+
+
+    object NULL_TO_EMPTY_STRING_ADAPTER {
+        @FromJson
+        fun fromJson(reader: JsonReader): String {
+            if (reader.peek() != JsonReader.Token.NULL) {
+                return reader.nextString()
+            }
+            reader.nextNull<Unit>()
+            return ""
+        }
+    }
 
 
     companion object{
         private const val BASE_URL = "https://damiantourapi.azurewebsites.net/api/"
-        private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).add(Date::class.java, Rfc3339DateJsonAdapter().nullSafe()).build()
+        private val moshi = Moshi.Builder()
+            .add(NULL_TO_EMPTY_STRING_ADAPTER)
+            .add(KotlinJsonAdapterFactory())
+            .add(Date::class.java, Rfc3339DateJsonAdapter()
+                .nullSafe()).build()
         fun create(): DamianApiService{
             val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
 

@@ -5,4 +5,10 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="black_semi_transparent">#000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="gray_1">#fcfcfc</color>
+    <color name="gray_2">#f2f1ef</color>
+    <color name="gray_3">#dcdcdc</color>
+    <color name="gray_4">#757575</color>
+    <color name="gray_5">#414141</color>
+
 </resources>
