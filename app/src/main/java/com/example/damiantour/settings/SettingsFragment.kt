@@ -32,42 +32,23 @@ class SettingsFragment :Fragment(){
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        val bottomNavigationView : BottomNavigationView = binding.root.findViewById(R.id.nav_bar)
         val navController = findNavController()
-        bottomNavigationView.setupWithNavController(navController)
+        binding.navBar.setupWithNavController(navController)
 
-        val button : Button = binding.root.findViewById(R.id.logoutButton)
-        button.setOnClickListener {
+        binding.logoutButton.setOnClickListener {
             logout()
         }
 
-//        binding.seekBar2.setOnSeekBarChangeListener(object :
-//            SeekBar.OnSeekBarChangeListener {
-//            override fun onProgressChanged(seek: SeekBar,
-//                                           progress: Int, fromUser: Boolean) {
-//                // write custom code for progress is changed
-//
-//            }
-//
-//            override fun onStartTrackingTouch(seek: SeekBar) {
-//                // write custom code for progress is started
-//            }
-//
-//            override fun onStopTrackingTouch(seek: SeekBar) {
-//                // write custom code for progress is stopped
-//                Toast.makeText(context,
-//                    "Progress is: " + seek.progress + "%",
-//                    Toast.LENGTH_SHORT).show()
-//            }
-//        })
-//
-//        binding.seekBar2.setProgress(0)
-//        binding.seekBar2.incrementProgressBy(5)
+        binding.sliderid.addOnChangeListener { slider, value, fromUser ->
+            //wip
+            Toast.makeText(context, "Value:$value", Toast.LENGTH_SHORT).show()
+        }
 
-
-
+        binding.switchNotificaties.setOnCheckedChangeListener { buttonView, isChecked ->
+            //wip
+            Toast.makeText(context, "Value:$isChecked", Toast.LENGTH_SHORT).show()
+        }
         return binding.root
-
     }
 
     private fun logout(){
