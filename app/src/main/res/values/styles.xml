@@ -10,5 +10,11 @@
         <item name="android:background">@drawable/textfield_shape</item>
         <item name="android:ems">10</item>
     </style>
+    <style name="AppTheme2" parent="Theme.MaterialComponents">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 
 </resources>

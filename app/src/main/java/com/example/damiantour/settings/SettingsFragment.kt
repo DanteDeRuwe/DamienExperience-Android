@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.SeekBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -39,11 +41,37 @@ class SettingsFragment :Fragment(){
             logout()
         }
 
+//        binding.seekBar2.setOnSeekBarChangeListener(object :
+//            SeekBar.OnSeekBarChangeListener {
+//            override fun onProgressChanged(seek: SeekBar,
+//                                           progress: Int, fromUser: Boolean) {
+//                // write custom code for progress is changed
+//
+//            }
+//
+//            override fun onStartTrackingTouch(seek: SeekBar) {
+//                // write custom code for progress is started
+//            }
+//
+//            override fun onStopTrackingTouch(seek: SeekBar) {
+//                // write custom code for progress is stopped
+//                Toast.makeText(context,
+//                    "Progress is: " + seek.progress + "%",
+//                    Toast.LENGTH_SHORT).show()
+//            }
+//        })
+//
+//        binding.seekBar2.setProgress(0)
+//        binding.seekBar2.incrementProgressBy(5)
+
+
 
         return binding.root
 
     }
+
     private fun logout(){
         preferences.edit().remove("TOKEN").apply()
     }
+
 }
