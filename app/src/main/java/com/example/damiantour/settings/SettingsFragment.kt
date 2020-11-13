@@ -35,11 +35,12 @@ class SettingsFragment :Fragment(){
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
+        val bottomNavigationView : BottomNavigationView = binding.root.findViewById(R.id.nav_bar)
         val navController = findNavController()
-        binding.navBar.setupWithNavController(navController)
+        bottomNavigationView.setupWithNavController(navController)
 
-        binding.textDeelnemerscode.text = text_deelnemerscode
-        binding.logoutButton.setOnClickListener {
+        val button : Button = binding.root.findViewById(R.id.logoutButton)
+        button.setOnClickListener {
             logout()
         }
 
@@ -70,6 +71,7 @@ class SettingsFragment :Fragment(){
         }
 
         return binding.root
+
     }
 
     private fun logout(){
