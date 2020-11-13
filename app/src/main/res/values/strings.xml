@@ -5,7 +5,7 @@
     <string name="user_location_permission_not_granted">U heeft de locatie niet gedeeld.</string>
     <string name="email_input">Email</string>
     <string name="password_input">Wachtwoord</string>
-    <string name="login">INLOGGEN</string>
+    <string name="login">Inloggen</string>
     <string name="lost_password">Wachtwoord vergeten</string>
     <string name="damiaan_logo_login_description">Logo van de Damiaan Experience</string>
     <string name="login_background_description">Background login screen</string>
@@ -37,4 +37,5 @@
     <string name="nullNumber">0</string>
     <string name="seconds">SECONDS</string>
     <string name="damiaan_logo_start_route">description_damiaan_logo_start_route</string>
+
 </resources>

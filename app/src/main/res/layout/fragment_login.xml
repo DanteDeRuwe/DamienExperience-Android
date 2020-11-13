@@ -108,6 +108,7 @@ Author: Ruben Naudts
             android:onClick="@{() -> loginViewModel.login()}"
             android:text="@string/login"
             android:textAlignment="center"
+            android:textAllCaps="true"
             android:textColor="@android:color/background_light"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
