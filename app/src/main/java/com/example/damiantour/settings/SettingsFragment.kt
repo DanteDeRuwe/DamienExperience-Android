@@ -12,17 +12,25 @@ import android.widget.Button
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentSettingsBinding
+import com.example.damiantour.network.DamianApiService
+import com.example.damiantour.network.LoginData
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
+import java.lang.Exception
 
 class SettingsFragment :Fragment(){
     private lateinit var preferences: SharedPreferences
     private lateinit var binding: FragmentSettingsBinding
     private var text_deelnemerscode : String = "Deelnemerscode"
+
+    private val apiService : DamianApiService = DamianApiService.create()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -74,6 +82,32 @@ class SettingsFragment :Fragment(){
 
         return binding.root
 
+    }
+
+    private fun getDeelnemerscode(){
+        var deelnemerscode = preferences.getString("deelnemerscode", null)
+        if (deelnemerscode == null){
+            lifecycleScope.launch {
+                deelnemerscode = setDeelnemerscode()
+            }
+        }
+
+        binding.textDeelnemerscode.text = deelnemerscode
+    }
+
+    private suspend fun setDeelnemerscode() : String {
+        var token = preferences.getString("TOKEN", "")
+        var deelnemerscode = ""
+        try {
+            if (token != null) {
+                deelnemerscode = apiService.getDeelnemerscode(token)
+            }
+        } catch (e : Exception) {
+            //TODO
+        }
+        
+        preferences.edit().putString("deelnemercode", deelnemerscode)
+        return deelnemerscode
     }
 
     private fun logout(){

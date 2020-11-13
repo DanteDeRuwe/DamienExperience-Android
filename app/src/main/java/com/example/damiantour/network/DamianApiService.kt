@@ -51,7 +51,10 @@ interface DamianApiService {
         @Header("Authorization") token : String
     ): ProfileData
 
-
+    @GET("deelnemerscode")
+    suspend fun getDeelnemerscode(
+        @Header("Authorization") token : String
+    ): String
 
 
 

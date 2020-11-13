@@ -28,12 +28,12 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/text_batterijbesparing_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="BATTERIJBESPARING"
+                android:text="@string/batterijBesparing"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
@@ -46,34 +46,35 @@
                 android:id="@+id/logoutButton"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_left"
                 android:background="@drawable/primary_button_shape"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Logout"
+                android:text="@string/text_logout"
                 android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/text_usernaam"
-                app:layout_constraintTop_toBottomOf="@+id/btn_how_it_work" />
+                app:layout_constraintTop_toBottomOf="@+id/divider4"
+                app:layout_constraintVertical_bias="0.6" />
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/text_locatieDelen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Om de hoeveel minuten wenst u uw locatie te delen?"
+                android:text="@string/text_locatieDelen"
                 app:layout_constraintBottom_toTopOf="@+id/sliderid"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView2"
+                app:layout_constraintTop_toBottomOf="@+id/text_batterijbesparing_header"
                 app:layout_constraintVertical_bias="0.25" />
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/text_notificaties_header"
                 android:layout_width="203dp"
                 android:layout_height="21dp"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Notificaties"
+                android:text="@string/text_notifications"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
@@ -83,12 +84,12 @@
                 app:layout_constraintVertical_bias="0.41000003" />
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/text_deelnemerscode_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Deelnemerscode"
+                android:text="@string/text_deelnemerscode"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
@@ -97,27 +98,27 @@
                 app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/text_aanUitZetten"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Aan of uit zetten"
+                android:text="@string/text_aanUitZetten"
                 app:layout_constraintBottom_toTopOf="@+id/divider3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3"
-                app:layout_constraintVertical_bias="0.25" />
+                app:layout_constraintTop_toBottomOf="@+id/text_notificaties_header" />
 
             <TextView
                 android:id="@+id/text_deelnemerscode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Deelnemerscode"
+                android:text="@string/text_deelnemerscodeGenerated"
                 app:layout_constraintBottom_toTopOf="@+id/divider4"
-                app:layout_constraintEnd_toStartOf="@+id/button_share_deelnemerscode"
-                app:layout_constraintStart_toEndOf="@+id/textView4"
-                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_deelnemerscode_header"
+                app:layout_constraintVertical_bias="0.48000002" />
 
             <Button
                 android:id="@+id/btn_how_it_work"
@@ -125,20 +126,20 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/grey_button_shape"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Hoe werkt de app?"
+                android:text="@string/text_appWerking"
                 android:textColor="@color/grey"
-                app:layout_constraintBottom_toTopOf="@+id/textView7"
+                app:layout_constraintBottom_toTopOf="@+id/text_ingelogdAls"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider4" />
 
             <TextView
-                android:id="@+id/textView7"
+                android:id="@+id/text_ingelogdAls"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Ingelogd als"
+                android:text="@string/text_ingelogd_als"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
@@ -151,15 +152,13 @@
                 android:id="@+id/button_share_deelnemerscode"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="@dimen/margin_left"
                 android:background="@drawable/grey_button_shape"
-                android:contentDescription="share link met de wereld"
+                android:contentDescription="@string/text_share"
                 android:fontFamily="@font/akkuratpro"
                 android:src="@drawable/ic_share_fill"
                 app:layout_constraintBottom_toTopOf="@+id/divider4"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.874"
-                app:layout_constraintStart_toEndOf="@+id/textView4"
                 app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
             <TextView
@@ -168,15 +167,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
                 android:fontFamily="@font/akkuratpro"
-                android:text="Jonas Haenebalcke"
+                android:text="@string/text_gebruikersnaam"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btn_how_it_work" />
 
             <View
                 android:id="@+id/divider2"
-                android:layout_width="370dp"
+                android:layout_width="0dp"
                 android:layout_height="1dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:layout_marginEnd="@dimen/margin_left"
                 android:background="?android:attr/listDivider"
                 app:layout_constraintBottom_toTopOf="@+id/divider3"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -186,8 +187,10 @@
 
             <View
                 android:id="@+id/divider3"
-                android:layout_width="@dimen/separtor"
+                android:layout_width="0dp"
                 android:layout_height="1dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:layout_marginEnd="@dimen/margin_left"
                 android:background="?android:attr/listDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -197,8 +200,10 @@
 
             <View
                 android:id="@+id/divider4"
-                android:layout_width="@dimen/separtor"
+                android:layout_width="0dp"
                 android:layout_height="1dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:layout_marginEnd="@dimen/margin_left"
                 android:layout_marginBottom="200dp"
                 android:background="?android:attr/listDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -210,41 +215,38 @@
                 android:id="@+id/switch_notificaties"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_left"
                 android:textColor="@color/colorPrimary"
                 android:theme="@style/AppTheme"
                 app:layout_constraintBottom_toTopOf="@+id/divider3"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.778"
-                app:layout_constraintStart_toEndOf="@+id/textView5"
-                app:layout_constraintTop_toBottomOf="@+id/textView3"
-                app:layout_constraintVertical_bias="0.3"
+                app:layout_constraintTop_toBottomOf="@+id/text_notificaties_header"
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             <TextView
                 android:id="@+id/textView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="188dp"
                 android:fontFamily="@font/akkuratpro"
-                android:text="5"
+                android:text="@string/text_minSeekbar"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"
                 app:layout_constraintEnd_toStartOf="@+id/sliderid"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/text_locatieDelen" />
 
             <TextView
                 android:id="@+id/textView9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="188dp"
                 android:fontFamily="@font/akkuratpro"
-                android:text="25"
+                android:text="@string/text_maxSeekbar"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.333"
                 app:layout_constraintStart_toEndOf="@+id/sliderid"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/text_locatieDelen" />
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/text_instellingen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/instellingen"
@@ -252,7 +254,7 @@
                 android:textColor="@color/colorPrimary"
                 android:textSize="30sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/textView"
+                app:layout_constraintBottom_toTopOf="@+id/text_locatieDelen"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -262,7 +264,7 @@
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav_bar"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="?android:attr/windowBackground"

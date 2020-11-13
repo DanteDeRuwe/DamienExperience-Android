@@ -37,4 +37,17 @@
     <string name="nullNumber">0</string>
     <string name="seconds">SECONDS</string>
     <string name="damiaan_logo_start_route">description_damiaan_logo_start_route</string>
+    <string name="batterijBesparing">BatterijBesparing</string>
+    <string name="text_locatieDelen">Om de hoeveel minuten wenst u uw locatie te delen?</string>
+    <string name="text_logout">Logout</string>
+    <string name="text_notifications">Notificaties</string>
+    <string name="text_deelnemerscode">Deelnemerscode</string>
+    <string name="text_aanUitZetten">Aan of uit zetten</string>
+    <string name="text_deelnemerscodeGenerated">DeelnemerscodeDummy</string>
+    <string name="text_appWerking">Hoe werkt de app?</string>
+    <string name="text_ingelogd_als">Ingelogd als</string>
+    <string name="text_share">share link met de wereld</string>
+    <string name="text_gebruikersnaam">Jonas Haenebalcke</string>
+    <string name="text_maxSeekbar">25</string>
+    <string name="text_minSeekbar">5</string>
 </resources>
