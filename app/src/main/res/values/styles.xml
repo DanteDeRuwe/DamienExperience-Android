@@ -10,5 +10,15 @@
         <item name="android:background">@drawable/textfield_shape</item>
         <item name="android:ems">10</item>
     </style>
+    <style name="countdown_style">
+        <item name="android:width">70dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="countdown_time_style">
+        <item name="android:width">70dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">18sp</item>
+    </style>
 
 </resources>
