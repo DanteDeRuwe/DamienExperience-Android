@@ -44,12 +44,14 @@ class SettingsFragment :Fragment(){
             logout()
         }
 
+        binding.textUsernaam.text = preferences.getString("fullName", "fout")
+
         binding.sliderid.addOnChangeListener { slider, value, fromUser ->
-            preferences.edit().putInt("send_route_call_api",value.toInt()).apply();
+            preferences.edit().putInt("send_route_call_api",value.toInt()).apply()
         }
 
         binding.switchNotificaties.setOnCheckedChangeListener { buttonView, isChecked ->
-            preferences.edit().putBoolean("notifications",isChecked).apply();
+            preferences.edit().putBoolean("notifications",isChecked).apply()
         }
         binding.buttonShareDeelnemerscode.setOnClickListener {
             val sendIntent: Intent = Intent().apply {

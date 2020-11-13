@@ -49,7 +49,12 @@ interface DamianApiService {
     @GET("profile")
     suspend fun getProfile(
         @Header("Authorization") token : String
-    ):ProfileData
+    ): ProfileData
+
+
+
+
+
 
     object NULL_TO_EMPTY_STRING_ADAPTER {
         @FromJson
