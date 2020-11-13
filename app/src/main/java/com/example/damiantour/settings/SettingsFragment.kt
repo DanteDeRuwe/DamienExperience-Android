@@ -1,7 +1,9 @@
 package com.example.damiantour.settings
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +12,7 @@ import android.widget.Button
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
@@ -19,7 +22,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class SettingsFragment :Fragment(){
     private lateinit var preferences: SharedPreferences
     private lateinit var binding: FragmentSettingsBinding
-
+    private var text_deelnemerscode : String = "Deelnemerscode"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -35,24 +38,44 @@ class SettingsFragment :Fragment(){
         val navController = findNavController()
         binding.navBar.setupWithNavController(navController)
 
+        binding.textDeelnemerscode.text = text_deelnemerscode
         binding.logoutButton.setOnClickListener {
             logout()
         }
 
         binding.sliderid.addOnChangeListener { slider, value, fromUser ->
-            //wip
-            Toast.makeText(context, "Value:$value", Toast.LENGTH_SHORT).show()
+            preferences.edit().putInt("send_route_call_api",value.toInt()).apply();
         }
 
         binding.switchNotificaties.setOnCheckedChangeListener { buttonView, isChecked ->
-            //wip
-            Toast.makeText(context, "Value:$isChecked", Toast.LENGTH_SHORT).show()
+            preferences.edit().putBoolean("notifications",isChecked).apply();
         }
+        binding.buttonShareDeelnemerscode.setOnClickListener {
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, text_deelnemerscode)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, "Share deelnemerscode")
+            startActivity(shareIntent)
+        }
+        binding.btnHowItWork.setOnClickListener {
+            //enter the real link
+            val uris = Uri.parse("https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO")
+            val intents = Intent(Intent.ACTION_VIEW, uris)
+            val b = Bundle()
+            b.putBoolean("new_window", true)
+            intents.putExtras(b)
+            context?.startActivity(intents)
+        }
+
         return binding.root
     }
 
     private fun logout(){
         preferences.edit().remove("TOKEN").apply()
+        //wip
+        view?.findNavController()?.navigate(R.id.action_settingsFragment2_to_loginFragment)
     }
 
 }

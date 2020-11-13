@@ -104,4 +104,8 @@ class LoginFragment : Fragment() {
         view?.findNavController()?.navigate(R.id.action_loginFragment_to_mapFragment)
     }
 
+    private suspend fun getUserData(token: String){
+
+    }
+
 }

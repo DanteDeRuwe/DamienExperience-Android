@@ -53,7 +53,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/text_usernaam"
-                app:layout_constraintTop_toBottomOf="@+id/button" />
+                app:layout_constraintTop_toBottomOf="@+id/btn_how_it_work" />
 
             <TextView
                 android:id="@+id/textView"
@@ -87,11 +87,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
                 android:text="Deelnemerscode"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
-                android:fontFamily="@font/akkuratpro"
                 app:layout_constraintBottom_toTopOf="@+id/divider4"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider3" />
@@ -120,7 +120,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btn_how_it_work"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/grey_button_shape"
@@ -153,9 +153,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:background="@drawable/grey_button_shape"
+                android:contentDescription="share link met de wereld"
                 android:fontFamily="@font/akkuratpro"
                 android:src="@drawable/ic_share_fill"
-                android:contentDescription="share link met de wereld"
                 app:layout_constraintBottom_toTopOf="@+id/divider4"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.874"
@@ -166,12 +166,12 @@
                 android:id="@+id/text_usernaam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/akkuratpro"
                 android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
                 android:text="Jonas Haenebalcke"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button" />
+                app:layout_constraintTop_toBottomOf="@+id/btn_how_it_work" />
 
             <View
                 android:id="@+id/divider2"
@@ -224,8 +224,8 @@
                 android:id="@+id/textView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/akkuratpro"
                 android:layout_marginTop="188dp"
+                android:fontFamily="@font/akkuratpro"
                 android:text="5"
                 app:layout_constraintEnd_toStartOf="@+id/sliderid"
                 app:layout_constraintStart_toStartOf="parent"
@@ -235,8 +235,8 @@
                 android:id="@+id/textView9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/akkuratpro"
                 android:layout_marginTop="188dp"
+                android:fontFamily="@font/akkuratpro"
                 android:text="25"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.333"

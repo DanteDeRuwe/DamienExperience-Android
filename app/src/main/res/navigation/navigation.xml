@@ -31,7 +31,13 @@
     <fragment
         android:id="@+id/settingsFragment2"
         android:name="com.example.damiantour.settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment2_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/settingsFragment2"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/sosFragment2"
         android:name="com.example.damiantour.sos.SosFragment"

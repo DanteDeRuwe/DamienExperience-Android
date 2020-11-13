@@ -71,6 +71,7 @@ import kotlin.properties.Delegates
  */
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
+
     private lateinit var markerViewManager: MarkerViewManager
     private var coroutinesActive by Delegates.notNull<Boolean>()
 
@@ -531,6 +532,4 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapView.onDestroy()
         coroutinesActive = false
     }
-
-
 }

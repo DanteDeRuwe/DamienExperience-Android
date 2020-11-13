@@ -34,6 +34,10 @@ interface DamianApiService {
         @Path("routeName") routeName : String
     ) : RouteData
 
+    @GET("profile")
+    suspend fun getProfile(
+        @Header("Authorization") token : String
+    ):ProfileData
 
 
     companion object{
