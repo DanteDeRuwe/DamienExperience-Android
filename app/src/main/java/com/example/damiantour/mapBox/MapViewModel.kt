@@ -65,14 +65,14 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         val listLoc = _locations.value
         if(listLoc!=null && listLoc.isNotEmpty()){
             println("listLoc : " + listLoc.size)
-             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+            return if(listTempLoc!=null && listTempLoc.isNotEmpty()){
                 println("extra listTempLoc : " + listTempLoc.size)
-                 val mix =  listLoc + listTempLoc
-                 println("mix list : " +  mix.size)
-                 return mix
+                val mix =  listLoc + listTempLoc
+                println("mix list : " +  mix.size)
+                mix
 
             } else{
-                 return listLoc
+                listLoc
             }
         }else{
             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
