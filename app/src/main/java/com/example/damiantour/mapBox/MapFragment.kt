@@ -74,6 +74,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     private lateinit var markerViewManager: MarkerViewManager
     private var coroutinesActive by Delegates.notNull<Boolean>()
+    private lateinit var preferences: SharedPreferences
 
     //the view
     private lateinit var mapView: MapView
@@ -84,7 +85,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private var RECORDTEMPLOCATION_MS = 2000L
 
     // every 5 minutes
-    private var SENDLOCATIONS = 5
     private var WANTSTOSENDLOCATION = true
 
     private lateinit var permissionsManager: PermissionsManager
@@ -103,6 +103,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
+        preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         coroutinesActive = false
     }
 
@@ -381,6 +382,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private suspend fun writeLocationCoRoutine() {
         var time = 1
+        var sendlocation: Int
         // should not happen here
         mapViewModel.deleteLocations()
         while (timerContinue) {
@@ -393,10 +395,12 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             }
             println("1 min passed")
             mapViewModel.setCurrentLocationList()
+            sendlocation = preferences.getInt("send_route_call_api",5)
+            println("sendlocation = $sendlocation")
             time += 1
-            if (WANTSTOSENDLOCATION && time == SENDLOCATIONS) {
+            if (WANTSTOSENDLOCATION && time == sendlocation) {
                 //TODO
-                println("5 min passed")
+                println("$sendlocation min passed")
                 //mapViewModel.resetCurrentTempLocations()
                 println("API POST")
                 time = 1

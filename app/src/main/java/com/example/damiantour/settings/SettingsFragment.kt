@@ -54,6 +54,10 @@ class SettingsFragment :Fragment(){
 
         binding.textUsernaam.text = preferences.getString("fullName", "fout")
 
+        binding.sliderid.value = preferences.getInt("send_route_call_api",5).toFloat()
+
+        binding.switchNotificaties.isChecked = preferences.getBoolean("notifications",false)
+
         binding.sliderid.addOnChangeListener { slider, value, fromUser ->
             preferences.edit().putInt("send_route_call_api",value.toInt()).apply()
         }
