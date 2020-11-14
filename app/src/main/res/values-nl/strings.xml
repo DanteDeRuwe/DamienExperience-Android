@@ -25,7 +25,37 @@
     <string name="instellingen">Instellingen</string>
     <string name="sos">SOS</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+    <!-- test strings -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="wip_text">Work In Progress</string>
+
+    <!-- start route -->
+    <string name="start_route_success_start">U kan nu de wandeling starten. \nVeel succes!</string>
+    <string name="start_route_success_wait">De wandeling is nog niet begonnen.\nNog even wachten</string>
+    <string name="start_route">Start route</string>
+    <string name="start_route_not_registered_text">U bent nog niet voor een wandeling geregistreerd. \nKlik op onderstaande knop om je in te schrijven!</string>
+    <string name="inschrijven">Schrijf me in</string>
+    <string name="opnieuwProberen">retry connection</string>
+    <string name="call_organisation">Bel de organisatie</string>
+    <string name="bel_112">Bel 112</string>
+    <string name="open_112_app">Open de 112 app</string>
+    <string name="organisation_phonenumber">+32 123 456 789</string>
+    <string name="_112_app_name">be.Nextel.EmergencyApp112</string>
+
+    <!-- SOS fragment -->
+    <string name="sos_phonenumber">112</string>
+    <string name="days">DAYS</string>
+    <string name="hours">HOURS</string>
+    <string name="minutes">MINUTES</string>
+    <string name="nullNumber">0</string>
+    <string name="seconds">SECONDS</string>
+    <string name="damiaan_logo_start_route">description_damiaan_logo_start_route</string>
+
+    <!-- stop route -->
+    <string name="stop_button">STOP</string>
+    <string name="stop_dialog_title">Stop wandeling</string>
+    <string name="stop_dialog_message">Bent u zeker dat u de wandeling wilt stopzetten?</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nee</string>
+
 </resources>
