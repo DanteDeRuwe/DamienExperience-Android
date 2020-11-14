@@ -46,6 +46,10 @@ interface DamianApiService {
         @Header("Authorization") token: String
     ) : String
 
+    @PUT("walk/stop")
+    suspend fun stopWalk(
+            @Header("Authorization") token: String
+    ) : String
 
 
 

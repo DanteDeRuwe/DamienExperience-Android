@@ -77,6 +77,7 @@ import kotlin.properties.Delegates
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private lateinit var markerViewManager: MarkerViewManager
     private var coroutinesActive by Delegates.notNull<Boolean>()
+    private lateinit var preferences: SharedPreferences
 
     //the view
     private lateinit var mapView: MapView
@@ -562,7 +563,20 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             .setNegativeButton(R.string.no, null).show()
     }
 
+    /**
+     * @author: Ruben Naudts & Jordy Van Kerkvoorde
+     * Shows confirm dialog when user presses stop tour button
+     */
     fun stopTourConfirmed(){
         //TODO : stop tour afwerken...
+        //update coords
+        lifecycleScope.launch {
+            val token = preferences.getString("TOKEN", null).toString()
+            //eerst walk nog updaten
+            //TODO : update coords.
+            //
+            
+            apiService.stopWalk(token)
+        }
     }
 }
