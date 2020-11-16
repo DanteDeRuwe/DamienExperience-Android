@@ -1,6 +1,7 @@
 package com.example.damiantour.mapBox
 
 import android.app.Application
+import android.content.Context
 import android.location.Location
 import androidx.lifecycle.*
 import com.example.damiantour.database.TupleDatabaseDao
@@ -19,9 +20,9 @@ import java.util.Collections.addAll
 class MapViewModel(private val database: TupleDatabaseDao, application: Application) :
     AndroidViewModel(application) {
 
-
     //the object
     lateinit var mapBoxMap: MapboxMap
+    private var locationUtils: LocationUtils = LocationUtils
 
     // Important !!!
     //temp property
@@ -44,7 +45,13 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         get() = _waypoint
 
     //List of 30 records (coordstuple every 2 seconds)
+    /*
     private var _tempLocations = MutableLiveData<MutableList<Tuple>>()
+    val tempLocations: LiveData<MutableList<Tuple>>
+        get() = _tempLocations*/
+
+    //List of 30 records (coordstuple every 2 seconds)
+    private var _tempLocations = locationUtils.getTempLocationList()
     val tempLocations: LiveData<MutableList<Tuple>>
         get() = _tempLocations
 
@@ -91,7 +98,10 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
     //kinda constructor  but not really
     init {
         _listSize.value = 0
-        _tempLocations.value = ArrayList<Tuple>()
+        //_tempLocations.value = ArrayList<Tuple>()
+    }
+    fun makeLocationUtil(context :Context){
+        locationUtils.start(context)
     }
 
     //adds one line on the map
@@ -145,22 +155,6 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
      * this is not saved in the local database or will not be send to the backend (this is temporay data)
      * will be clear every minute
      */
-    fun setCurrentTempLocation() {
-        var isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
-        while (!isActivated) {
-            println("Wachten op activation van locationComponent")
-            isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
-        }
-        val location: Location? = mapBoxMap.locationComponent.lastKnownLocation
-        if (location != null) {
-            println("Plaatst een coordstuple op de lijst")
-            val list = _tempLocations.value!!
-            list.add(Tuple(longitude = location.longitude,latitude = location.latitude))
-            _tempLocations.postValue( list)
-        } else {
-            println("Locatie nog niet gevonden (locatie component)")
-        }
-    }
 
     /**
      * @author Simon

@@ -1,14 +1,14 @@
 package com.example.damiantour.mapBox
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.SharedPreferences
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +27,6 @@ import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.network.DamianApiService
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -51,8 +50,7 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import kotlinx.coroutines.*
-import java.lang.Exception
+import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
 /// Documentation
@@ -71,21 +69,15 @@ import kotlin.properties.Delegates
  */
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
-
+    val  MY_ACTION :String = "NewLocationRecorded"
     private lateinit var markerViewManager: MarkerViewManager
     private var coroutinesActive by Delegates.notNull<Boolean>()
     private lateinit var preferences: SharedPreferences
 
+    private var myLocationReceiver : MyLocationReceiver?=null
     //the view
     private lateinit var mapView: MapView
     private lateinit var mapViewModel: MapViewModel
-    private var locationEngine: LocationEngine? = null
-
-    // every 2 seconds
-    private var RECORDTEMPLOCATION_MS = 2000L
-
-    // every 5 minutes
-    private var WANTSTOSENDLOCATION = true
 
     private lateinit var permissionsManager: PermissionsManager
     private var timerContinue: Boolean = true
@@ -96,6 +88,20 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     private val apiService: DamianApiService = DamianApiService.create()
 
+    //wip
+    private val serviceConnection: ServiceConnection = object : ServiceConnection{
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val name: String = className.getClassName()
+        }
+
+        override fun onServiceDisconnected(className: ComponentName) {
+            if (className.getClassName().equals("LocationService")) {
+                locationService = null
+            }
+        }
+    }
+    var locationService: LocationService? = null
+
     /**
      * @author Simon Bettens & Jonas Haenbalcke
      * on create fragment
@@ -105,7 +111,14 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         coroutinesActive = false
+
+        //wip
+        val serviceStart = Intent(context, LocationService::class.java)
+        context?.startService(serviceStart)
+        context?.bindService(serviceStart, serviceConnection, Context.BIND_AUTO_CREATE)
+
     }
+
 
     /**
      * @author Simon Bettens & Jonas Haenbalcke
@@ -125,12 +138,25 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         //get map
         mapView = root.findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
+
+
+
+
+
+        //mapViewModel.makeLocationUtil(requireContext());
+
+
+
+
+
+
+
         mapView.getMapAsync(this)
         /***
          * Observers
          */
         //shows or hides the waypoints
-        mapViewModel.waypoint.observe(viewLifecycleOwner, Observer { waypoint ->
+        mapViewModel.waypoint.observe(viewLifecycleOwner,  { waypoint ->
             if (waypoint != null) {
                 addMarkersOnMap(waypoint)
             } else {
@@ -138,7 +164,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             }
         })
         //draws or redraws
-        mapViewModel.tempLocations.observe(viewLifecycleOwner, Observer { templocationList ->
+        mapViewModel.tempLocations.observe(viewLifecycleOwner,  { templocationList ->
             val last = templocationList.size - 1
             if (last >= 0) {
                 val location = templocationList[last]
@@ -146,7 +172,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 drawWalkedLine()
             }
         })
-        mapViewModel.locations.observe(viewLifecycleOwner, Observer { locationList ->
+        mapViewModel.locations.observe(viewLifecycleOwner,  { locationList ->
             drawWalkedLine()
         })
         /***
@@ -309,8 +335,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                             lineSortKey(3f)
                         )
                     )
-                }catch( e: Exception){
-                    println("Exception throw : " +e.localizedMessage)
+                }catch (e: Exception){
+                    println("Exception throw : " + e.localizedMessage)
                 }
             }
         }
@@ -369,42 +395,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         lifecycleScope.launch {
             sendRouteRequest()
             drawRouteLayer()
-            writeLocationCoRoutine()
-        }
-    }
 
-    /**
-     * @author Simon Bettens
-     * this runs on a separate thread
-     * gets location every 2 seconds and places it on the list
-     * every 1 min 6 locations will be placed in the database and the list is cleared
-     * SENDLOCATIONS specifies the amount of the before the locations is send to the backend
-     */
-    private suspend fun writeLocationCoRoutine() {
-        var time = 1
-        var sendlocation: Int
-        // should not happen here
-        mapViewModel.deleteLocations()
-        while (timerContinue) {
-            var counter = 0
-            while (counter <= 60) {
-                println("How many secs passed : $counter")
-                delay(RECORDTEMPLOCATION_MS)
-                mapViewModel.setCurrentTempLocation()
-                counter += 2
-            }
-            println("1 min passed")
-            mapViewModel.setCurrentLocationList()
-            sendlocation = preferences.getInt("send_route_call_api",5)
-            println("sendlocation = $sendlocation")
-            time += 1
-            if (WANTSTOSENDLOCATION && time == sendlocation) {
-                //TODO
-                println("$sendlocation min passed")
-                //mapViewModel.resetCurrentTempLocations()
-                println("API POST")
-                time = 1
-            }
         }
     }
 
@@ -498,6 +489,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
+        myLocationReceiver = MyLocationReceiver()
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(MY_ACTION)
+        requireActivity().registerReceiver(myLocationReceiver, intentFilter)
         mapView.onStart()
     }
 
@@ -535,5 +530,12 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         markerViewManager.onDestroy()
         mapView.onDestroy()
         coroutinesActive = false
+    }
+}
+private class MyLocationReceiver : BroadcastReceiver() {
+    override fun onReceive(arg0: Context?, arg1: Intent) {
+        val long = arg1.getDoubleExtra("LONGITUDE",0.0)
+        val lat = arg1.getDoubleExtra("LATITUDE",0.0)
+        println("location recorded = $long,$lat")
     }
 }

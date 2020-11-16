@@ -87,5 +87,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
 
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01"
+    implementation "com.google.android.gms:play-services-location:17.1.0"
+    implementation "com.karumi:dexter:5.0.0"
 
 }
