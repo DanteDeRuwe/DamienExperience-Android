@@ -576,7 +576,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             //TODO : update coords.
             //
             
-            apiService.stopWalk(token)
+            //apiService.stopWalk(token)
         }
     }
 }
