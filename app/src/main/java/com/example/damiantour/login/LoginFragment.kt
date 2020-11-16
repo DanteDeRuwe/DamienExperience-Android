@@ -39,7 +39,7 @@ class LoginFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-        if(preferences.getString("TOKEN", null).toString() != null){
+        if(preferences.getString("TOKEN", null) != null){
             lifecycleScope.launch {
                 navigateToStartRoute()
             }
@@ -110,8 +110,7 @@ class LoginFragment : Fragment() {
             navigateToStartRoute()
         } catch (e: Exception){
 
-            binding.loginErrorfield.text = getString(R.string.login_error)
-            binding.loginErrorfield.visibility = View.VISIBLE
+
         }
     }
 

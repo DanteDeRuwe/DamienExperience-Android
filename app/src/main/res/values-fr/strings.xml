@@ -56,5 +56,12 @@
     <string name="stop_dialog_message">ètes vous sûr de arrèter?</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
+    <string name="speed_unit">km/h</string>
+    <string name="distance_unit">km</string>
+    <string name="congratulations">congratulations</string>
+    <string name="je_hebt_een_totaal_van">vous avez parcouru</string>
+    <string name="gewandeld">au total.</string>
+    <string name="je_gemiddelde_snelheid_was">votre vitesse moyenne était</string>
+    <string name="go_back_button">retourner</string>
 
 </resources>
