@@ -13,6 +13,9 @@ import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentStartRouteNotRegisteredBinding
 
 
+/**
+ * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+ */
 class StartRouteNotRegisteredFragment : Fragment() {
 
     private lateinit var binding: FragmentStartRouteNotRegisteredBinding

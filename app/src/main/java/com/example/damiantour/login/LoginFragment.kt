@@ -33,6 +33,9 @@ class LoginFragment : Fragment() {
 
     private val apiService : DamianApiService = DamianApiService.create()
 
+    /**
+     * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
@@ -112,6 +115,9 @@ class LoginFragment : Fragment() {
         }
     }
 
+    /**
+     * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+     */
     private suspend fun navigateToStartRoute(){
         val token = preferences.getString("TOKEN", null).toString()
 
@@ -127,6 +133,9 @@ class LoginFragment : Fragment() {
         }
     }
 
+    /**
+     * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+     */
     private fun navigateOnNoConnection(){
         val hasConnection = Connection.isOnline(requireContext())
         if(!hasConnection){

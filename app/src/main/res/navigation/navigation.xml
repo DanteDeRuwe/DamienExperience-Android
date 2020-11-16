@@ -27,7 +27,11 @@
         android:id="@+id/mapFragment"
         android:name="com.example.damiantour.mapBox.MapFragment"
         android:label="MapFragment"
-        tools:layout="@layout/fragment_map"/>
+        tools:layout="@layout/fragment_map">
+        <action
+            android:id="@+id/action_mapFragment_to_stoppedRouteFragment"
+            app:destination="@id/stoppedRouteFragment" />
+    </fragment>
     <fragment
         android:id="@+id/chatFragment2"
         android:name="com.example.damiantour.chat.ChatFragment"
@@ -67,5 +71,13 @@
         <action
             android:id="@+id/action_noConnection_to_loginFragment"
             app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/stoppedRouteFragment"
+        android:name="com.example.damiantour.stopRoute.StoppedRouteFragment"
+        android:label="StoppedRouteFragment" >
+        <action
+            android:id="@+id/action_stoppedRouteFragment_to_startRouteNotRegistered"
+            app:destination="@id/startRouteNotRegistered" />
     </fragment>
 </navigation>

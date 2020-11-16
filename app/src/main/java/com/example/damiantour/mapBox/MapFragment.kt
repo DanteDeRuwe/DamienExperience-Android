@@ -108,6 +108,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
         coroutinesActive = false
+        preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
     }
 
     /**
@@ -577,6 +578,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             //
             
             //apiService.stopWalk(token)
+
+            findNavController().navigate(R.id.action_mapFragment_to_stoppedRouteFragment)
         }
     }
 }

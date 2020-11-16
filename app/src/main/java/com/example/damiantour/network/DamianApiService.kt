@@ -21,7 +21,7 @@ import com.squareup.moshi.Rfc3339DateJsonAdapter
 
 
 /**
- * @author: Ruben Naudts and Simon Bettens
+ * @author: Ruben Naudts and Simon Bettens and Jordy Van Kerkvoorde
  */
 interface DamianApiService {
 
