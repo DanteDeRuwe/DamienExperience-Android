@@ -3,4 +3,5 @@
     <dimen name="button_radius">12dp</dimen>
     <dimen name="margin_left">40dp</dimen>
     <dimen name="separtor">370dp</dimen>
+    <dimen name="stop_button_width">70dp</dimen>
 </resources>

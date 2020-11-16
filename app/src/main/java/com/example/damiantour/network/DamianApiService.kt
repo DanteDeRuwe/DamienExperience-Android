@@ -30,6 +30,16 @@ interface DamianApiService {
         @Body login : LoginData,
     ) : String
 
+    @GET("profile")
+    suspend fun getProfile(
+            @Header("Authorization") token : String
+    ): ProfileData
+
+    @GET("deelnemerscode")
+    suspend fun getDeelnemerscode(
+            @Header("Authorization") token : String
+    ): String
+
     @GET("route/{routeName}")
     suspend fun getRoute(
         @Header("Authorization") token: String,
@@ -46,15 +56,12 @@ interface DamianApiService {
         @Header("Authorization") token: String
     ) : String
 
-    @GET("profile")
-    suspend fun getProfile(
-        @Header("Authorization") token : String
-    ): ProfileData
+    @PUT("walk/stop")
+    suspend fun stopWalk(
+            @Header("Authorization") token: String
+    ) : String
 
-    @GET("deelnemerscode")
-    suspend fun getDeelnemerscode(
-        @Header("Authorization") token : String
-    ): String
+
 
 
 
@@ -69,6 +76,7 @@ interface DamianApiService {
             return ""
         }
     }
+
 
     companion object{
         private const val BASE_URL = "https://damiantourapi.azurewebsites.net/api/"

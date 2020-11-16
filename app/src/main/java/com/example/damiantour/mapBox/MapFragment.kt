@@ -2,6 +2,7 @@ package com.example.damiantour.mapBox
 
 import android.annotation.SuppressLint
 import android.content.*
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,10 +10,12 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -27,6 +30,7 @@ import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.network.DamianApiService
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -50,7 +54,8 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.lang.Exception
 import kotlin.properties.Delegates
 
 /// Documentation
@@ -103,7 +108,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     var locationService: LocationService? = null
 
     /**
-     * @author Simon Bettens & Jonas Haenbalcke
+     * @author Simon Bettens & Jonas Haenbalcke & Ruben Naudts & Jordy Van Kerkvoorde
      * on create fragment
      */
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -175,6 +180,16 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapViewModel.locations.observe(viewLifecycleOwner,  { locationList ->
             drawWalkedLine()
         })
+
+        /**
+         * Stop button observer
+         */
+        val stopbutton = root.findViewById<Button>(R.id.stop_button)
+        stopbutton.setOnClickListener{
+           stopTour()
+        }
+
+
         /***
          * Navigation
          */
@@ -531,11 +546,43 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapView.onDestroy()
         coroutinesActive = false
     }
-}
-private class MyLocationReceiver : BroadcastReceiver() {
-    override fun onReceive(arg0: Context?, arg1: Intent) {
-        val long = arg1.getDoubleExtra("LONGITUDE",0.0)
-        val lat = arg1.getDoubleExtra("LATITUDE",0.0)
-        println("location recorded = $long,$lat")
+    /**
+     * @author: Ruben Naudts & Jordy Van Kerkvoorde
+     * Shows confirm dialog when user presses stop tour button
+     */
+    fun stopTour(){
+        AlertDialog.Builder(context)
+                .setTitle(R.string.stop_dialog_title)
+                .setMessage(R.string.stop_dialog_message)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(R.string.yes, DialogInterface.OnClickListener { dialog, id ->
+                    // FIRE ZE MISSILES!
+                    stopTourConfirmed()
+                })
+                .setNegativeButton(R.string.no, null).show()
+    }
+
+    /**
+     * @author: Ruben Naudts & Jordy Van Kerkvoorde
+     * Shows confirm dialog when user presses stop tour button
+     */
+    fun stopTourConfirmed(){
+        //TODO : stop tour afwerken...
+        //update coords
+        lifecycleScope.launch {
+            val token = preferences.getString("TOKEN", null).toString()
+            //eerst walk nog updaten
+            //TODO : update coords.
+            //
+
+            apiService.stopWalk(token)
+        }
+    }
+    private class MyLocationReceiver : BroadcastReceiver() {
+        override fun onReceive(arg0: Context?, arg1: Intent) {
+            val long = arg1.getDoubleExtra("LONGITUDE",0.0)
+            val lat = arg1.getDoubleExtra("LATITUDE",0.0)
+            println("location recorded = $long,$lat")
+        }
     }
 }

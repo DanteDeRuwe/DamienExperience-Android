@@ -68,7 +68,7 @@ class StartRouteSuccessFragment : Fragment() {
     private fun initCountdown(){
         //natuurlijk moet de Future nog ingesteld worden op het verschil van de starttijd van de wandeling en de huidige datum (in millis)
         //aangezien dat niet zo tof gaat zijn voor te testen zou ik het gewoon zo hardcoded laten staan en uitleggen aan de klant
-        val timer = object: CountDownTimer(20000, 1000) {
+        val timer = object: CountDownTimer(1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 binding.daysTV.setText(Math.floor((millisUntilFinished/ (1000 * 60 * 60 * 24)).toDouble()).toInt().toString())
                 binding.hoursTV.setText(Math.floor(((millisUntilFinished % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toDouble()).toInt().toString())
