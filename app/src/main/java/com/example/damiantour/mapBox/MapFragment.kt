@@ -10,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +20,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -30,7 +29,6 @@ import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.network.DamianApiService
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -74,38 +72,48 @@ import kotlin.properties.Delegates
  */
 //Needs refactoring and extracting of methodes to
 class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
-    val  MY_ACTION :String = "NewLocationRecorded"
-    private lateinit var markerViewManager: MarkerViewManager
-    private var coroutinesActive by Delegates.notNull<Boolean>()
-    private lateinit var preferences: SharedPreferences
-
-    private var myLocationReceiver : MyLocationReceiver?=null
-    //the view
-    private lateinit var mapView: MapView
-    private lateinit var mapViewModel: MapViewModel
-
-    private lateinit var permissionsManager: PermissionsManager
-    private var timerContinue: Boolean = true
-    private var isInBackground : Boolean = false
-    private var marker: MarkerView? = null
-
-    private lateinit var _style: Style
-
+    //api connection
     private val apiService: DamianApiService = DamianApiService.create()
-
-    //wip
-    private val serviceConnection: ServiceConnection = object : ServiceConnection{
+    //preferences
+    private lateinit var preferences: SharedPreferences
+    //the service
+    private lateinit var locationService : LocationService
+    //there is a service bound on the object
+    private var mBound: Boolean = false
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val name: String = className.getClassName()
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as LocationServiceBinder
+            locationService = binder.getService()
+            mBound = true
         }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            if (className.getClassName().equals("LocationService")) {
-                locationService = null
-            }
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
         }
     }
-    var locationService: LocationService? = null
+
+    /**
+     * mapbox properties
+     */
+    //this manages the markers (markeroverlay)
+    private lateinit var markerViewManager: MarkerViewManager
+    //this is one of the markers that is now visible
+    private var marker: MarkerView? = null
+    //the view
+    private lateinit var mapView: MapView
+    //the map view model
+    private lateinit var mapViewModel: MapViewModel
+    //the styling
+    private lateinit var style: Style
+    //permissions
+    private lateinit var permissionsManager: PermissionsManager
+
+
+    //properties
+    private var coroutinesActive by Delegates.notNull<Boolean>()
+    private var timerContinue: Boolean = true
+    private var isInBackground : Boolean = false
 
     /**
      * @author Simon Bettens & Jonas Haenbalcke & Ruben Naudts & Jordy Van Kerkvoorde
@@ -116,14 +124,12 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         Mapbox.getInstance(requireContext(), getString(R.string.mapbox_access_token))
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         coroutinesActive = false
-
         //wip
         val serviceStart = Intent(context, LocationService::class.java)
+        serviceStart.action = "START"
         context?.startService(serviceStart)
-        context?.bindService(serviceStart, serviceConnection, Context.BIND_AUTO_CREATE)
-
+        context?.bindService(serviceStart, connection, Context.BIND_AUTO_CREATE)
     }
-
 
     /**
      * @author Simon Bettens & Jonas Haenbalcke
@@ -137,25 +143,12 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         val application = requireNotNull(this.activity).application
         val dataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
         val viewModelFactory = MapViewModelFactory(dataSource, application)
-        mapViewModel = ViewModelProviders.of(this, viewModelFactory).get(MapViewModel::class.java)
+        mapViewModel = ViewModelProvider(this, viewModelFactory).get(MapViewModel::class.java)
         // inflate view
         val root = inflater.inflate(R.layout.fragment_map, container, false)
         //get map
         mapView = root.findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-
-
-
-
-
-        //mapViewModel.makeLocationUtil(requireContext());
-
-
-
-
-
-
-
         mapView.getMapAsync(this)
         /***
          * Observers
@@ -214,7 +207,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            _style = style
+            this.style = style
             drawWaypointSymbols(style)
             enableLocationComponent(style)
         }
@@ -244,8 +237,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private fun drawRouteLayer() {
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
-        if (this::_style.isInitialized) {
-            _style.addSource(
+        if (this::style.isInitialized) {
+            style.addSource(
                 GeoJsonSource(
                     "line-source",
                     FeatureCollection.fromFeatures(
@@ -258,7 +251,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 )
             )
             // adds styling to the line connecting the coordstuppels
-            _style.addLayer(
+            style.addLayer(
                 LineLayer("linelayer", "line-source").withProperties(
                     lineCap(Property.LINE_CAP_ROUND),
                     lineJoin(Property.LINE_JOIN_ROUND),
@@ -324,11 +317,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private fun drawWalkedLine() {
         if(!isInBackground) {
             val walkedCoordinatesList = mapViewModel.createLineSourceFromWalkedRoute()
-            if (this::_style.isInitialized) {
+            if (this::style.isInitialized) {
                 try {
-                    _style.removeLayer("walkedlinelayer")
-                    _style.removeSource("walkedline-source")
-                    _style.addSource(
+                    style.removeLayer("walkedlinelayer")
+                    style.removeSource("walkedline-source")
+                    style.addSource(
                         GeoJsonSource(
                             "walkedline-source",
                             FeatureCollection.fromFeatures(
@@ -341,7 +334,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                         )
                     )
                     // adds styling to the line connecting the coordstuppels
-                    _style.addLayer(
+                    style.addLayer(
                         LineLayer("walkedlinelayer", "walkedline-source").withProperties(
                             lineCap(Property.LINE_CAP_ROUND),
                             lineJoin(Property.LINE_JOIN_ROUND),
@@ -504,10 +497,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        myLocationReceiver = MyLocationReceiver()
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(MY_ACTION)
-        requireActivity().registerReceiver(myLocationReceiver, intentFilter)
         mapView.onStart()
     }
 
@@ -570,19 +559,15 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         //TODO : stop tour afwerken...
         //update coords
         lifecycleScope.launch {
+            locationService.stopService()
+
             val token = preferences.getString("TOKEN", null).toString()
             //eerst walk nog updaten
             //TODO : update coords.
             //
 
             apiService.stopWalk(token)
-        }
-    }
-    private class MyLocationReceiver : BroadcastReceiver() {
-        override fun onReceive(arg0: Context?, arg1: Intent) {
-            val long = arg1.getDoubleExtra("LONGITUDE",0.0)
-            val lat = arg1.getDoubleExtra("LATITUDE",0.0)
-            println("location recorded = $long,$lat")
+            mapViewModel.deleteDatabaseLocations()
         }
     }
 }

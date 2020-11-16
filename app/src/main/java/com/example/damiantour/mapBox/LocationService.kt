@@ -7,14 +7,20 @@ import android.content.Intent
 import android.location.Location
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
+import android.support.v4.media.session.PlaybackStateCompat
+import android.telephony.ServiceState
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.database.TupleDatabaseDao
 import com.example.damiantour.network.DamianApiService
 import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -25,9 +31,20 @@ import java.util.concurrent.TimeUnit
  */
 
 class LocationService : Service(){
+    //name of the broadcast
+    private val  MY_ACTION :String = "NewLocationRecorded"
+    //singleton class to connect with the viewmodel
+    private var locationUtils: LocationUtils = LocationUtils
+    private val binder = LocationServiceBinder(this)
 
-    val  MY_ACTION :String = "NewLocationRecorded"
+    private var isServiceStarted : Boolean = false
+    //this is necersary to keep the service a live when the phone is turned off
+    // could be verry power intensive
+    //needs much testing!
+    private var wakeLock: PowerManager.WakeLock? = null
+    //api service
     val apiService: DamianApiService = DamianApiService.create()
+    //database connection
     var dataSource : TupleDatabaseDao? = null
     //the location provider
     var fusedLocationProviderClient: FusedLocationProviderClient?= null
@@ -35,44 +52,68 @@ class LocationService : Service(){
     var locationRequest: LocationRequest?=null
     //callback that is called on locationchange
     var locationCallback: LocationCallback?= null
-    // a list of locations
-    var _tempLocations = MutableLiveData<MutableList<Tuple>>()
-    val tempLocations: LiveData<MutableList<Tuple>>
-        get() = _tempLocations
+
 
     override fun onCreate() {
         Log.i("LocationService", "onCreate")
         super.onCreate()
-        start()
+        startService()
     }
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i("LocationService", "onStartCommand")
-        return super.onStartCommand(intent, flags, startId)
+        if (intent != null) {
+            val action = intent.action
+            println("using an intent with action $action")
+            when (action) {
+                "START" -> startService()
+                "STOP"  -> stopService()
+                else -> println("This should never happen. No action in the received intent")
+            }
+            } else {
+            println(
+                    "with a null intent. It has been probably restarted by the system."
+            )
+        }
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        return null
+        return binder
     }
     /**
      * mehod that inits all properties on first start else does nothing
      */
 
     @SuppressLint("MissingPermission")
-    fun start(){
+    fun startService(){
+        if (isServiceStarted) return
+        println("Starting the foreground service task")
+        Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show()
+        isServiceStarted = true
+
+        // we need this lock so our service gets not affected by Doze Mode
+        //
+        wakeLock =
+                (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LocationService::lock").apply {
+                        acquire()
+                    }
+                }
+
         val context: Context = this
-        if(LocationUtils.dataSource ==null) {
+        if(dataSource == null) {
             GlobalScope.launch {
-                LocationUtils.dataSource = DamianDatabase.getInstance(context).tupleDatabaseDao
-                LocationUtils.dataSource?.clear()
+                dataSource = DamianDatabase.getInstance(context).tupleDatabaseDao
+                dataSource?.clear()
             }
         }
-        if(LocationUtils.fusedLocationProviderClient == null) {
-            LocationUtils._tempLocations.value = ArrayList<Tuple>()
-            LocationUtils.fusedLocationProviderClient =
-                LocationServices.getFusedLocationProviderClient(context)
+        if(fusedLocationProviderClient == null) {
+            locationUtils.start()
+            fusedLocationProviderClient =
+                getFusedLocationProviderClient(context)
         }
-        if(LocationUtils.locationRequest == null){
-            LocationUtils.locationRequest = LocationRequest().apply {
+        if(locationRequest == null){
+            locationRequest = LocationRequest().apply {
                 // Sets the desired interval for active location updates. This interval is inexact. You
                 // may not receive updates at all if no location sources are available, or you may
                 // receive them less frequently than requested. You may also receive updates more
@@ -95,8 +136,8 @@ class LocationService : Service(){
                 priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
             }
         }
-        if(LocationUtils.locationCallback == null){
-            LocationUtils.locationCallback = object : LocationCallback() {
+        if(locationCallback == null){
+            locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult?) {
                     super.onLocationResult(locationResult)
                     if (locationResult?.lastLocation != null) {
@@ -107,38 +148,77 @@ class LocationService : Service(){
                             println("database")
                             postLocation()
                         }
+
                     } else {
                         Timber.d("Location information isn't available.")
                     }
                 }
             }
-            LocationUtils.fusedLocationProviderClient?.requestLocationUpdates(
-                LocationUtils.locationRequest,
-                LocationUtils.locationCallback, Looper.myLooper()
+            fusedLocationProviderClient?.requestLocationUpdates(
+                locationRequest,
+                locationCallback, Looper.myLooper()
             )
         }
     }
 
+    fun stopService()
+    {
+        println("Stopping the foreground service")
+        Toast.makeText(this, "Service stopping", Toast.LENGTH_SHORT).show()
+        try {
+
+            wakeLock?.let {
+                if (it.isHeld) {
+                    it.release()
+                }
+            }
+            fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
+            stopForeground(true)
+            stopSelf()
+        } catch (e: Exception) {
+            println("Service stopped without being started: ${e.message}")
+        }
+        timer = false
+        isServiceStarted = false
+    }
+
     @SuppressLint("MissingPermission")
-    fun getTempLocationList() :  LiveData<MutableList<Tuple>> {
-        return LocationUtils._tempLocations
+    private fun getTempLocationList() : MutableList<Tuple>? {
+        return LocationUtils._tempLocations.value
     }
 
     private fun postNewLocation(loc: Location?){
-        val list = LocationUtils._tempLocations.value!!
-        if (loc != null) {
-            list.add(Tuple(longitude = loc.longitude, latitude = loc.latitude))
-            val intent = Intent()
-            intent.action = MY_ACTION
-            intent.putExtra("LONGITUDE", loc.longitude)
-            intent.putExtra("LATITUDE", loc.latitude)
-            sendBroadcast(intent)
-        }
-        LocationUtils._tempLocations.postValue(list)
+        LocationUtils.postNewLocation(loc)
     }
 
     private fun tempLocationsSize(): Int {
-        return LocationUtils._tempLocations.value!!.size
+        return LocationUtils.tempLocationsSize()
+    }
+
+
+    var timer : Boolean = false
+
+    @SuppressLint("MissingPermission")
+    private suspend fun writeLocationCoRoutine() {
+        var time = 1
+        timer = true
+        while (timer) {
+            var counter = 0
+            while (counter <= 60) {
+                println("How many secs passed : $counter")
+                delay(2000)
+                fusedLocationProviderClient?.lastLocation?.addOnSuccessListener {
+                    val loc = it
+                    postNewLocation(loc)
+                    counter += 2
+                }
+            }
+            if(tempLocationsSize()==30){
+                println("database")
+                postLocation()
+            }
+            time += 1
+        }
     }
 
     /**
@@ -151,12 +231,12 @@ class LocationService : Service(){
      */
     private fun postLocation() {
         GlobalScope.launch {
-            val tempLocations = LocationUtils._tempLocations.value
+            val tempLocations = getTempLocationList()!!
             var counter = 0
             while (counter < 30) {
-                val tempLoc = tempLocations!![counter]
+                val tempLoc = tempLocations[counter]
                 val loc = Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
-                LocationUtils.dataSource?.insert(loc)
+                dataSource?.insert(loc)
                 counter += 5
             }
             resetCurrentTempLocations()
@@ -179,8 +259,8 @@ class LocationService : Service(){
      * @author Simon
      * clear both the local database
      */
-    suspend fun deleteLocations(){
-        LocationUtils.dataSource?.clear()
+    suspend fun deleteDatabaseLocations(){
+        dataSource?.clear()
     }
 
     /**
