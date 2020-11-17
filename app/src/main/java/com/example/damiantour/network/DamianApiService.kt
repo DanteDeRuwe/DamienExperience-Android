@@ -18,11 +18,13 @@ import retrofit2.http.*
 import java.util.*
 import java.util.logging.XMLFormatter
 import com.squareup.moshi.Rfc3339DateJsonAdapter
+import org.json.JSONArray
 
 
 /**
  * @author: Ruben Naudts and Simon Bettens
  */
+@JvmSuppressWildcards
 interface DamianApiService {
 
     @POST("login")
@@ -60,8 +62,11 @@ interface DamianApiService {
     suspend fun stopWalk(
             @Header("Authorization") token: String
     ) : String
-
-
+    @PUT("walk/update")
+    suspend fun updateWalk(
+            @Header("Authorization") token: String,
+            @Body coords : List<List<Double>>
+    ):String
 
 
 
@@ -79,6 +84,7 @@ interface DamianApiService {
 
 
     companion object{
+
         private const val BASE_URL = "https://damiantourapi.azurewebsites.net/api/"
         private val moshi = Moshi.Builder()
             .add(NULL_TO_EMPTY_STRING_ADAPTER)
@@ -86,8 +92,7 @@ interface DamianApiService {
             .add(Date::class.java, Rfc3339DateJsonAdapter()
                 .nullSafe()).build()
         fun create(): DamianApiService{
-            val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
-
+            val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
             val client = OkHttpClient.Builder()
                 .addInterceptor(logger)
                 .build()

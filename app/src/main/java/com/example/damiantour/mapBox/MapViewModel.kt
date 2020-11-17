@@ -1,8 +1,6 @@
 package com.example.damiantour.mapBox
 
 import android.app.Application
-import android.content.Context
-import android.location.Location
 import androidx.lifecycle.*
 import com.example.damiantour.database.TupleDatabaseDao
 import com.example.damiantour.findClosestPoint
@@ -12,7 +10,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Collections.addAll
 
 /***
  * @author Simon
@@ -56,7 +53,7 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         get() = _tempLocations
 
     //1 min locations (6 coordstuples every 1 min)
-    private var _locations = database.getAllTuples()
+    private var _locations = database.getAllTuplesLiveData()
     val locations: LiveData<List<Tuple>>
         get() = _locations
 

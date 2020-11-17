@@ -4,26 +4,31 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
-import android.support.v4.media.session.PlaybackStateCompat
-import android.telephony.ServiceState
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.database.TupleDatabaseDao
 import com.example.damiantour.network.DamianApiService
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 /**
@@ -36,28 +41,31 @@ class LocationService : Service(){
     //singleton class to connect with the viewmodel
     private var locationUtils: LocationUtils = LocationUtils
     private val binder = LocationServiceBinder(this)
-
     private var isServiceStarted : Boolean = false
     //this is necersary to keep the service a live when the phone is turned off
     // could be verry power intensive
     //needs much testing!
     private var wakeLock: PowerManager.WakeLock? = null
     //api service
-    val apiService: DamianApiService = DamianApiService.create()
+    private val apiService: DamianApiService = DamianApiService.create()
+    private var howManyItemsToSend :Int = 0
     //database connection
-    var dataSource : TupleDatabaseDao? = null
+    private var dataSource : TupleDatabaseDao? = null
+    //the preferences
+    private lateinit var preferences: SharedPreferences
     //the location provider
-    var fusedLocationProviderClient: FusedLocationProviderClient?= null
+    private var fusedLocationProviderClient: FusedLocationProviderClient?= null
     //the location request
-    var locationRequest: LocationRequest?=null
+    private var locationRequest: LocationRequest?=null
     //callback that is called on locationchange
-    var locationCallback: LocationCallback?= null
+    private var locationCallback: LocationCallback?= null
+
 
 
     override fun onCreate() {
         Log.i("LocationService", "onCreate")
         super.onCreate()
-        startService()
+        preferences = getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
     }
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i("LocationService", "onStartCommand")
@@ -66,7 +74,7 @@ class LocationService : Service(){
             println("using an intent with action $action")
             when (action) {
                 "START" -> startService()
-                "STOP"  -> stopService()
+                "STOP" -> stopService()
                 else -> println("This should never happen. No action in the received intent")
             }
             } else {
@@ -142,12 +150,14 @@ class LocationService : Service(){
                     super.onLocationResult(locationResult)
                     if (locationResult?.lastLocation != null) {
                         // save to local list
+                        /*
                         println("write")
                         postNewLocation(locationResult.lastLocation)
                         if(tempLocationsSize()==30){
                             println("database")
                             postLocation()
                         }
+                        */
 
                     } else {
                         Timber.d("Location information isn't available.")
@@ -155,9 +165,12 @@ class LocationService : Service(){
                 }
             }
             fusedLocationProviderClient?.requestLocationUpdates(
-                locationRequest,
-                locationCallback, Looper.myLooper()
+                    locationRequest,
+                    locationCallback, Looper.myLooper()
             )
+        }
+        GlobalScope.launch {
+            writeLocationCoRoutine()
         }
     }
 
@@ -184,7 +197,7 @@ class LocationService : Service(){
 
     @SuppressLint("MissingPermission")
     private fun getTempLocationList() : MutableList<Tuple>? {
-        return LocationUtils._tempLocations.value
+        return LocationUtils.getTempLocationList().value
     }
 
     private fun postNewLocation(loc: Location?){
@@ -200,7 +213,7 @@ class LocationService : Service(){
 
     @SuppressLint("MissingPermission")
     private suspend fun writeLocationCoRoutine() {
-        var time = 1
+        var time = 0
         timer = true
         while (timer) {
             var counter = 0
@@ -210,14 +223,20 @@ class LocationService : Service(){
                 fusedLocationProviderClient?.lastLocation?.addOnSuccessListener {
                     val loc = it
                     postNewLocation(loc)
-                    counter += 2
                 }
+                counter += 2
+                println("counter $counter")
             }
             if(tempLocationsSize()==30){
                 println("database")
                 postLocation()
             }
             time += 1
+            val sendWhen = 1 //preferences.getInt("send_route_call_api", 5)
+            if (time == sendWhen){
+                updateWalkApi()
+                time = 0
+            }
         }
     }
 
@@ -226,33 +245,55 @@ class LocationService : Service(){
      * is called every minute
      * gets 6 records out of the list  at positions (0,5,10,15,20,25)
      * this is than saved in the database and later on send to the backend
-     *
      * needs 6 records to have a nice forming line on the screen (angular and android)
      */
-    private fun postLocation() {
-        GlobalScope.launch {
-            val tempLocations = getTempLocationList()!!
-            var counter = 0
-            while (counter < 30) {
-                val tempLoc = tempLocations[counter]
-                val loc = Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
-                dataSource?.insert(loc)
-                counter += 5
-            }
-            resetCurrentTempLocations()
+    private suspend fun postLocation() {
+        val tempLocations = getTempLocationList()!!
+        var counter = 0
+        while (counter < 30) {
+            val tempLoc = tempLocations[counter]
+            val loc = Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
+            dataSource?.insert(loc)
+            counter += 5
+            howManyItemsToSend+=1
         }
-
+        resetCurrentTempLocations()
     }
+
+    private suspend fun updateWalkApi()
+    {
+        val token = preferences.getString("TOKEN", "")!!
+        GlobalScope.launch {
+            val tupelsList : List<Tuple> = dataSource?.getAllTuples()!!
+
+            var size = tupelsList.size
+            println("size $size")
+            val startIndex = size - howManyItemsToSend
+            println("startIndex $startIndex")
+            val allTuples = ArrayList<ArrayList<Double>>()
+            size = size-1
+            for (x in startIndex..size) {
+                println("x $x")
+                val tuple = tupelsList[x]
+                allTuples.add(tuple.getTuple())
+            }
+            try {
+                val jsonArray = JSONArray(allTuples)
+                println(jsonArray)
+                apiService.updateWalk(token, allTuples)
+            }catch (e:java.lang.Exception){
+                println(e.localizedMessage)
+            }
+            howManyItemsToSend = 0
+        }
+    }
+
     /**
      * @author Simon
      * clears the temporay list of locations
      */
     private fun resetCurrentTempLocations() {
-        println("reset list")
-        val list = LocationUtils._tempLocations.value
-        if(list!=null) {
-            LocationUtils._tempLocations.value!!.clear()
-        }
+        LocationUtils.resetCurrentTempLocations()
     }
 
     /**
@@ -264,7 +305,8 @@ class LocationService : Service(){
     }
 
     /**
-     * when service is destroyed
+     * @author Simon
+     * when service is destroyed this is called and cleanup happens
      */
     override fun onDestroy() {
         fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
