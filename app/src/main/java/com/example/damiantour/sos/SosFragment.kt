@@ -15,10 +15,8 @@ import com.example.damiantour.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
-/**
- * A simple [Fragment] subclass.
- * Use the [SosFragment.newInstance] factory method to
- * create an instance of this fragment.
+/***
+ * @author DanteDeRuwe
  */
 class SosFragment : Fragment() {
 
@@ -38,13 +36,13 @@ class SosFragment : Fragment() {
 
         callOrganizationBtn.setOnClickListener { openDialer(getString(R.string.organisation_phonenumber))}
         call112Btn.setOnClickListener { openDialer(getString(R.string.sos_phonenumber))}
-        open112AppBtn.setOnClickListener{open112app()}
-        open112AppImgBtn.setOnClickListener{open112app()}
+        open112AppBtn.setOnClickListener{openSosApp()}
+        open112AppImgBtn.setOnClickListener{openSosApp()}
 
         return root
     }
 
-    private fun open112app() {
+    private fun openSosApp() {
         val appPackageName: String = getString(R.string._112_app_name)
         try{
             val pm = requireContext().packageManager
@@ -53,7 +51,6 @@ class SosFragment : Fragment() {
             requireContext().startActivity(intent)
 
         }catch(exception: Exception){
-            println("app $appPackageName not installed")
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
@@ -64,8 +61,7 @@ class SosFragment : Fragment() {
     }
 
     private fun openDialer(phoneNumber: String) {
-        val intent = Intent(Intent.ACTION_DIAL)
-        intent.data = Uri.parse("tel:$phoneNumber")
+        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
         startActivity(intent)
     }
 }
