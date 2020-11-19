@@ -43,7 +43,7 @@
         <action
             android:id="@+id/action_settingsFragment2_to_loginFragment"
             app:destination="@id/loginFragment"
-            app:popUpTo="@id/settingsFragment2"
+            app:popUpTo="@id/startRouteSuccess"
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
@@ -58,8 +58,7 @@
         <action
             android:id="@+id/action_startRouteSuccess_to_mapFragment"
             app:destination="@id/mapFragment"
-            app:popUpTo="@id/startRouteSuccess"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/startRouteNotRegistered"
