@@ -120,16 +120,17 @@ class LoginFragment : Fragment() {
      */
     private suspend fun navigateToStartRoute(){
         val token = preferences.getString("TOKEN", null).toString()
-
-        try{
-            val hasRegistration = apiService.isRegistered(token)
-            var action = LoginFragmentDirections.actionLoginFragmentToStartRouteNotRegistered()
-            if(hasRegistration){
-                 action = LoginFragmentDirections.actionLoginFragmentToStartRouteSuccess()
+        if(token!=null){
+            try{
+                val hasRegistration = apiService.isRegistered(token)
+                var action = LoginFragmentDirections.actionLoginFragmentToStartRouteNotRegistered()
+                if(hasRegistration){
+                    action = LoginFragmentDirections.actionLoginFragmentToStartRouteSuccess()
+                }
+                view?.findNavController()?.navigate(action)
+            }catch(e : Exception){
+                println(e)
             }
-            view?.findNavController()?.navigate(action)
-        }catch(e : Exception){
-            println(e)
         }
     }
 

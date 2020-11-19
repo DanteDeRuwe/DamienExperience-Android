@@ -206,7 +206,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             true
         }
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
-        mapboxMap.setStyle(Style.Builder().fromUri("mapbox://styles/jordyvankerkvoorde/ckhnkv7p70ydc19qqwgabrz3s\n")) { style ->
+        mapboxMap.setStyle(Style.Builder().fromUri("mapbox://styles/jordyvankerkvoorde/ckhp5avpy0gtr19o5sffbkkn5\n")) { style ->
             this.style = style
             drawWaypointSymbols(style)
             enableLocationComponent(style)
@@ -563,7 +563,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
             val token = preferences.getString("TOKEN", null).toString()
             try {
-                locationService.postLocation()
+
                 locationService.updateWalkApi()
                 //TODO(not yet totally implemented in backend could crash backend if called)
                 //nodejs mail service

@@ -10,6 +10,5 @@ data class RouteData(
     val tourName: String,
     val date: Date,
     val distanceInMeters: Int,
-    val lineColor: String,
-    val coordinates: List<List<Double>>
+    val path : PathData
 )

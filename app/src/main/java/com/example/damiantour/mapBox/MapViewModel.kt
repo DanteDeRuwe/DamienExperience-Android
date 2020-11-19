@@ -100,7 +100,7 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         //adds one line on the map
         fun addPath(routeData: RouteData) {
             val routeCoordinatesList = ArrayList<Point>()
-            val coordsList = routeData.coordinates
+            val coordsList = routeData.path.coordinates
             val length = coordsList.size
             var counter = 0
             //Loops over all the coordinates

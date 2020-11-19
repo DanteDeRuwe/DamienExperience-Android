@@ -40,7 +40,7 @@ class StoppedRouteFragment : Fragment() {
         binding.speedTextview.text = String.format("%.2f %s",viewModel.getAverageSpeed() ,getString(R.string.speed_unit))
 
         // Get name from shared preferences
-        val name = "Ruben"//preferences.getString("NAME", null).toString()
+        val name = preferences.getString("fullName", null).toString()
 
         binding.congratsTextview.text = String.format("%s %s", getString(R.string.congratulations), name)
 
