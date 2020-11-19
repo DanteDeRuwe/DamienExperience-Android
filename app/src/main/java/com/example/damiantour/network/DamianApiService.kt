@@ -22,7 +22,7 @@ import org.json.JSONArray
 
 
 /**
- * @author: Ruben Naudts and Simon Bettens
+ * @author: Ruben Naudts and Simon Bettens and Jordy Van Kerkvoorde
  */
 @JvmSuppressWildcards
 interface DamianApiService {

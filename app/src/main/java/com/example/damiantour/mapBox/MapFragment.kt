@@ -573,6 +573,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             }
 
             mapViewModel.deleteDatabaseLocations()
+            findNavController().navigate(R.id.action_mapFragment_to_stoppedRouteFragment)
         }
     }
 }

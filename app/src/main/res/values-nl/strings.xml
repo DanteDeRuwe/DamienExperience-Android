@@ -57,5 +57,12 @@
     <string name="stop_dialog_message">Bent u zeker dat u de wandeling wilt stopzetten?</string>
     <string name="yes">Ja</string>
     <string name="no">Nee</string>
+    <string name="speed_unit">km/u</string>
+    <string name="distance_unit">km</string>
+    <string name="congratulations">proficiat</string>
+    <string name="je_hebt_een_totaal_van">Je hebt een totaal van</string>
+    <string name="gewandeld">gewandeld.</string>
+    <string name="je_gemiddelde_snelheid_was">Je gemiddelde snelheid was</string>
+    <string name="go_back_button">Ga Terug</string>
 
 </resources>

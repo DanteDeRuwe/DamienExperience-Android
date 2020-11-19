@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
-
+/**
+ * @author Jordy Van Kerkvoorde
+ */
 class Connection {
     companion object{
         fun isOnline(context: Context): Boolean {

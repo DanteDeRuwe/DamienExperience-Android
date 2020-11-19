@@ -21,6 +21,10 @@ import com.example.damiantour.login.LoginViewModel
 import com.example.damiantour.network.DamianApiService
 import kotlinx.coroutines.launch
 
+
+/**
+ * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+ */
 class StartRouteSuccessFragment : Fragment() {
     private lateinit var binding: FragmentStartRouteSuccessBinding
     private lateinit var preferences: SharedPreferences
