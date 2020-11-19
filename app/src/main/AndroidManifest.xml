@@ -22,7 +22,6 @@
             android:name=".mapBox.LocationService"
             android:enabled="true"
             android:exported="false" />
-
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">

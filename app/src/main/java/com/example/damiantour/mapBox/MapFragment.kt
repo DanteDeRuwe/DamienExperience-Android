@@ -206,7 +206,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             true
         }
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
-        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+        mapboxMap.setStyle(Style.Builder().fromUri("mapbox://styles/jordyvankerkvoorde/ckhnkv7p70ydc19qqwgabrz3s\n")) { style ->
             this.style = style
             drawWaypointSymbols(style)
             enableLocationComponent(style)
@@ -562,11 +562,16 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             locationService.stopService()
 
             val token = preferences.getString("TOKEN", null).toString()
-            //eerst walk nog updaten
-            //TODO : update coords.
-            //
+            try {
+                locationService.postLocation()
+                locationService.updateWalkApi()
+                //TODO(not yet totally implemented in backend could crash backend if called)
+                //nodejs mail service
+                //apiService.stopWalk(token)
+            }catch (e:Exception){
+                println(e.localizedMessage)
+            }
 
-            apiService.stopWalk(token)
             mapViewModel.deleteDatabaseLocations()
         }
     }
