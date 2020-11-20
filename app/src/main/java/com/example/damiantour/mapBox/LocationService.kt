@@ -146,7 +146,7 @@ class LocationService : Service() {
         wakeLock =
                 (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                     newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LocationService::lock").apply {
-                        acquire(45)
+                        acquire()
                     }
                 }
         cancellationSource = CancellationTokenSource()
