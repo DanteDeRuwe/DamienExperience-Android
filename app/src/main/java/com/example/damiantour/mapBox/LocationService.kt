@@ -327,8 +327,6 @@ class LocationService : Service() {
                 allTuples.add(tuple.getTuple())
             }
             try {
-                val jsonArray = JSONArray(allTuples)
-                println(jsonArray)
                 apiService.updateWalk(token, allTuples)
             } catch (e: java.lang.Exception) {
                 println(e.localizedMessage)
