@@ -13,7 +13,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /***
- * @author Simon
+ * @author Simon and Jordy
  */
 class MapViewModel(private val database: TupleDatabaseDao, application: Application) :
     AndroidViewModel(application) {
@@ -121,7 +121,9 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         }
 
     private fun addWaypoints(waypoints : List<WaypointData>) {
-        _waypoints.postValue(waypoints)
+        println("waypoints" +waypoints)
+        _listSize.value = waypoints.size
+        _waypoints = MutableLiveData(waypoints)
     }
 
     /**

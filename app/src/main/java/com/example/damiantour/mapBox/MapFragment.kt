@@ -68,7 +68,7 @@ import kotlin.properties.Delegates
 // https://docs.mapbox.com/android/java/examples/show-directions-on-a-map/
 
 /**
- * @author  Jonas and Simon
+ * @author  Jonas and Simon and Jordy
  *
  */
 //Needs refactoring and extracting of methodes to
@@ -209,7 +209,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         markerViewManager = MarkerViewManager(mapView, mapboxMap)
         mapboxMap.setStyle(Style.Builder().fromUri("mapbox://styles/jordyvankerkvoorde/ckhp5avpy0gtr19o5sffbkkn5\n")) { style ->
             this.style = style
-            drawWaypointSymbols(style)
+
             enableLocationComponent(style)
         }
         if (!coroutinesActive) {
@@ -226,6 +226,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             val JWTtoken: String = preferences.getString("TOKEN", null).toString()
             val routeResult = apiService.getRoute(JWTtoken, "TestTourOne")
             mapViewModel.addPath(routeResult)
+            drawWaypointSymbols()
         } catch (e: Exception) {
             println("Fout" + e.localizedMessage)
         }
@@ -268,16 +269,16 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * @author Simon Bettens & Jonas Haenbalcke
      * draws the waypoints symbol on the map
      */
-    private fun drawWaypointSymbols(style: Style) {
+    private fun drawWaypointSymbols() {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
         var counter = 0
         //Must be a int
         val listSize = mapViewModel.listSize.value
+        val list = mapViewModel.waypoints.value!!
         //Loops over all the coordinates
-        while (counter < listSize!!) {
+        for (wp in list) {
             //get properties
-            val wp = mapViewModel.waypoints.value?.get(counter)
-            if (wp != null) {
+            println(wp)
                 //get coords
                 val lon: Double = wp.longitude
                 val lat: Double = wp.latitude
@@ -285,7 +286,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                     Point.fromLngLat(lon, lat)
                 )
                 symbolLayerIconFeatureList.add(feature)
-            }
             counter++
         }
         //add every point to the map
