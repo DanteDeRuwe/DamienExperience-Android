@@ -28,6 +28,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.network.DamianApiService
+import com.example.damiantour.network.WaypointData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -269,8 +270,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private fun drawWaypointSymbols(style: Style) {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
-        //this call reads the json and put everthing in een arraylist<Waypoint>
-        mapViewModel.readWaypointFile()
         var counter = 0
         //Must be a int
         val listSize = mapViewModel.listSize.value
@@ -368,9 +367,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * @author Simon Bettens
      * adds the markers overlay of the closest waypoint from where the user has ticked
      */
-    private fun addMarkersOnMap(wp: Waypoint) {
-        val title: String = wp.title
-        val description: String = wp.description
+    private fun addMarkersOnMap(wp: WaypointData) {
+        //needs to change according to system lang
+        val title: String = wp.languagesText.title.nl
+        val description: String = wp.languagesText.description.nl
         //get coords
         val lon: Double = wp.longitude
         val lat: Double = wp.latitude

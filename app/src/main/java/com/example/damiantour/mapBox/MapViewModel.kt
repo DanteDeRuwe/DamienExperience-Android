@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.example.damiantour.database.TupleDatabaseDao
 import com.example.damiantour.findClosestPoint
 import com.example.damiantour.network.RouteData
+import com.example.damiantour.network.WaypointData
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -32,13 +33,13 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         get() = _routeCoordinates
 
     //waypoints on the line
-    private var _waypoints = MutableLiveData<List<Waypoint>>()
-    val waypoints: LiveData<List<Waypoint>>
+    private var _waypoints = MutableLiveData<List<WaypointData>>()
+    val waypoints: LiveData<List<WaypointData>>
         get() = _waypoints
 
     //selected waypoint
-    private var _waypoint = MutableLiveData<Waypoint>()
-    val waypoint: LiveData<Waypoint>
+    private var _waypoint = MutableLiveData<WaypointData>()
+    val waypoint: LiveData<WaypointData>
         get() = _waypoint
 
     //List of 30 records (coordstuple every 2 seconds)
@@ -112,11 +113,18 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
                 routeCoordinatesList.add(Point.fromLngLat(lon, lat))
                 counter++
             }
+
+            addWaypoints(routeData.waypoints)
+
             //sets the value
             _routeCoordinates.value = routeCoordinatesList
         }
 
-        /**
+    private fun addWaypoints(waypoints : List<WaypointData>) {
+        _waypoints.postValue(waypoints)
+    }
+
+    /**
          * @author Simon
          * tries to get select the closest Waypoint from the selected point
          * if the every waypoint is further than 500m the method returns 'null' (in  method findClosestPoint(clickPoint, list))
@@ -199,67 +207,5 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
             return walkedCoordinatesList
         }
 
-        // Important !!!!
-        // temp method
-        fun readWaypointFile() {
-            val obj = JSONObject(getWaypoints())
-            coordsObject = obj.getJSONArray("features")
-            _listSize.value = coordsObject.length()
-            getWaypointData()
-        }
-
-        // Important !!!!
-        //temp method
-        //gets the data in the jsonarray
-        fun getWaypointData() {
-            val waypointsList = ArrayList<Waypoint>()
-            var counter = 0
-            while (counter < listSize.value!!) {
-                val waypointObject = coordsObject.getJSONObject(counter)
-
-                val title = waypointObject.get("title") as String
-                val description = waypointObject.get("description") as String
-                //get coords
-                val tupel = waypointObject.getJSONObject("coordinates")
-                val lon = tupel.get("longitude") as Double
-                val lat = tupel.get("latitude") as Double
-                val wp = Waypoint(title, description, lon, lat)
-                waypointsList.add(wp)
-                counter++
-            }
-            _waypoints.value = waypointsList
-        }
-
-        fun getWaypoints(): String {
-            return "{\n" +
-                    "\"features\" : [\n" +
-                    "      {\n" +
-                    "        \"title\": \"Delhaize Tremelo\",\n" +
-                    "        \"description\": \"Gratis blikje frisdrank en snoepreep bij vertoon van een geldige coupon.\",\n" +
-                    "        \"coordinates\": {\n" +
-                    "          \"longitude\": 4.705204,\n" +
-                    "          \"latitude\": 50.990410\n" +
-                    "        }\n" +
-                    "      },\n" +
-                    "      {\n" +
-                    "        \"title\": \"Bevoorrading 1\",\n" +
-                    "        \"description\": \"Hier krijg je een appeltje voor de dorst!\",\n" +
-                    "        \"coordinates\": {\n" +
-                    "          \"longitude\": 4.708955,\n" +
-                    "          \"latitude\": 50.994423\n" +
-                    "        }\n" +
-                    "      },\n" +
-                    "      {\n" +
-                    "        \"title\": \"Voetbalveld\",\n" +
-                    "        \"description\": \"Wachtpost rode kruis\",\n" +
-                    "        \"coordinates\": {\n" +
-                    "          \"longitude\": 4.702002,\n" +
-                    "          \"latitude\": 50.986546\n" +
-                    "        }\n" +
-                    "      }\n" +
-                    "    ]\n" +
-                    "  }\n" +
-                    "}"
-        }
 
 }

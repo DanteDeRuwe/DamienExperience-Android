@@ -1,4 +1,6 @@
 package com.example.damiantour.network
 
-class LanguagesData {
-}
+data class LanguagesData (
+        val nl: String,
+        val fr: String
+)
