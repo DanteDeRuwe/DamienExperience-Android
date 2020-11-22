@@ -21,7 +21,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -55,6 +54,8 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.coroutines.*
 import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
 /// Documentation
@@ -174,7 +175,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapViewModel.locations.observe(viewLifecycleOwner,  { locationList ->
             drawWalkedLine()
         })
-
+        mapViewModel.waypoints.observe(viewLifecycleOwner, { waypointsList ->
+            drawWaypointsLayer()
+        })
         /**
          * Stop button observer
          */
@@ -182,8 +185,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         stopbutton.setOnClickListener{
            stopTour()
         }
-
-
         /***
          * Navigation
          */
@@ -226,7 +227,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             val JWTtoken: String = preferences.getString("TOKEN", null).toString()
             val routeResult = apiService.getRoute(JWTtoken, "TestTourOne")
             mapViewModel.addPath(routeResult)
-            drawWaypointSymbols()
+            drawWaypointsLayer()
         } catch (e: Exception) {
             println("Fout" + e.localizedMessage)
         }
@@ -266,17 +267,16 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     }
 
     /**
-     * @author Simon Bettens & Jonas Haenbalcke
+     * @author Simon Bettens & Jonas Haenbalcke & Jordy van Kerkvoorde
      * draws the waypoints symbol on the map
      */
-    private fun drawWaypointSymbols() {
+    private fun drawWaypointsLayer() {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
-        var counter = 0
         //Must be a int
         val listSize = mapViewModel.listSize.value
         val list = mapViewModel.waypoints.value!!
         //Loops over all the coordinates
-        for (wp in list) {
+        for ((counter, wp) in list.withIndex()) {
             //get properties
             println(wp)
                 //get coords
@@ -286,7 +286,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                     Point.fromLngLat(lon, lat)
                 )
                 symbolLayerIconFeatureList.add(feature)
-            counter++
         }
         //add every point to the map
         style.addSource(
@@ -347,7 +346,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 }
             }
         }
-
     }
 
     /**
@@ -369,8 +367,19 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private fun addMarkersOnMap(wp: WaypointData) {
         //needs to change according to system lang
-        val title: String = wp.languagesText.title.nl
-        val description: String = wp.languagesText.description.nl
+        var title = ""
+        var description = ""
+        when (Locale.getDefault().language) {
+            "nl" ->{ title = wp.languagesText.title.nl
+                    description = wp.languagesText.description.nl}
+            "fr" -> {title = wp.languagesText.title.fr
+                    description = wp.languagesText.description.fr}
+            else -> { // Note the block
+                title = wp.languagesText.title.nl
+                description = wp.languagesText.description.nl
+                print("x is neither nl nor fr, so showed nl version")
+            }
+        }
         //get coords
         val lon: Double = wp.longitude
         val lat: Double = wp.latitude
@@ -403,10 +412,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         lifecycleScope.launch {
             sendRouteRequest()
             drawRouteLayer()
-
         }
     }
-
 
     /**
      * @author Simon & Jonas
@@ -539,7 +546,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * @author: Ruben Naudts & Jordy Van Kerkvoorde
      * Shows confirm dialog when user presses stop tour button
      */
-    fun stopTour(){
+    private fun stopTour(){
         AlertDialog.Builder(context)
                 .setTitle(R.string.stop_dialog_title)
                 .setMessage(R.string.stop_dialog_message)
@@ -555,7 +562,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * @author: Ruben Naudts & Jordy Van Kerkvoorde
      * Shows confirm dialog when user presses stop tour button
      */
-    fun stopTourConfirmed(){
+    private fun stopTourConfirmed(){
         //TODO : stop tour afwerken...
         //update coords
         lifecycleScope.launch {
