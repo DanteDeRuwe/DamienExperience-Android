@@ -4,12 +4,12 @@ import com.squareup.moshi.Json
 import java.util.*
 
 /**
- * @author Simon Bettens
+ * @author Simon Bettens & Jordy Van Kerkvoorde
  */
 data class RouteData(
     val tourName: String,
     val date: Date,
     val distanceInMeters: Int,
-    val lineColor: String,
-    val coordinates: List<List<Double>>
+    val path : PathData,
+    val waypoints : List<WaypointData>
 )

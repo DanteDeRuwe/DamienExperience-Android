@@ -19,7 +19,7 @@
     <string name="wip_text">Work In Progress</string>
     <string name="login_error">Het e-mailadres of paswoord is ongeldig</string>
     <string name="start_route_success_start">U kan nu de wandeling starten. \nVeel succes!</string>
-    <string name="start_route_success_wait">De wandeling is nog niet begonnen.\nNog even wachten...</string>
+    <string name="start_route_success_wait">De wandeling is nog niet begonnen.\nNog even wachten</string>
     <string name="start_route">Start route</string>
     <string name="start_route_not_registered_text">U bent nog niet voor een wandeling geregistreerd. \nKlik op onderstaande knop om je in te schrijven!</string>
     <string name="inschrijven">Schrijf me in</string>
@@ -37,5 +37,33 @@
     <string name="nullNumber">0</string>
     <string name="seconds">SECONDS</string>
     <string name="damiaan_logo_start_route">description_damiaan_logo_start_route</string>
+    <string name="batterijBesparing">BatterijBesparing</string>
+    <string name="text_locatieDelen">Om de hoeveel minuten wenst u uw locatie te delen?</string>
+    <string name="text_logout">Logout</string>
+    <string name="text_notifications">Notificaties</string>
+    <string name="text_deelnemerscode">Deelnemerscode</string>
+    <string name="text_aanUitZetten">Aan of uit zetten</string>
+    <string name="text_deelnemerscodeGenerated">DeelnemerscodeDummy</string>
+    <string name="text_appWerking">Hoe werkt de app?</string>
+    <string name="text_ingelogd_als">Ingelogd als</string>
+    <string name="text_share">share link met de wereld</string>
+    <string name="text_gebruikersnaam">Jonas Haenebalcke</string>
+    <string name="text_maxSeekbar">25</string>
+    <string name="text_minSeekbar">5</string>
+
+    <string name="stop_button">STOP</string>
+    <string name="stop_dialog_title">Stop wandeling</string>
+    <string name="stop_dialog_message">Bent u zeker dat u de wandeling wilt stopzetten?</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nee</string>
+
+    <string name="speed_unit">km/u</string>
+    <string name="distance_unit">km</string>
+    <string name="congratulations">proficiat</string>
+    <string name="je_hebt_een_totaal_van">Je hebt een totaal van</string>
+    <string name="gewandeld">gewandeld.</string>
+    <string name="je_gemiddelde_snelheid_was">Je gemiddelde snelheid was</string>
+    <string name="go_back_button">Ga Terug</string>
+
 
 </resources>

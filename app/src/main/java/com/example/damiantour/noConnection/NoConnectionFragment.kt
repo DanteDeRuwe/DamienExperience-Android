@@ -12,6 +12,9 @@ import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentNoConnectionBinding
 import com.example.damiantour.databinding.FragmentStartRouteNotRegisteredBinding
 
+/**
+ * @author Jordy Van Kerkvoorde
+ */
 class NoConnectionFragment : Fragment() {
 
     private lateinit var binding: FragmentNoConnectionBinding

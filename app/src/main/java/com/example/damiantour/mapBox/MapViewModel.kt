@@ -1,32 +1,24 @@
 package com.example.damiantour.mapBox
 
 import android.app.Application
-import android.location.Location
 import androidx.lifecycle.*
 import com.example.damiantour.database.TupleDatabaseDao
 import com.example.damiantour.findClosestPoint
 import com.example.damiantour.network.RouteData
+import com.example.damiantour.network.WaypointData
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Collections.addAll
 
 /***
- * @author Simon
+ * @author Simon Bettens and Jordy Van Kerkvoorde
  */
 class MapViewModel(private val database: TupleDatabaseDao, application: Application) :
-    AndroidViewModel(application) {
-
-
-    //the object
+        AndroidViewModel(application) {
     lateinit var mapBoxMap: MapboxMap
-
-    // Important !!!
-    //temp property
-    //contains jsonObject of waypoints
-    private lateinit var coordsObject: JSONArray
+    private var locationUtils: LocationUtils = LocationUtils
 
     // coords to show the line
     private var _routeCoordinates = MutableLiveData<List<Point>>()
@@ -34,22 +26,22 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         get() = _routeCoordinates
 
     //waypoints on the line
-    private var _waypoints = MutableLiveData<List<Waypoint>>()
-    val waypoints: LiveData<List<Waypoint>>
+    private var _waypoints = MutableLiveData<List<WaypointData>>()
+    val waypoints: LiveData<List<WaypointData>>
         get() = _waypoints
 
     //selected waypoint
-    private var _waypoint = MutableLiveData<Waypoint>()
-    val waypoint: LiveData<Waypoint>
+    private var _waypoint = MutableLiveData<WaypointData>()
+    val waypoint: LiveData<WaypointData>
         get() = _waypoint
 
     //List of 30 records (coordstuple every 2 seconds)
-    private var _tempLocations = MutableLiveData<MutableList<Tuple>>()
+    private var _tempLocations = locationUtils.getTempLocationList()
     val tempLocations: LiveData<MutableList<Tuple>>
         get() = _tempLocations
 
     //1 min locations (6 coordstuples every 1 min)
-    private var _locations = database.getAllTuples()
+    private var _locations = database.getAllTuplesLiveData()
     val locations: LiveData<List<Tuple>>
         get() = _locations
 
@@ -63,19 +55,19 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
     private fun getMixListLocations(): List<Tuple>? {
         val listTempLoc = _tempLocations.value
         val listLoc = _locations.value
-        if(listLoc!=null && listLoc.isNotEmpty()){
+        if (listLoc != null && listLoc.isNotEmpty()) {
             println("listLoc : " + listLoc.size)
-             if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+            return if (listTempLoc != null && listTempLoc.isNotEmpty()) {
                 println("extra listTempLoc : " + listTempLoc.size)
-                 val mix =  listLoc + listTempLoc
-                 println("mix list : " +  mix.size)
-                 return mix
+                val mix = listLoc + listTempLoc
+                println("mix list : " + mix.size)
+                mix
 
-            } else{
-                 return listLoc
+            } else {
+                listLoc
             }
-        }else{
-            if(listTempLoc!=null && listTempLoc.isNotEmpty()){
+        } else {
+            if (listTempLoc != null && listTempLoc.isNotEmpty()) {
                 println("listTempLoc : " + listTempLoc.size)
                 return listTempLoc
             }
@@ -91,13 +83,18 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
     //kinda constructor  but not really
     init {
         _listSize.value = 0
-        _tempLocations.value = ArrayList<Tuple>()
+        //_tempLocations.value = ArrayList<Tuple>()
     }
 
-    //adds one line on the map
-    fun addPath(routeData : RouteData) {
+    /**
+     * @author Simon
+     * adds the route
+     * gets all the coords of the route
+     * sets the waypoints
+     */
+    fun addPath(routeData: RouteData) {
         val routeCoordinatesList = ArrayList<Point>()
-        val coordsList = routeData.coordinates
+        val coordsList = routeData.path.coordinates
         val length = coordsList.size
         var counter = 0
         //Loops over all the coordinates
@@ -109,12 +106,21 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
             routeCoordinatesList.add(Point.fromLngLat(lon, lat))
             counter++
         }
+        addWaypoints(routeData.waypoints)
         //sets the value
-        _routeCoordinates.value = routeCoordinatesList
+        _routeCoordinates = MutableLiveData(routeCoordinatesList)
     }
 
     /**
-     * @author Simon
+     * @author Jordy Van Kerkvoorde
+     */
+    private fun addWaypoints(waypoints: List<WaypointData>) {
+        _listSize.value = waypoints.size
+        _waypoints = MutableLiveData(waypoints)
+    }
+
+    /**
+     * @author Simon Bettens
      * tries to get select the closest Waypoint from the selected point
      * if the every waypoint is further than 500m the method returns 'null' (in  method findClosestPoint(clickPoint, list))
      * if the closest waypoint is the same as the selected waypoint,the selected waypoint will be deselected
@@ -133,73 +139,14 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
             }
             _waypoint.value = wp
         }
-
-    }
-
-    /**
-     * @author Simon
-     * adds coordstuple every 2 seconds to list
-     * must check is location is enabled (if not it must wait until it is)
-     * gets that location and adds it to the list
-     *
-     * this is not saved in the local database or will not be send to the backend (this is temporay data)
-     * will be clear every minute
-     */
-    fun setCurrentTempLocation() {
-        var isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
-        while (!isActivated) {
-            println("Wachten op activation van locationComponent")
-            isActivated = mapBoxMap.locationComponent.isLocationComponentActivated
-        }
-        val location: Location? = mapBoxMap.locationComponent.lastKnownLocation
-        if (location != null) {
-            println("Plaatst een coordstuple op de lijst")
-            val list = _tempLocations.value!!
-            list.add(Tuple(longitude = location.longitude,latitude = location.latitude))
-            _tempLocations.postValue( list)
-        } else {
-            println("Locatie nog niet gevonden (locatie component)")
-        }
-    }
-
-    /**
-     * @author Simon
-     * is called every minute
-     * gets 6 records out of the list  at positions (0,5,10,15,20,25)
-     * this is than saved in the database and later on send to the backend
-     *
-     * needs 6 records to have a nice forming line on the screen (angular and android)
-     */
-    suspend fun setCurrentLocationList() {
-        val tempLocations = _tempLocations.value
-        var counter = 0
-        while (counter < 30) {
-            val tempLoc = tempLocations!![counter]
-            val loc = Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
-            database.insert(loc)
-            counter += 5
-        }
-        resetCurrentTempLocations()
     }
 
     /**
      * @author Simon
      * clear both the local database
      */
-    suspend fun deleteLocations(){
+    suspend fun deleteDatabaseLocations() {
         database.clear()
-    }
-
-    /**
-     * @author Simon
-     * clears the temporay list of locations
-     */
-    private fun resetCurrentTempLocations() {
-        println("reset list")
-        val list = _tempLocations.value
-        if(list!=null) {
-            _tempLocations.value!!.clear()
-        }
     }
 
     /**
@@ -220,319 +167,6 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
             counter++
         }
         return walkedCoordinatesList
-    }
-
-    // Important !!!!
-    // temp method
-    fun readWaypointFile() {
-        val obj = JSONObject(getWaypoints())
-        coordsObject = obj.getJSONArray("features")
-        _listSize.value = coordsObject.length()
-        getWaypointData()
-    }
-
-    // Important !!!!
-    //temp method
-    //gets the data in the jsonarray
-    private fun getWaypointData() {
-        val waypointsList = ArrayList<Waypoint>()
-        var counter = 0
-        while (counter < listSize.value!!) {
-            val waypointObject = coordsObject.getJSONObject(counter)
-
-            val title = waypointObject.get("title") as String
-            val description = waypointObject.get("description") as String
-            //get coords
-            val tupel = waypointObject.getJSONObject("coordinates")
-            val lon = tupel.get("longitude") as Double
-            val lat = tupel.get("latitude") as Double
-            val wp = Waypoint(title, description, lon, lat)
-            waypointsList.add(wp)
-            counter++
-        }
-        _waypoints.value = waypointsList
-    }
-
-    // dummy data
-    private fun getRoute(): String {
-        return "{\n" +
-                "    \"type\": \"FeatureCollection\"," +
-                "    \"features\": [" +
-                "      {" +
-                "        \"type\": \"Feature\"," +
-                "        \"properties\": {}," +
-                "        \"geometry\": {" +
-                "          \"type\": \"LineString\"," +
-                "          \"coordinates\": [" +
-                "            [" +
-                "              4.708843231201172," +
-                "              50.9944865168635" +
-                "            ]," +
-                "            [" +
-                "              4.703693389892578," +
-                "              50.99108304254769" +
-                "            ]," +
-                "            [" +
-                "              4.705195426940918," +
-                "              50.99017810856411" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.70386505126953," +
-                "              50.989367704946844" +
-                "            ]," +
-                "            [" +
-                "              4.702770709991455," +
-                "              50.989772908524195" +
-                "            ]," +
-                "            [" +
-                "              4.702212810516357," +
-                "              50.9889895117497" +
-                "            ]," +
-                "            [" +
-                "              4.7017621994018555," +
-                "              50.984288853430854" +
-                "            ]," +
-                "            [" +
-                "              4.702920913696289," +
-                "              50.985342490650396" +
-                "            ]," +
-                "            [" +
-                "              4.7046589851379395,\n" +
-                "              50.986423119367196\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.705259799957275,\n" +
-                "              50.98732812656122\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.705452919006348,\n" +
-                "              50.988098044163905\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.705753326416016,\n" +
-                "              50.988935483898565\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.70639705657959,\n" +
-                "              50.98958381396164\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.707319736480713,\n" +
-                "              50.98947575958004\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.711203575134277,\n" +
-                "              50.988017000807105\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.7126305103302,\n" +
-                "              50.987578013498705\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.714068174362183,\n" +
-                "              50.98703096196555\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.714701175689697,\n" +
-                "              50.98706473076542\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.715237617492676,\n" +
-                "              50.987517230313394\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.715688228607178,\n" +
-                "              50.98775360892028\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.7151947021484375,\n" +
-                "              50.98873287889668\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.714980125427246,\n" +
-                "              50.988962497832\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.7147440910339355,\n" +
-                "              50.98909756726333\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.714454412460327,\n" +
-                "              50.98963784105814\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.713563919067383,\n" +
-                "              50.98965810120312\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.712855815887451,\n" +
-                "              50.98979992197026\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.7122979164123535,\n" +
-                "              50.98987420886582\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.711611270904541,\n" +
-                "              50.989813428687384\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.711031913757324,\n" +
-                "              50.989712128213114\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.710677862167358,\n" +
-                "              50.98963108767451\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.7100770473480225,\n" +
-                "              50.989691868091725\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.709744453430176,\n" +
-                "              50.98975264842937\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.709347486495972,\n" +
-                "              50.98975264842937\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.708961248397826,\n" +
-                "              50.98973238832567\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.708864688873291,\n" +
-                "              50.99002953562688\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.708617925643921,\n" +
-                "              50.99038746053207\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.708296060562134,\n" +
-                "              50.99072512300668\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.7079527378082275,\n" +
-                "              50.99092096611637\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.70739483833313,\n" +
-                "              50.9911235615671\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.708349704742432,\n" +
-                "              50.99227833874959\n" +
-                "            ],\n" +
-                "            [\n" +
-                "              4.709476232528686,\n" +
-                "              50.99192042842648\n" +
-                "            ]," +
-                "            [" +
-                "              4.709728360176086," +
-                "              50.992065618795955" +
-                "            ]," +
-                "            [" +
-                "              4.710431098937988," +
-                "              50.99198795888739" +
-                "            ]," +
-                "            [" +
-                "              4.711015820503235," +
-                "              50.991809002951186" +
-                "            ]," +
-                "            [" +
-                "              4.711251854896545," +
-                "              50.992041983185366" +
-                "            ]," +
-                "            [" +
-                "              4.712952375411987," +
-                "              50.9918866631592" +
-                "            ]," +
-                "            [" +
-                "              4.713091850280762," +
-                "              50.99176510799351" +
-                "            ]," +
-                "            [" +
-                "              4.7132956981658936," +
-                "              50.991724589534215" +
-                "            ]," +
-                "            [" +
-                "              4.7137463092803955," +
-                "              50.991738095691225" +
-                "            ]," +
-                "            [" +
-                "              4.713928699493408," +
-                "              50.99183939174371" +
-                "            ]," +
-                "            [" +
-                "              4.7141969203948975," +
-                "              50.99180562641744" +
-                "            ]," +
-                "            [" +
-                "              4.7149693965911865," +
-                "              50.991947440622646" +
-                "            ]," +
-                "            [" +
-                "              4.7154951095581055," +
-                "              50.99200146496779" +
-                "            ]," +
-                "            [" +
-                "              4.71637487411499," +
-                "              50.99187991010278" +
-                "            ]," +
-                "            [" +
-                "              4.716482162475586," +
-                "              50.99444600078013" +
-                "            ]," +
-                "            [" +
-                "              4.708929061889648," +
-                "              50.99450002221675" +
-                "            ]," +
-                "            [" +
-                "              4.7088465839624405," +
-                "              50.99448820503287" +
-                "            ]," +
-                "            [" +
-                "              4.708844237029552," +
-                "              50.99448546175759" +
-                "            ]" +
-                "          ]" +
-                "        }" +
-                "      }" +
-                "    ]" +
-                "  }"
-    }
-
-    private fun getWaypoints(): String {
-        return "{\n" +
-                "\"features\" : [\n" +
-                "      {\n" +
-                "        \"title\": \"Delhaize Tremelo\",\n" +
-                "        \"description\": \"Gratis blikje frisdrank en snoepreep bij vertoon van een geldige coupon.\",\n" +
-                "        \"coordinates\": {\n" +
-                "          \"longitude\": 4.705204,\n" +
-                "          \"latitude\": 50.990410\n" +
-                "        }\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"title\": \"Bevoorrading 1\",\n" +
-                "        \"description\": \"Hier krijg je een appeltje voor de dorst!\",\n" +
-                "        \"coordinates\": {\n" +
-                "          \"longitude\": 4.708955,\n" +
-                "          \"latitude\": 50.994423\n" +
-                "        }\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"title\": \"Voetbalveld\",\n" +
-                "        \"description\": \"Wachtpost rode kruis\",\n" +
-                "        \"coordinates\": {\n" +
-                "          \"longitude\": 4.702002,\n" +
-                "          \"latitude\": 50.986546\n" +
-                "        }\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  }\n" +
-                "}"
     }
 
 

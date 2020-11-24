@@ -1,6 +1,6 @@
 package com.example.damiantour
 
-import com.example.damiantour.mapBox.Waypoint
+import com.example.damiantour.network.WaypointData
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 
@@ -9,8 +9,8 @@ import com.mapbox.turf.TurfMeasurement
  * finds the closest point in a list and within a 500m
  * http://turfjs.org/docs/#distance
  */
-fun findClosestPoint(clickPoint : Point, listOfWayPoints :List<Waypoint>) : Waypoint? {
-    var closestPoint : Waypoint? = null
+fun findClosestPoint(clickPoint : Point, listOfWayPoints :List<WaypointData>) : WaypointData? {
+    var closestPoint : WaypointData? = null
     var closestDistance : Double = Double.MAX_VALUE
     val size = listOfWayPoints.size
     var counter = 0

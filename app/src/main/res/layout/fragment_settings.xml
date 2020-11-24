@@ -1,28 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wip_text"
-            />
-        <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/nav_bar"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="154dp"
-            android:layout_marginBottom="111dp"
-            android:text="Logout" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderid"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="320dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="160dp"
+                android:stepSize="5.0"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                android:theme="@style/AppTheme2"
+                android:valueFrom="5"
+                android:valueTo="25"
+                app:layout_constraintBottom_toBottomOf="@+id/divider2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/text_batterijbesparing_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/batterijBesparing"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/sliderid"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.58000004" />
+
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_left"
+                android:background="@drawable/primary_button_shape"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_logout"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider4"
+                app:layout_constraintVertical_bias="0.6" />
+
+            <TextView
+                android:id="@+id/text_locatieDelen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_locatieDelen"
+                app:layout_constraintBottom_toTopOf="@+id/sliderid"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_batterijbesparing_header"
+                app:layout_constraintVertical_bias="0.25" />
+
+            <TextView
+                android:id="@+id/text_notificaties_header"
+                android:layout_width="203dp"
+                android:layout_height="21dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_notifications"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/divider3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider2"
+                app:layout_constraintVertical_bias="0.41000003" />
+
+            <TextView
+                android:id="@+id/text_deelnemerscode_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_deelnemerscode"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/divider4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+
+            <TextView
+                android:id="@+id/text_aanUitZetten"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_aanUitZetten"
+                app:layout_constraintBottom_toTopOf="@+id/divider3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_notificaties_header" />
+
+            <TextView
+                android:id="@+id/text_deelnemerscode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_deelnemerscodeGenerated"
+                app:layout_constraintBottom_toTopOf="@+id/divider4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_deelnemerscode_header"
+                app:layout_constraintVertical_bias="0.48000002" />
+
+            <Button
+                android:id="@+id/btn_how_it_work"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/grey_button_shape"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_appWerking"
+                android:textColor="@color/grey"
+                app:layout_constraintBottom_toTopOf="@+id/text_ingelogdAls"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider4" />
+
+            <TextView
+                android:id="@+id/text_ingelogdAls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_ingelogd_als"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider4"
+                app:layout_constraintVertical_bias="0.6" />
+
+            <ImageButton
+                android:id="@+id/button_share_deelnemerscode"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_left"
+                android:background="@drawable/grey_button_shape"
+                android:contentDescription="@string/text_share"
+                android:fontFamily="@font/akkuratpro"
+                android:src="@drawable/ic_share_fill"
+                app:layout_constraintBottom_toTopOf="@+id/divider4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+
+            <TextView
+                android:id="@+id/text_usernaam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_left"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_gebruikersnaam"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btn_how_it_work" />
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:layout_marginEnd="@dimen/margin_left"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintBottom_toTopOf="@+id/divider3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.65999997" />
+
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:layout_marginEnd="@dimen/margin_left"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.49" />
+
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/margin_left"
+                android:layout_marginEnd="@dimen/margin_left"
+                android:layout_marginBottom="200dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+
+            <Switch
+                android:id="@+id/switch_notificaties"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_left"
+                android:textColor="@color/colorPrimary"
+                android:theme="@style/AppTheme"
+                app:layout_constraintBottom_toTopOf="@+id/divider3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_notificaties_header"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_minSeekbar"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"
+                app:layout_constraintEnd_toStartOf="@+id/sliderid"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_locatieDelen" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/text_maxSeekbar"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/sliderid"
+                app:layout_constraintTop_toBottomOf="@+id/text_locatieDelen" />
+
+            <TextView
+                android:id="@+id/text_instellingen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/instellingen"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/text_locatieDelen"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.19999999" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav_bar"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="?android:attr/windowBackground"

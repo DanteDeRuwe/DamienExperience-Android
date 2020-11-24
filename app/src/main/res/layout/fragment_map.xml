@@ -1,6 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+<RelativeLayout
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,7 +15,26 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="50.9944"
         mapbox:mapbox_cameraTargetLng="4.7088"
-        mapbox:mapbox_cameraZoom="11" />
+        mapbox:mapbox_cameraZoom="11">
+
+
+    </com.mapbox.mapboxsdk.maps.MapView>
+
+    <Button
+        android:id="@+id/stop_button"
+        android:layout_width="@dimen/stop_button_width"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/nav_bar"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/primary_button_shape"
+        android:text="@string/stop_button"
+        android:textColor="@color/gray_1"
+        android:textStyle="bold"
+        />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_bar"
@@ -24,3 +45,4 @@
         app:menu="@menu/menu" />
 
 </RelativeLayout>
+</layout>

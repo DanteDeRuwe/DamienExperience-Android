@@ -28,4 +28,40 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="wip_text">Work In Progress</string>
 
+    <!-- start route -->
+    <string name="start_route_success_start">Vous pouvez commencer la promenade \nBonne Chance!</string>
+    <string name="start_route_success_wait">La promenade n \' est pas déjà commmené.\n un instance svp</string>
+    <string name="start_route">Commence</string>
+    <string name="start_route_not_registered_text">Vous n\'ètes pas déjà inscrit. \nClique ici pour s\'inscrire!</string>
+    <string name="inschrijven">inscrivez moi</string>
+    <string name="opnieuwProberen">réessayer la connexion</string>
+    <string name="call_organisation">appeler l\'organisation</string>
+    <string name="bel_112">appeler 112</string>
+    <string name="open_112_app">Ouvrez l\'appli 112</string>
+    <string name="organisation_phonenumber">+32 123 456 789</string>
+    <string name="_112_app_name">be.Nextel.EmergencyApp112</string>
+
+    <!-- SOS fragment -->
+    <string name="sos_phonenumber">112</string>
+    <string name="days">JOURS</string>
+    <string name="hours">HEURES</string>
+    <string name="minutes">MINUTES</string>
+    <string name="nullNumber">0</string>
+    <string name="seconds">SECONDES</string>
+    <string name="damiaan_logo_start_route">description_damiaan_logo_start_route</string>
+
+    <!-- stop route -->
+    <string name="stop_button">ARRèTE</string>
+    <string name="stop_dialog_title">Arrète</string>
+    <string name="stop_dialog_message">ètes vous sûr de arrèter?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="speed_unit">km/h</string>
+    <string name="distance_unit">km</string>
+    <string name="congratulations">congratulations</string>
+    <string name="je_hebt_een_totaal_van">vous avez parcouru</string>
+    <string name="gewandeld">au total.</string>
+    <string name="je_gemiddelde_snelheid_was">votre vitesse moyenne était</string>
+    <string name="go_back_button">retourner</string>
+
 </resources>

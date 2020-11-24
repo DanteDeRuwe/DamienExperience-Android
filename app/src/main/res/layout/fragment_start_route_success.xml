@@ -150,6 +150,8 @@
             app:layout_constraintStart_toEndOf="@+id/minutesTV"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.996" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </layout>

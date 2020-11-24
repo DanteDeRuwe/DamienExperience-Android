@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="stoppedRouteFragmentViewModel"
+            type="com.example.damiantour.stopRoute.StoppedRouteViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/damiaan_logo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/damiaan_logo_login_description"
+            android:src="@drawable/damiaantours"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/congrats_textview"
+            style="@style/title_style"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sharp_grotesque_medium_20"
+            app:layout_constraintTop_toBottomOf="@+id/damiaan_logo" />
+
+        <LinearLayout
+            android:id="@+id/distance_walked_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/congrats_textview">
+
+            <TextView
+                android:id="@+id/completed_textview"
+                style="@style/stop_route_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/akkuratpro"
+                android:text="@string/je_hebt_een_totaal_van" />
+
+            <TextView
+                android:id="@+id/distance_textview"
+                style="@style/title_style"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/walked_textview"
+                style="@style/stop_route_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/gewandeld" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/average_speed_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/distance_walked_layout">
+
+            <TextView
+                android:id="@+id/average_speed_textview"
+                style="@style/stop_route_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/je_gemiddelde_snelheid_was" />
+
+            <TextView
+                android:id="@+id/speed_textview"
+                style="@style/title_style"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/go_back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/primary_button_shape"
+            android:fontFamily="@font/akkuratpro"
+            android:text="@string/go_back_button"
+            android:textAlignment="center"
+            android:textColor="@color/gray_1"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/average_speed_layout" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

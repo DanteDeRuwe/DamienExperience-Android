@@ -21,7 +21,10 @@ data class Tuple(
     /**
      *     get the tuple in DoubleArray form
      */
-    fun getTupleArray(): DoubleArray {
-        return doubleArrayOf(longitude, latitude)
+    fun getTuple(): ArrayList<Double> {
+        val tuple = ArrayList<Double>()
+        tuple.add(longitude)
+        tuple.add(latitude)
+        return tuple
     }
 }

@@ -33,10 +33,13 @@ class LoginFragment : Fragment() {
 
     private val apiService : DamianApiService = DamianApiService.create()
 
+    /**
+     * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-        if(preferences.getString("TOKEN", null).toString() != null){
+        if(preferences.getString("TOKEN", null) != null){
             lifecycleScope.launch {
                 navigateToStartRoute()
             }
@@ -91,11 +94,11 @@ class LoginFragment : Fragment() {
     private suspend fun sendLoginRequest(loginData: LoginData){
         try {
             //Execute API Login request
-            val token =  apiService.login(loginData)
+            val token =  "Bearer " + apiService.login(loginData)
 
             //Save token for later use.
             //val preferences : SharedPreferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-            preferences.edit().putString("TOKEN", "Bearer " + token).apply()
+            preferences.edit().putString("TOKEN",token).apply()
 
             //Code to request JWT token
             /*
@@ -103,35 +106,48 @@ class LoginFragment : Fragment() {
             val JWTtoken : String = preferences.getString("TOKEN", null).toString()
             */
 
+            getUserData(token)
             //Navigate to map
             navigateToStartRoute()
         } catch (e: Exception){
 
-            binding.loginErrorfield.text = getString(R.string.login_error)
-            binding.loginErrorfield.visibility = View.VISIBLE
+
         }
     }
 
+    /**
+     * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+     */
     private suspend fun navigateToStartRoute(){
         val token = preferences.getString("TOKEN", null).toString()
-
-        try{
-            val hasRegistration = apiService.isRegistered(token)
-            var action = LoginFragmentDirections.actionLoginFragmentToStartRouteNotRegistered()
-            if(hasRegistration){
-                 action = LoginFragmentDirections.actionLoginFragmentToStartRouteSuccess()
+        if(token!=null){
+            try{
+                val hasRegistration = apiService.isRegistered(token)
+                var action = LoginFragmentDirections.actionLoginFragmentToStartRouteNotRegistered()
+                if(hasRegistration){
+                    action = LoginFragmentDirections.actionLoginFragmentToStartRouteSuccess()
+                }
+                view?.findNavController()?.navigate(action)
+            }catch(e : Exception){
+                println(e)
             }
-            view?.findNavController()?.navigate(action)
-        }catch(e : Exception){
-            println(e)
         }
     }
 
+    /**
+     * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
+     */
     private fun navigateOnNoConnection(){
         val hasConnection = Connection.isOnline(requireContext())
         if(!hasConnection){
             findNavController().navigate(R.id.action_loginFragment_to_noConnection)
         }
+    }
+
+    private suspend fun getUserData(token: String){
+        val profiledata = apiService.getProfile(token)
+        val fullname = profiledata.firstName + " " + profiledata.lastName
+        preferences.edit().putString("fullName",fullname).apply()
     }
 
 }
