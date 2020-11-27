@@ -42,7 +42,7 @@ interface DamianApiService {
             @Header("Authorization") token : String
     ): String
 
-    @GET("route/{routeName}")
+    @GET("route/GetRouteByName/{routeName}")
     suspend fun getRoute(
         @Header("Authorization") token: String,
         @Path("routeName") routeName : String
