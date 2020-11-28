@@ -20,7 +20,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.damiantour.mapBox.Tuple
+import androidx.room.TypeConverters
+import com.example.damiantour.database.dao.LocationDatabaseDao
+import com.example.damiantour.database.dao.TupleDatabaseDao
+import com.example.damiantour.database.dao.UniversalDao
+import com.example.damiantour.database.dao.WaypointDatabaseDao
+import com.example.damiantour.mapBox.model.*
+import com.example.damiantour.network.model.LanguagesData
+import com.example.damiantour.network.model.LanguagesTextData
+import com.example.damiantour.network.model.WaypointData
 
 /**
  * A database that stores SleepNight information.
@@ -31,14 +39,17 @@ import com.example.damiantour.mapBox.Tuple
  *
  * with every update of the database up the version number
  */
-@Database(entities = [Tuple::class], version = 2, exportSchema = false)
+@Database(entities = [Tuple::class, Route::class,LocationData::class, Waypoint::class], version = 7, exportSchema = true)
+@TypeConverters(MapTypeConverter::class)
 abstract class DamianDatabase : RoomDatabase() {
 
     /**
      * Connects the database to the DAO.
      */
     abstract val tupleDatabaseDao : TupleDatabaseDao
-
+    abstract val locationDatabaseDao : LocationDatabaseDao
+    abstract val waypointDatabaseDao : WaypointDatabaseDao
+    abstract val universalDao: UniversalDao
     /**
      * Define a companion object, this allows us to add functions on the SleepDatabase class.
      *
@@ -88,7 +99,7 @@ abstract class DamianDatabase : RoomDatabase() {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
                         DamianDatabase::class.java,
-                        "tuple_database"
+                        "damian_database"
                     )
                         // Wipes and rebuilds instead of migrating if no Migration object.
                         // Migration is not part of this lesson. You can learn more about

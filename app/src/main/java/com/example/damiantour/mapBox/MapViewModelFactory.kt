@@ -3,7 +3,8 @@ package com.example.damiantour.mapBox
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.damiantour.database.TupleDatabaseDao
+import com.example.damiantour.database.dao.TupleDatabaseDao
+import com.example.damiantour.database.dao.WaypointDatabaseDao
 
 /**
  * This is pretty much boiler plate code for a ViewModel Factory.
@@ -11,13 +12,14 @@ import com.example.damiantour.database.TupleDatabaseDao
  * Provides the TupleDatabaseDao and context to the ViewModel.
  */
 class MapViewModelFactory(
-    private val dataSource: TupleDatabaseDao,
-    private val application: Application
+        private val dataSource: TupleDatabaseDao,
+        private val waypointDataSource : WaypointDatabaseDao,
+        private val application: Application
 ) : ViewModelProvider.Factory {
     @Suppress("unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MapViewModel::class.java)) {
-            return MapViewModel(dataSource, application) as T
+            return MapViewModel(dataSource,waypointDataSource, application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

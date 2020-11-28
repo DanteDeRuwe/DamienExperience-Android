@@ -24,10 +24,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
+import com.example.damiantour.mapBox.service.LocationService
+import com.example.damiantour.mapBox.service.LocationServiceBinder
 import com.example.damiantour.network.DamianApiService
-import com.example.damiantour.network.WaypointData
+import com.example.damiantour.network.model.WaypointData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -143,8 +146,11 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     ): View? {
         //get viewmodel from factory
         val application = requireNotNull(this.activity).application
-        val dataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
-        val viewModelFactory = MapViewModelFactory(dataSource, application)
+
+        val tupleDataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
+        val waypointDataSource = DamianDatabase.getInstance(application).waypointDatabaseDao
+
+        val viewModelFactory = MapViewModelFactory(tupleDataSource,waypointDataSource, application)
         mapViewModel = ViewModelProvider(this, viewModelFactory).get(MapViewModel::class.java)
         // inflate view
         val root = inflater.inflate(R.layout.fragment_map, container, false)
@@ -172,10 +178,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 drawWalkedLine()
             }
         })
-        mapViewModel.locations.observe(viewLifecycleOwner,  { locationList ->
+        mapViewModel.locations.observe(viewLifecycleOwner,  {
             drawWalkedLine()
         })
-        mapViewModel.waypoints.observe(viewLifecycleOwner, { waypointsList ->
+        mapViewModel.waypoints.observe(viewLifecycleOwner, {
             drawWaypointsLayer()
         })
         /**
@@ -273,10 +279,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private fun drawWaypointsLayer() {
         val symbolLayerIconFeatureList = ArrayList<Feature>()
         //Must be a int
-        val listSize = mapViewModel.listSize.value
         val list = mapViewModel.waypoints.value!!
         //Loops over all the coordinates
-        for ((counter, wp) in list.withIndex()) {
+        for (wp in list) {
             //get properties
             println(wp)
                 //get coords
@@ -367,8 +372,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      */
     private fun addMarkersOnMap(wp: WaypointData) {
         //needs to change according to system lang
-        var title = ""
-        var description = ""
+        val title : String
+        val description : String
         when (Locale.getDefault().language) {
             "nl" ->{ title = wp.languagesText.title.nl
                     description = wp.languagesText.description.nl}
@@ -551,10 +556,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 .setTitle(R.string.stop_dialog_title)
                 .setMessage(R.string.stop_dialog_message)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(R.string.yes, DialogInterface.OnClickListener { dialog, id ->
+                .setPositiveButton(R.string.yes) { _, _ ->
                     // FIRE ZE MISSILES!
                     stopTourConfirmed()
-                })
+                }
                 .setNegativeButton(R.string.no, null).show()
     }
 

@@ -1,4 +1,4 @@
-package com.example.damiantour.mapBox
+package com.example.damiantour.mapBox.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "tuple_table")
 data class Tuple(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "tuple_id")
     var tupleId: Long = 0L,
 
     @ColumnInfo(name = "longitude")

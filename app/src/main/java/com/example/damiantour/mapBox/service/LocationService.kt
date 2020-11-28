@@ -1,4 +1,4 @@
-package com.example.damiantour.mapBox
+package com.example.damiantour.mapBox.service
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -16,7 +16,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.example.damiantour.database.DamianDatabase
-import com.example.damiantour.database.TupleDatabaseDao
+import com.example.damiantour.database.dao.TupleDatabaseDao
+import com.example.damiantour.mapBox.LocationUtils
+import com.example.damiantour.mapBox.model.Tuple
 import com.example.damiantour.network.DamianApiService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -25,7 +27,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.*
-import org.json.JSONArray
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -158,7 +159,7 @@ class LocationService : Service() {
             }
         }
         if (fusedLocationProviderClient == null) {
-            locationUtils.start()
+            LocationUtils.start()
             fusedLocationProviderClient =
                     getFusedLocationProviderClient(context)
         }

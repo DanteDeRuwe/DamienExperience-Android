@@ -2,20 +2,24 @@ package com.example.damiantour.mapBox
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.damiantour.database.TupleDatabaseDao
+import com.example.damiantour.database.dao.TupleDatabaseDao
+import com.example.damiantour.database.dao.WaypointDatabaseDao
 import com.example.damiantour.findClosestPoint
-import com.example.damiantour.network.RouteData
-import com.example.damiantour.network.WaypointData
+import com.example.damiantour.mapBox.model.Tuple
+import com.example.damiantour.mapWaypointDataToWaypoint
+import com.example.damiantour.network.model.RouteData
+import com.example.damiantour.network.model.WaypointData
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /***
  * @author Simon Bettens and Jordy Van Kerkvoorde
  */
-class MapViewModel(private val database: TupleDatabaseDao, application: Application) :
+class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao, private val waypointDatabaseDao: WaypointDatabaseDao, application: Application) :
         AndroidViewModel(application) {
     lateinit var mapBoxMap: MapboxMap
     private var locationUtils: LocationUtils = LocationUtils
@@ -41,7 +45,7 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         get() = _tempLocations
 
     //1 min locations (6 coordstuples every 1 min)
-    private var _locations = database.getAllTuplesLiveData()
+    private var _locations = tupleDatabaseDao.getAllTuplesLiveData()
     val locations: LiveData<List<Tuple>>
         get() = _locations
 
@@ -109,14 +113,23 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
         addWaypoints(routeData.waypoints)
         //sets the value
         _routeCoordinates = MutableLiveData(routeCoordinatesList)
+
     }
 
     /**
      * @author Jordy Van Kerkvoorde
      */
     private fun addWaypoints(waypoints: List<WaypointData>) {
-        _listSize.value = waypoints.size
-        _waypoints = MutableLiveData(waypoints)
+        _listSize.postValue(waypoints.size)
+        GlobalScope.launch(Dispatchers.IO) {
+            waypointDatabaseDao.clear()
+            for (waypointdata in waypoints) {
+                val waypoint = mapWaypointDataToWaypoint(waypointdata)
+                println(waypoint)
+                waypointDatabaseDao.insert(waypoint)
+            }
+            _waypoints = MutableLiveData(waypoints)
+        }
     }
 
     /**
@@ -146,7 +159,7 @@ class MapViewModel(private val database: TupleDatabaseDao, application: Applicat
      * clear both the local database
      */
     suspend fun deleteDatabaseLocations() {
-        database.clear()
+        tupleDatabaseDao.clear()
     }
 
     /**
