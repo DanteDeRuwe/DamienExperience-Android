@@ -281,7 +281,7 @@ class LocationService : Service() {
                 postLocation()
             }
             time += 1
-            val sendWhen = 0 //preferences.getInt("send_route_call_api", 5)
+            val sendWhen = preferences.getInt("send_route_call_api", 5)
             if (time == sendWhen) {
                 updateWalkApi()
                 time = 0
