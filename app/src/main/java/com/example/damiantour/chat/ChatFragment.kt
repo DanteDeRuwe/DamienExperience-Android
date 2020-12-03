@@ -8,14 +8,17 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
+import com.github.nkzawa.socketio.client.IO
+import com.github.nkzawa.socketio.client.Socket
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 /**
- * A simple [Fragment] subclass.
- * Use the [ChatFragment.newInstance] factory method to
- * create an instance of this fragment.
+* @author Dante De Ruwe and Jordy Van Kerkvoorde
  */
 class ChatFragment : Fragment() {
+
+    private val socket : Socket = IO.socket(getString(R.string.chatSocketURI))
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -24,6 +27,9 @@ class ChatFragment : Fragment() {
         val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
+
+        socket.connect() //TODO
+
         return root
     }
 }

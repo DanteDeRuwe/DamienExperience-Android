@@ -64,6 +64,7 @@
     <string name="gewandeld">gewandeld.</string>
     <string name="je_gemiddelde_snelheid_was">Je gemiddelde snelheid was</string>
     <string name="go_back_button">Ga Terug</string>
+    <string name="chatSocketURI">https://damienexperience-chat.herokuapp.com/</string>
 
 
 </resources>
