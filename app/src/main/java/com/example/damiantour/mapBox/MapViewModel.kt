@@ -2,9 +2,12 @@ package com.example.damiantour.mapBox
 
 import android.app.Application
 import androidx.lifecycle.*
+import com.example.damiantour.database.dao.LocationDatabaseDao
+import com.example.damiantour.database.dao.RouteDatabaseDao
 import com.example.damiantour.database.dao.TupleDatabaseDao
 import com.example.damiantour.database.dao.WaypointDatabaseDao
 import com.example.damiantour.findClosestPoint
+import com.example.damiantour.mapBox.model.LocationData
 import com.example.damiantour.mapBox.model.Tuple
 import com.example.damiantour.mapWaypointDataToWaypoint
 import com.example.damiantour.network.model.RouteData
@@ -19,8 +22,13 @@ import kotlinx.coroutines.launch
 /***
  * @author Simon Bettens and Jordy Van Kerkvoorde
  */
-class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao, private val waypointDatabaseDao: WaypointDatabaseDao, application: Application) :
+class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
+                   private val waypointDatabaseDao: WaypointDatabaseDao,
+                   private val locationDatabaseDao: LocationDatabaseDao,
+                   private val routeDatabaseDao: RouteDatabaseDao,
+                   application: Application) :
         AndroidViewModel(application) {
+
     lateinit var mapBoxMap: MapboxMap
     private var locationUtils: LocationUtils = LocationUtils
 
@@ -41,12 +49,12 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao, private val w
 
     //List of 30 records (coordstuple every 2 seconds)
     private var _tempLocations = locationUtils.getTempLocationList()
-    val tempLocations: LiveData<MutableList<Tuple>>
+    val tempLocations: LiveData<MutableList<LocationData>>
         get() = _tempLocations
 
     //1 min locations (6 coordstuples every 1 min)
-    private var _locations = tupleDatabaseDao.getAllTuplesLiveData()
-    val locations: LiveData<List<Tuple>>
+    private var _locations = locationDatabaseDao.getAllLocationsLiveData()
+    val locations: LiveData<List<LocationData>>
         get() = _locations
 
     /**
@@ -56,7 +64,7 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao, private val w
      * needs to check if the list of location of every 1 min is initialized and that it has values
      * needs to check if the list of templocation of every 2 sec is initialized and that it has values
      */
-    private fun getMixListLocations(): List<Tuple>? {
+    private fun getMixListLocations(): List<LocationData>? {
         val listTempLoc = _tempLocations.value
         val listLoc = _locations.value
         if (listLoc != null && listLoc.isNotEmpty()) {
@@ -91,7 +99,7 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao, private val w
     }
 
     /**
-     * @author Simon
+     * @author Simon & Ruben
      * adds the route
      * gets all the coords of the route
      * sets the waypoints
@@ -159,7 +167,7 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao, private val w
      * clear both the local database
      */
     suspend fun deleteDatabaseLocations() {
-        tupleDatabaseDao.clear()
+        locationDatabaseDao.clear()
     }
 
     /**

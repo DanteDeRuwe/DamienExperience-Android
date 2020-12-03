@@ -16,8 +16,10 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.example.damiantour.database.DamianDatabase
+import com.example.damiantour.database.dao.LocationDatabaseDao
 import com.example.damiantour.database.dao.TupleDatabaseDao
 import com.example.damiantour.mapBox.LocationUtils
+import com.example.damiantour.mapBox.model.LocationData
 import com.example.damiantour.mapBox.model.Tuple
 import com.example.damiantour.network.DamianApiService
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -54,7 +56,7 @@ class LocationService : Service() {
     private var howManyItemsToSend: Int = 0
 
     //database connection
-    private var dataSource: TupleDatabaseDao? = null
+    private var dataSource: LocationDatabaseDao? = null
 
     //the preferences
     private lateinit var preferences: SharedPreferences
@@ -154,7 +156,7 @@ class LocationService : Service() {
         val context: Context = this
         if (dataSource == null) {
             GlobalScope.launch {
-                dataSource = DamianDatabase.getInstance(context).tupleDatabaseDao
+                dataSource = DamianDatabase.getInstance(context).locationDatabaseDao
                 dataSource?.clear()
             }
         }
@@ -243,7 +245,7 @@ class LocationService : Service() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun getTempLocationList(): MutableList<Tuple>? {
+    private fun getTempLocationList(): MutableList<LocationData>? {
         return LocationUtils.getTempLocationList().value
     }
 
@@ -304,7 +306,7 @@ class LocationService : Service() {
         var counter = 0
         while (counter < tempLocSize) {
             val tempLoc = tempLocations[counter]
-            val loc = Tuple(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
+            val loc = LocationData(longitude = tempLoc.longitude, latitude = tempLoc.latitude)
             dataSource?.insert(loc)
             counter += shift
             howManyItemsToSend += 1
@@ -315,7 +317,7 @@ class LocationService : Service() {
     suspend fun updateWalkApi() {
         val token = preferences.getString("TOKEN", "")!!
         GlobalScope.launch {
-            val tupelsList: List<Tuple> = dataSource?.getAllTuples()!!
+            val tupelsList: List<LocationData> = dataSource?.getAllLocations()!!
             var size = tupelsList.size
             println("size $size")
             val startIndex = size - howManyItemsToSend
@@ -325,7 +327,7 @@ class LocationService : Service() {
             for (x in startIndex..size) {
                 println("x $x")
                 val tuple = tupelsList[x]
-                allTuples.add(tuple.getTuple())
+                allTuples.add(tuple.getLocationTuple())
             }
             try {
                 apiService.updateWalk(token, allTuples)

@@ -21,10 +21,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.damiantour.database.dao.LocationDatabaseDao
-import com.example.damiantour.database.dao.TupleDatabaseDao
-import com.example.damiantour.database.dao.UniversalDao
-import com.example.damiantour.database.dao.WaypointDatabaseDao
+import com.example.damiantour.database.dao.*
 import com.example.damiantour.mapBox.model.*
 import com.example.damiantour.network.model.LanguagesData
 import com.example.damiantour.network.model.LanguagesTextData
@@ -37,9 +34,10 @@ import com.example.damiantour.network.model.WaypointData
  * This pattern is pretty much the same for any database,
  * so you can reuse it.
  *
+ * IMPORTANT DISCLAIMER:
  * with every update of the database up the version number
  */
-@Database(entities = [Tuple::class, Route::class,LocationData::class, Waypoint::class], version = 7, exportSchema = true)
+@Database(entities = [Tuple::class, Route::class,LocationData::class, Waypoint::class], version = 8, exportSchema = true)   // UP THE DB VERSION NUMBER
 @TypeConverters(MapTypeConverter::class)
 abstract class DamianDatabase : RoomDatabase() {
 
@@ -50,6 +48,7 @@ abstract class DamianDatabase : RoomDatabase() {
     abstract val locationDatabaseDao : LocationDatabaseDao
     abstract val waypointDatabaseDao : WaypointDatabaseDao
     abstract val universalDao: UniversalDao
+    abstract val routeDatabaseDao: RouteDatabaseDao
     /**
      * Define a companion object, this allows us to add functions on the SleepDatabase class.
      *
@@ -59,6 +58,8 @@ abstract class DamianDatabase : RoomDatabase() {
     companion object {
         /**
          * INSTANCE will keep a reference to any database returned via getInstance.
+         *
+         * merry christmas <3
          *
          * This will help us avoid repeatedly initializing the database, which is expensive.
          *

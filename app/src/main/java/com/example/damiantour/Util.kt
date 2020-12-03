@@ -1,7 +1,10 @@
 package com.example.damiantour
 
 import com.example.damiantour.mapBox.model.LanguagesText
+import com.example.damiantour.mapBox.model.Route
+import com.example.damiantour.mapBox.model.Tuple
 import com.example.damiantour.mapBox.model.Waypoint
+import com.example.damiantour.network.model.RouteData
 import com.example.damiantour.network.model.WaypointData
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
@@ -48,4 +51,12 @@ fun mapWaypointDataToWaypoint(waypointdata: WaypointData) : Waypoint{
     descs["fr"] = waypointdata.languagesText.description.fr
     val languagesText = LanguagesText(title = titles ,description = descs)
     return Waypoint(waypointdata.id,waypointdata.longitude,waypointdata.latitude,languagesText)
+}
+
+fun getCoordinatesFromRoute(routeData: RouteData) : List<Tuple>{
+    val tupleList = ArrayList<Tuple>()
+    routeData.path.coordinates.forEach{ list ->
+        tupleList.add(Tuple(longitude = list[0], latitude = list[1]))
+    }
+    return tupleList
 }

@@ -149,8 +149,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
 
         val tupleDataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
         val waypointDataSource = DamianDatabase.getInstance(application).waypointDatabaseDao
+        val locationDataSource = DamianDatabase.getInstance(application).locationDatabaseDao
+        val routeDataSource = DamianDatabase.getInstance(application).routeDatabaseDao
 
-        val viewModelFactory = MapViewModelFactory(tupleDataSource,waypointDataSource, application)
+        val viewModelFactory = MapViewModelFactory(tupleDataSource,waypointDataSource, locationDataSource, routeDataSource, application)
         mapViewModel = ViewModelProvider(this, viewModelFactory).get(MapViewModel::class.java)
         // inflate view
         val root = inflater.inflate(R.layout.fragment_map, container, false)
