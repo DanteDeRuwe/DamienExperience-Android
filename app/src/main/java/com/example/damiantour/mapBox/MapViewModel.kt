@@ -9,6 +9,8 @@ import com.example.damiantour.database.dao.WaypointDatabaseDao
 import com.example.damiantour.findClosestPoint
 import com.example.damiantour.mapBox.model.LocationData
 import com.example.damiantour.mapBox.model.Tuple
+import com.example.damiantour.mapBox.model.Waypoint
+import com.example.damiantour.mapRouteDataToRoute
 import com.example.damiantour.mapWaypointDataToWaypoint
 import com.example.damiantour.network.model.RouteData
 import com.example.damiantour.network.model.WaypointData
@@ -33,18 +35,18 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
     private var locationUtils: LocationUtils = LocationUtils
 
     // coords to show the line
-    private var _routeCoordinates = MutableLiveData<List<Point>>()
-    val routeCoordinates: LiveData<List<Point>>
+    private var _routeCoordinates = tupleDatabaseDao.getAllTuplesLiveData()
+    val routeCoordinates: LiveData<List<Tuple>>
         get() = _routeCoordinates
 
     //waypoints on the line
-    private var _waypoints = MutableLiveData<List<WaypointData>>()
-    val waypoints: LiveData<List<WaypointData>>
+    private var _waypoints = waypointDatabaseDao.getAllWaypointDataLiveData()
+    val waypoints: LiveData<List<Waypoint>>
         get() = _waypoints
 
     //selected waypoint
-    private var _waypoint = MutableLiveData<WaypointData>()
-    val waypoint: LiveData<WaypointData>
+    private var _waypoint = MutableLiveData<Waypoint>()
+    val waypoint: LiveData<Waypoint>
         get() = _waypoint
 
     //List of 30 records (coordstuple every 2 seconds)
@@ -87,6 +89,17 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
         }
     }
 
+    fun getRoute() : List<Point>{
+        val tupleList = routeCoordinates.value
+        val pointList = ArrayList<Point>()
+        if(!tupleList.isNullOrEmpty()) {
+            for (tuple in tupleList) {
+                pointList.add(Point.fromLngLat(tuple.longitude, tuple.latitude))
+            }
+        }
+        return pointList
+    }
+
     //size of the list
     private var _listSize = MutableLiveData<Int>()
     val listSize: LiveData<Int>
@@ -105,7 +118,9 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
      * sets the waypoints
      */
     fun addPath(routeData: RouteData) {
+        insertRouteInDatabase(routeData)
         val routeCoordinatesList = ArrayList<Point>()
+        val tupleList = ArrayList<Tuple>()
         val coordsList = routeData.path.coordinates
         val length = coordsList.size
         var counter = 0
@@ -115,13 +130,30 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
             val lon = tupel[0]
             val lat = tupel[1]
             //adds coordinates to the route
+            tupleList.add(Tuple(longitude = lon,latitude = lat))
             routeCoordinatesList.add(Point.fromLngLat(lon, lat))
             counter++
         }
+        insertRouteTupleInDatabase(tupleList)
         addWaypoints(routeData.waypoints)
-        //sets the value
-        _routeCoordinates = MutableLiveData(routeCoordinatesList)
+    }
 
+    private fun insertRouteTupleInDatabase(tuples : List<Tuple>){
+
+        GlobalScope.launch {
+            tupleDatabaseDao.clear()
+            for (tuple in tuples){
+                tupleDatabaseDao.insert(tuple)
+            }
+        }
+    }
+
+    private fun insertRouteInDatabase(routeData: RouteData) {
+        GlobalScope.launch(Dispatchers.IO) {
+            routeDatabaseDao.clear()
+            val route = mapRouteDataToRoute(routeData)
+            routeDatabaseDao.insert(route)
+        }
     }
 
     /**
@@ -136,7 +168,6 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
                 println(waypoint)
                 waypointDatabaseDao.insert(waypoint)
             }
-            _waypoints = MutableLiveData(waypoints)
         }
     }
 
@@ -162,6 +193,15 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
         }
     }
 
+    /**
+     * @author Simon Bettens
+     * checks if there is a route present
+     */
+    suspend fun hasNoRoute() : Boolean{
+        // niet verbeteren
+        //dit moet gebeuren
+        return routeDatabaseDao.getRoute() == null
+    }
     /**
      * @author Simon
      * clear both the local database
@@ -189,6 +229,7 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
         }
         return walkedCoordinatesList
     }
+
 
 
 }

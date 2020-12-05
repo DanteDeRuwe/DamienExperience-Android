@@ -18,5 +18,8 @@ interface RouteDatabaseDao {
     suspend fun delete(route: Route)
 
     @Query("select * from route_table limit 1")
-    fun getRoute(): Route
+    suspend fun getRoute(): Route
+
+    @Query("DELETE FROM route_table")
+    suspend fun clear()
 }

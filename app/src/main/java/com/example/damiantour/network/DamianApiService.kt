@@ -2,6 +2,7 @@ package com.example.damiantour.network
 
 import com.example.damiantour.network.model.LoginData
 import com.example.damiantour.network.model.ProfileData
+import com.example.damiantour.network.model.RegistrationData
 import com.example.damiantour.network.model.RouteData
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.FromJson
@@ -38,11 +39,23 @@ interface DamianApiService {
             @Header("Authorization") token : String
     ): String
 
-    @GET("route/GetRouteByName/{routeName}")
-    suspend fun getRoute(
+    @GET("route/getroutebyname/{routeName}")
+    suspend fun getRouteByName(
         @Header("Authorization") token: String,
         @Path("routeName") routeName : String
     ) : RouteData
+
+    @GET("route/getroutebyid/{routeId}")
+    suspend fun getRouteById(
+            @Header("Authorization") token: String,
+            @Path("routeId") routeId : String
+    ) : RouteData
+
+
+    @GET("routeregistration/getlast")
+    suspend fun getLastRegistration(
+            @Header("Authorization") token: String
+    ) : RegistrationData
 
     @GET("routeregistration/checkcurrentregistered")
     suspend fun isRegistered(

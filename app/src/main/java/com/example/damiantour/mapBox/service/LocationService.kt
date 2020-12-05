@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.database.dao.LocationDatabaseDao
+import com.example.damiantour.database.dao.RouteDatabaseDao
 import com.example.damiantour.database.dao.TupleDatabaseDao
 import com.example.damiantour.mapBox.LocationUtils
 import com.example.damiantour.mapBox.model.LocationData
@@ -38,11 +39,6 @@ import java.util.concurrent.TimeUnit
  */
 
 class LocationService : Service() {
-    //name of the broadcast
-    private val MY_ACTION: String = "NewLocationRecorded"
-
-    //singleton class to connect with the viewmodel
-    private var locationUtils: LocationUtils = LocationUtils
     private val binder = LocationServiceBinder(this)
     private var isServiceStarted: Boolean = false
 
@@ -57,7 +53,7 @@ class LocationService : Service() {
 
     //database connection
     private var dataSource: LocationDatabaseDao? = null
-
+    private var routeDataSource: RouteDatabaseDao? = null
     //the preferences
     private lateinit var preferences: SharedPreferences
 
@@ -65,26 +61,25 @@ class LocationService : Service() {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
 
     //the location request
-    private var locationRequest: LocationRequest? = null
+    //private var locationRequest: LocationRequest? = null
 
     //callback that is called on locationchange
-    private var locationCallback: LocationCallback? = null
+    //private var locationCallback: LocationCallback? = null
 
-    private var lm : LocationManager? = null
+    //private var lm : LocationManager? = null
 
     private var job: Job? = null
     private var cancellationSource: CancellationTokenSource? = null
 
 
     override fun onCreate() {
-        Log.i("LocationService", "onCreate")
+        //Log.i("LocationService", "onCreate")
         super.onCreate()
         preferences = getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        Log.i("LocationService", "onStartCommand")
         if (intent != null) {
             val action = intent.action
             println("using an intent with action $action")
@@ -135,7 +130,6 @@ class LocationService : Service() {
     /**
      * mehod that inits all properties on first start else does nothing
      */
-
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingPermission")
     fun startService() {
@@ -157,6 +151,7 @@ class LocationService : Service() {
         if (dataSource == null) {
             GlobalScope.launch {
                 dataSource = DamianDatabase.getInstance(context).locationDatabaseDao
+                routeDataSource = DamianDatabase.getInstance(context).routeDatabaseDao
                 dataSource?.clear()
             }
         }
@@ -164,7 +159,9 @@ class LocationService : Service() {
             LocationUtils.start()
             fusedLocationProviderClient =
                     getFusedLocationProviderClient(context)
+
         }
+        /*
         if (locationRequest == null) {
             locationRequest = LocationRequest().apply {
                 // Sets the desired interval for active location updates. This interval is inexact. You
@@ -216,7 +213,7 @@ class LocationService : Service() {
 
         fusedLocationProviderClient?.requestLocationUpdates(
                 locationRequest,locationCallback, Looper.myLooper()
-        )
+        )*/
         job = GlobalScope.launch {
             writeLocationCoRoutine()
         }
@@ -224,17 +221,19 @@ class LocationService : Service() {
 
     fun stopService() {
         println("Stopping the foreground service")
-        Toast.makeText(this, "Service stopping", Toast.LENGTH_SHORT).show()
         try {
-
             wakeLock?.let {
                 if (it.isHeld) {
                     it.release()
                 }
             }
+            GlobalScope.launch(Dispatchers.IO) {
+                routeDataSource?.clear()
+                deleteDatabaseLocations()
+            }
             cancellationSource?.cancel()
             stopForeground(true)
-            fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
+            //fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
             job?.cancel("Stop record location")
             stopSelf()
         } catch (e: Exception) {
@@ -260,16 +259,27 @@ class LocationService : Service() {
 
     var timer: Boolean = false
 
+    /**
+     * @author Simon Bettens
+     *
+     * gets location every 2 seconds needs to be accurate
+     * saves location in temp list
+     *
+     * after 1 minute has passed the temp location list will be flattend to only fit 6 locations
+     *
+     * will send the locations to backend when the user decides
+     */
     @SuppressLint("MissingPermission")
     private suspend fun writeLocationCoRoutine() {
         var time = 0
         timer = true
+        delay(5000)
         while (timer) {
             var counter = 0
             while (counter <= 60) {
                 println("How many secs passed : $counter")
                 delay(2000)
-                fusedLocationProviderClient?.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, cancellationSource?.token)?.addOnSuccessListener {
+                fusedLocationProviderClient?.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationSource?.token)?.addOnSuccessListener {
                     val loc = it
                     println("${loc.latitude},${loc.longitude}")
                     postNewLocation(loc)
@@ -299,7 +309,7 @@ class LocationService : Service() {
      * this is than saved in the database and later on send to the backend
      * needs 6 records to have a nice forming line on the screen (angular and android)
      */
-    suspend fun postLocation() {
+    private suspend fun postLocation() {
         val tempLocations = getTempLocationList()!!
         val tempLocSize = tempLocationsSize()
         val shift = tempLocSize / 6
@@ -314,6 +324,11 @@ class LocationService : Service() {
         resetCurrentTempLocations()
     }
 
+    /**
+     * @author Simon Bettens
+     *
+     * will send the locations to the backend
+     */
     suspend fun updateWalkApi() {
         val token = preferences.getString("TOKEN", "")!!
         GlobalScope.launch {
@@ -323,18 +338,20 @@ class LocationService : Service() {
             val startIndex = size - howManyItemsToSend
             println("startIndex $startIndex")
             val allTuples = ArrayList<ArrayList<Double>>()
-            size = size - 1
-            for (x in startIndex..size) {
-                println("x $x")
-                val tuple = tupelsList[x]
-                allTuples.add(tuple.getLocationTuple())
+            size -= 1
+            if(startIndex>0){
+                for (x in startIndex..size) {
+                    println("x $x")
+                    val tuple = tupelsList[x]
+                    allTuples.add(tuple.getLocationTuple())
+                }
+                try {
+                    apiService.updateWalk(token, allTuples)
+                    howManyItemsToSend = 0
+                } catch (e: java.lang.Exception) {
+                    println(e.localizedMessage)
+                }
             }
-            try {
-                apiService.updateWalk(token, allTuples)
-            } catch (e: java.lang.Exception) {
-                println(e.localizedMessage)
-            }
-            howManyItemsToSend = 0
         }
     }
 
@@ -359,9 +376,8 @@ class LocationService : Service() {
      * when service is destroyed this is called and cleanup happens
      */
     override fun onDestroy() {
-        println("aaaaahhhhhh i die")
         job?.cancel("Stop record location")
-        fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
+        //fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
         cancellationSource?.cancel()
         super.onDestroy()
     }

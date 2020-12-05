@@ -14,8 +14,8 @@ import com.mapbox.turf.TurfMeasurement
  * finds the closest point in a list and within a 500m
  * http://turfjs.org/docs/#distance
  */
-fun findClosestPoint(clickPoint : Point, listOfWayPoints :List<WaypointData>) : WaypointData? {
-    var closestPoint: WaypointData? = null
+fun findClosestPoint(clickPoint : Point, listOfWayPoints :List<Waypoint>) : Waypoint? {
+    var closestPoint: Waypoint? = null
     var closestDistance: Double = Double.MAX_VALUE
     val size = listOfWayPoints.size
     var counter = 0
@@ -59,4 +59,7 @@ fun getCoordinatesFromRoute(routeData: RouteData) : List<Tuple>{
         tupleList.add(Tuple(longitude = list[0], latitude = list[1]))
     }
     return tupleList
+}
+fun mapRouteDataToRoute(routeData: RouteData): Route {
+    return Route(tourName = routeData.tourName,date = routeData.date,distanceInMeters = routeData.distanceInMeters)
 }

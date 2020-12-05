@@ -64,4 +64,22 @@
     <string name="je_gemiddelde_snelheid_was">votre vitesse moyenne était</string>
     <string name="go_back_button">retourner</string>
 
+
+    <string name="batterijBesparing">BatterijBesparing</string>
+    <string name="text_locatieDelen">Om de hoeveel minuten wenst u uw locatie te delen?</string>
+    <string name="text_logout">Logout</string>
+    <string name="text_notifications">Notificaties</string>
+    <string name="text_deelnemerscode">Deelnemerscode</string>
+    <string name="text_aanUitZetten">Aan of uit zetten</string>
+    <string name="text_deelnemerscodeGenerated">DeelnemerscodeDummy</string>
+    <string name="text_appWerking">Hoe werkt de app?</string>
+    <string name="text_ingelogd_als">Ingelogd als</string>
+    <string name="text_share">share link met de wereld</string>
+    <string name="text_gebruikersnaam">Jonas Haenebalcke</string>
+    <string name="text_maxSeekbar">25</string>
+    <string name="text_minSeekbar">5</string>
+
+    <!-- error meldingingen -->
+    <string name="fout_ophalen_route">Un problème est survenu lors de la récupération de l\'itinéraire</string>
+    <string name="fout_ophalen_registration">Impossible de récupérer l\'enregistrement</string>
 </resources>

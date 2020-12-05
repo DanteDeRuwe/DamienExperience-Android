@@ -15,7 +15,7 @@ import java.util.*
 data class Route(
         @PrimaryKey(autoGenerate = true)
         @ColumnInfo(name = "route_id")
-        val id: Int,
+        val id: Long = 0L,
         @ColumnInfo(name = "tourName")
         val tourName: String,
         @ColumnInfo(name = "date")
