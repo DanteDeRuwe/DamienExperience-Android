@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +22,9 @@ import com.example.damiantour.databinding.FragmentStartRouteSuccessBinding
 import com.example.damiantour.login.LoginFragmentDirections
 import com.example.damiantour.login.LoginViewModel
 import com.example.damiantour.network.DamianApiService
+import com.example.damiantour.network.model.RegistrationData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
@@ -36,13 +42,35 @@ class StartRouteSuccessFragment : Fragment() {
         binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_start_route_success, container, false)
         initCountdown()
+        getRouteRegistration()
         toggleButton(false)
-        binding.startRouteButton.setOnClickListener(View.OnClickListener {
-                navigateToMapFragment()
-        })
+        binding.startRouteButton.setOnClickListener {
+            navigateToMapFragment()
+        }
         binding.startTV.setText(R.string.start_route_success_wait)
 
         return binding.root
+    }
+
+
+    private fun getRouteRegistration(){
+        GlobalScope.launch(Dispatchers.IO) {
+            var routeRegistration: RegistrationData?
+            val JWTtoken = preferences.getString("TOKEN", null).toString()
+            try {
+
+                routeRegistration = apiService.getLastRegistration(JWTtoken)
+                preferences.edit().putString("currentRouteId",routeRegistration.routeId).apply()
+            }catch (e: Exception){
+                println(e.stackTrace)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    showToast(getString(R.string.fout_ophalen_registration))
+                }, 3000)
+            }
+        }
+    }
+    private fun showToast(message: String){
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
    private fun navigateToMapFragment(){
@@ -82,9 +110,10 @@ class StartRouteSuccessFragment : Fragment() {
             override fun onFinish() {
                 binding.startTV.setText(R.string.start_route_success_start)
                 toggleButton(true)
+                /*
                 lifecycleScope.launch{
                     val token = preferences.getString("TOKEN", null).toString()
-                }
+                }*/
             }
         }
         timer.start()

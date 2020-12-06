@@ -15,6 +15,7 @@
             android:id="@+id/damiaan_logo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
             android:contentDescription="@string/damiaan_logo_login_description"
             android:src="@drawable/damiaantours"
             app:layout_constraintTop_toTopOf="parent" />
@@ -24,6 +25,7 @@
             style="@style/title_style"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stop_walk_item_margin"
             android:fontFamily="@font/sharp_grotesque_medium_20"
             app:layout_constraintTop_toBottomOf="@+id/damiaan_logo" />
 
@@ -31,6 +33,7 @@
             android:id="@+id/distance_walked_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stop_walk_item_margin"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/congrats_textview">
 
@@ -46,7 +49,8 @@
                 android:id="@+id/distance_textview"
                 style="@style/title_style"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary" />
 
             <TextView
                 android:id="@+id/walked_textview"
@@ -60,6 +64,7 @@
             android:id="@+id/average_speed_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stop_walk_item_margin"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/distance_walked_layout">
 
@@ -74,7 +79,8 @@
                 android:id="@+id/speed_textview"
                 style="@style/title_style"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary" />
 
         </LinearLayout>
 
@@ -83,6 +89,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/stop_walk_item_margin"
             android:background="@drawable/primary_button_shape"
             android:fontFamily="@font/akkuratpro"
             android:text="@string/go_back_button"
@@ -92,8 +99,10 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/average_speed_layout" />
+            app:layout_constraintTop_toBottomOf="@+id/average_speed_layout"
+            app:layout_constraintVertical_bias="1.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

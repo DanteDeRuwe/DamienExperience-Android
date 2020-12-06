@@ -9,8 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.SeekBar
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -19,7 +17,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentSettingsBinding
 import com.example.damiantour.network.DamianApiService
-import com.example.damiantour.network.LoginData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -58,11 +55,11 @@ class SettingsFragment :Fragment(){
 
         binding.switchNotificaties.isChecked = preferences.getBoolean("notifications",false)
 
-        binding.sliderid.addOnChangeListener { slider, value, fromUser ->
+        binding.sliderid.addOnChangeListener { _, value, _ ->
             preferences.edit().putInt("send_route_call_api",value.toInt()).apply()
         }
 
-        binding.switchNotificaties.setOnCheckedChangeListener { buttonView, isChecked ->
+        binding.switchNotificaties.setOnCheckedChangeListener { _, isChecked ->
             preferences.edit().putBoolean("notifications",isChecked).apply()
         }
         binding.buttonShareDeelnemerscode.setOnClickListener {
@@ -100,7 +97,7 @@ class SettingsFragment :Fragment(){
     }
 
     private suspend fun setDeelnemerscode() : String {
-        var token = preferences.getString("TOKEN", "")
+        val token = preferences.getString("TOKEN", "")
         var deelnemerscode = ""
         try {
             if (token != null) {
@@ -110,7 +107,7 @@ class SettingsFragment :Fragment(){
             //TODO
         }
         
-        preferences.edit().putString("deelnemercode", deelnemerscode)
+        preferences.edit().putString("deelnemercode", deelnemerscode).apply()
         return deelnemerscode
     }
 

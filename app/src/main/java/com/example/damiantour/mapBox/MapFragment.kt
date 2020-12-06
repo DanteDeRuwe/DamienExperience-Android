@@ -1,15 +1,14 @@
 package com.example.damiantour.mapBox
 
 import android.annotation.SuppressLint
-import android.content.*
 import android.app.AlertDialog
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.os.Bundle
-import android.os.IBinder
+import android.os.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,8 +25,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
+import com.example.damiantour.mapBox.model.Tuple
+import com.example.damiantour.mapBox.model.Waypoint
+import com.example.damiantour.mapBox.service.LocationService
+import com.example.damiantour.mapBox.service.LocationServiceBinder
 import com.example.damiantour.network.DamianApiService
-import com.example.damiantour.network.WaypointData
+import com.example.damiantour.network.model.RouteData
+import com.example.damiantour.network.model.WaypointData
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -52,8 +56,7 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import kotlinx.coroutines.*
-import java.lang.Exception
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
@@ -110,7 +113,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
     private lateinit var style: Style
     //permissions
     private lateinit var permissionsManager: PermissionsManager
-
+    private var JWTtoken: String = ""
+    private var routeId : String = ""
 
     //properties
     private var coroutinesActive by Delegates.notNull<Boolean>()
@@ -138,13 +142,20 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * Creates the view and prepares the fragment and viewmodel
      */
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         //get viewmodel from factory
         val application = requireNotNull(this.activity).application
-        val dataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
-        val viewModelFactory = MapViewModelFactory(dataSource, application)
+        JWTtoken = preferences.getString("TOKEN", null).toString()
+        routeId = preferences.getString("currentRouteId", "").toString()
+
+        val tupleDataSource = DamianDatabase.getInstance(application).tupleDatabaseDao
+        val waypointDataSource = DamianDatabase.getInstance(application).waypointDatabaseDao
+        val locationDataSource = DamianDatabase.getInstance(application).locationDatabaseDao
+        val routeDataSource = DamianDatabase.getInstance(application).routeDatabaseDao
+
+        val viewModelFactory = MapViewModelFactory(tupleDataSource, waypointDataSource, locationDataSource, routeDataSource, application)
         mapViewModel = ViewModelProvider(this, viewModelFactory).get(MapViewModel::class.java)
         // inflate view
         val root = inflater.inflate(R.layout.fragment_map, container, false)
@@ -156,7 +167,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
          * Observers
          */
         //shows or hides the waypoints
-        mapViewModel.waypoint.observe(viewLifecycleOwner,  { waypoint ->
+        mapViewModel.waypoint.observe(viewLifecycleOwner, { waypoint ->
             if (waypoint != null) {
                 addMarkersOnMap(waypoint)
             } else {
@@ -164,7 +175,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             }
         })
         //draws or redraws
-        mapViewModel.tempLocations.observe(viewLifecycleOwner,  { templocationList ->
+        mapViewModel.tempLocations.observe(viewLifecycleOwner, { templocationList ->
             val last = templocationList.size - 1
             if (last >= 0) {
                 val location = templocationList[last]
@@ -172,12 +183,16 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 drawWalkedLine()
             }
         })
-        mapViewModel.locations.observe(viewLifecycleOwner,  { locationList ->
+        mapViewModel.locations.observe(viewLifecycleOwner, {
             drawWalkedLine()
         })
-        mapViewModel.waypoints.observe(viewLifecycleOwner, { waypointsList ->
+        mapViewModel.waypoints.observe(viewLifecycleOwner, {
             drawWaypointsLayer()
         })
+        mapViewModel.routeCoordinates.observe(viewLifecycleOwner,{
+            drawRouteLayer()
+        })
+
         /**
          * Stop button observer
          */
@@ -216,21 +231,50 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         if (!coroutinesActive) {
             coroutinesActive = true
             println("cocourtine gestart")
-            startWriteLocationCoRoutine()
+            getRouteAndDraw()
+        }
+    }
+    /**
+     * @author Simon Bettens
+     * start the coroutine
+     */
+    private fun getRouteAndDraw() {
+        lifecycleScope.launch {
+            if(mapViewModel.hasNoRoute()) {
+                sendRouteRequest()
+            }
+            else{
+                drawRouteLayer()
+                drawWalkedLine()
+                drawWaypointsLayer()
+            }
         }
     }
 
+    private fun showToast(message: String){
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    }
+
+    /**
+     * @author Simon Bettens
+     * request location and draw it on the map
+     */
     private suspend fun sendRouteRequest() {
+        val routeResult : RouteData?
         try {
-            val preferences: SharedPreferences =
-                requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-            val JWTtoken: String = preferences.getString("TOKEN", null).toString()
-            val routeResult = apiService.getRoute(JWTtoken, "TestTourOne")
+            routeResult = apiService.getRouteById(JWTtoken, routeId)
+            println(routeResult)
             mapViewModel.addPath(routeResult)
+            drawRouteLayer()
             drawWaypointsLayer()
         } catch (e: Exception) {
-            println("Fout" + e.localizedMessage)
+            println(e.message)
+            Handler(Looper.getMainLooper()).postDelayed({
+                showToast(getString(R.string.fout_ophalen_route))
+            }, 3000)
+            return
         }
+
     }
 
     /**
@@ -241,28 +285,36 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         // Create the LineString from the list of coordinates and then make a GeoJSON
         // FeatureCollection so we can add the line to our map as a layer.
         if (this::style.isInitialized) {
-            style.addSource(
-                GeoJsonSource(
-                    "line-source",
-                    FeatureCollection.fromFeatures(
-                        arrayOf(
-                            Feature.fromGeometry(
-                                mapViewModel.routeCoordinates.value?.let { LineString.fromLngLats(it) }
-                            )
+            if(style.getSource("line-source")!=null){
+                style.removeLayer("linelayer")
+                style.removeSource("line-source")
+            }
+            val list =  mapViewModel.getRoute()
+            println(list)
+            if(list.isNotEmpty()) {
+                style.addSource(
+                        GeoJsonSource(
+                                "line-source",
+                                FeatureCollection.fromFeatures(
+                                        arrayOf(
+                                                Feature.fromGeometry(
+                                                        list.let { LineString.fromLngLats(it) }
+                                        )
+                                )
                         )
-                    )
                 )
-            )
-            // adds styling to the line connecting the coordstuppels
-            style.addLayer(
-                LineLayer("linelayer", "line-source").withProperties(
-                    lineCap(Property.LINE_CAP_ROUND),
-                    lineJoin(Property.LINE_JOIN_ROUND),
-                    lineWidth(5f),
-                    lineColor(Color.parseColor("#ff0040")),
-                    lineSortKey(5f)
                 )
-            )
+                // adds styling to the line connecting the coordstuppels
+                style.addLayer(
+                        LineLayer("linelayer", "line-source").withProperties(
+                                lineCap(Property.LINE_CAP_ROUND),
+                                lineJoin(Property.LINE_JOIN_ROUND),
+                                lineWidth(5f),
+                                lineColor(Color.parseColor("#ff0040")),
+                                lineSortKey(5f)
+                        )
+                )
+            }
         }
     }
 
@@ -271,41 +323,48 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * draws the waypoints symbol on the map
      */
     private fun drawWaypointsLayer() {
-        val symbolLayerIconFeatureList = ArrayList<Feature>()
-        //Must be a int
-        val listSize = mapViewModel.listSize.value
-        val list = mapViewModel.waypoints.value!!
-        //Loops over all the coordinates
-        for ((counter, wp) in list.withIndex()) {
-            //get properties
-            println(wp)
+        //source should be gone
+        if(this::style.isInitialized) {
+            if (style.getSource("ICONS") != null) {
+                style.removeLayer("SYMBOL_LAYER_ID")
+                style.removeSource("ICONS")
+            }
+            val symbolLayerIconFeatureList = ArrayList<Feature>()
+            //Must be a int
+            val list = mapViewModel.waypoints.value!!
+            //Loops over all the coordinates
+
+            for (wp in list) {
+                //get properties
+                println(wp)
                 //get coords
                 val lon: Double = wp.longitude
                 val lat: Double = wp.latitude
                 val feature = Feature.fromGeometry(
-                    Point.fromLngLat(lon, lat)
+                        Point.fromLngLat(lon, lat)
                 )
                 symbolLayerIconFeatureList.add(feature)
+            }
+            //add every point to the map
+            style.addSource(
+                    GeoJsonSource(
+                            "ICONS",
+                            FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
+                    )
+            )
+            // gets the icon
+            val icon = drawableToBitmap(getDrawable(requireContext(), R.drawable.ic_map_marker)!!)
+            // adds the image to the style
+            style.addImage("map_marker", icon, false)
+            //adds the icon to the map at every coordstupel
+            style.addLayer(
+                    SymbolLayer("SYMBOL_LAYER_ID", "ICONS").withProperties(
+                            iconImage("map_marker"),
+                            iconOffset(arrayOf(0f, -8f)),
+                            symbolSortKey(5f)
+                    )
+            )
         }
-        //add every point to the map
-        style.addSource(
-            GeoJsonSource(
-                "ICONS",
-                FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
-            )
-        )
-        // gets the icon
-        val icon = drawableToBitmap(getDrawable(requireContext(), R.drawable.ic_map_marker)!!)
-        // adds the image to the style
-        style.addImage("map_marker", icon, false)
-        //adds the icon to the map at every coordstupel
-        style.addLayer(
-            SymbolLayer("SYMBOL_LAYER_ID", "ICONS").withProperties(
-                iconImage("map_marker"),
-                iconOffset(arrayOf(0f, -8f)),
-                symbolSortKey(5f)
-            )
-        )
     }
 
     /**
@@ -320,26 +379,26 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                     style.removeLayer("walkedlinelayer")
                     style.removeSource("walkedline-source")
                     style.addSource(
-                        GeoJsonSource(
-                            "walkedline-source",
-                            FeatureCollection.fromFeatures(
-                                arrayOf(
-                                    Feature.fromGeometry(
-                                        walkedCoordinatesList.let { LineString.fromLngLats(it) }
+                            GeoJsonSource(
+                                    "walkedline-source",
+                                    FeatureCollection.fromFeatures(
+                                            arrayOf(
+                                                    Feature.fromGeometry(
+                                                            walkedCoordinatesList.let { LineString.fromLngLats(it) }
+                                                    )
+                                            )
                                     )
-                                )
                             )
-                        )
                     )
                     // adds styling to the line connecting the coordstuppels
                     style.addLayer(
-                        LineLayer("walkedlinelayer", "walkedline-source").withProperties(
-                            lineCap(Property.LINE_CAP_ROUND),
-                            lineJoin(Property.LINE_JOIN_ROUND),
-                            lineWidth(6f),
-                            lineColor(Color.parseColor("#3bb7a9")),
-                            lineSortKey(3f)
-                        )
+                            LineLayer("walkedlinelayer", "walkedline-source").withProperties(
+                                    lineCap(Property.LINE_CAP_ROUND),
+                                    lineJoin(Property.LINE_JOIN_ROUND),
+                                    lineWidth(6f),
+                                    lineColor(Color.parseColor("#3bb7a9")),
+                                    lineSortKey(3f)
+                            )
                     )
                 }catch (e: Exception){
                     println("Exception throw : " + e.localizedMessage)
@@ -365,18 +424,22 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * @author Simon Bettens
      * adds the markers overlay of the closest waypoint from where the user has ticked
      */
-    private fun addMarkersOnMap(wp: WaypointData) {
+    private fun addMarkersOnMap(wp: Waypoint) {
         //needs to change according to system lang
-        var title = ""
-        var description = ""
+        val title : String
+        val description : String
         when (Locale.getDefault().language) {
-            "nl" ->{ title = wp.languagesText.title.nl
-                    description = wp.languagesText.description.nl}
-            "fr" -> {title = wp.languagesText.title.fr
-                    description = wp.languagesText.description.fr}
+            "nl" -> {
+                title = wp.languagesText.title["nl"].toString()
+                description = wp.languagesText.description["nl"].toString()
+            }
+            "fr" -> {
+                title = wp.languagesText.title["fr"].toString()
+                description = wp.languagesText.description["fr"].toString()
+            }
             else -> { // Note the block
-                title = wp.languagesText.title.nl
-                description = wp.languagesText.description.nl
+                title = wp.languagesText.title["nl"].toString()
+                description = wp.languagesText.description["nl"].toString()
                 print("x is neither nl nor fr, so showed nl version")
             }
         }
@@ -385,7 +448,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         val lat: Double = wp.latitude
         //get and make custom view for markers
         val customView: View = LayoutInflater.from(context).inflate(
-            R.layout.marker_view_bubble, null
+                R.layout.marker_view_bubble, null
         )
         customView.layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
         // title for the view
@@ -404,16 +467,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
     }
 
-    /**
-     * @author Simon Bettens
-     * start the coroutine
-     */
-    private fun startWriteLocationCoRoutine() {
-        lifecycleScope.launch {
-            sendRouteRequest()
-            drawRouteLayer()
-        }
-    }
+
 
     /**
      * @author Simon & Jonas
@@ -424,9 +478,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             return drawable.bitmap
         }
         val bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
         )
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
@@ -472,18 +526,18 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * Requests permission from user
      */
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
     ) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onExplanationNeeded(permissionsToExplain: List<String>) {
         Toast.makeText(
-            requireContext(),
-            R.string.user_location_permission_explanation,
-            Toast.LENGTH_LONG
+                requireContext(),
+                R.string.user_location_permission_explanation,
+                Toast.LENGTH_LONG
         )
             .show()
     }
@@ -493,9 +547,9 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             enableLocationComponent(mapViewModel.mapBoxMap.style!!)
         } else {
             Toast.makeText(
-                requireContext(),
-                R.string.user_location_permission_not_granted,
-                Toast.LENGTH_LONG
+                    requireContext(),
+                    R.string.user_location_permission_not_granted,
+                    Toast.LENGTH_LONG
             )
                 .show()
             activity?.finish()
@@ -551,10 +605,10 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 .setTitle(R.string.stop_dialog_title)
                 .setMessage(R.string.stop_dialog_message)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(R.string.yes, DialogInterface.OnClickListener { dialog, id ->
+                .setPositiveButton(R.string.yes) { _, _ ->
                     // FIRE ZE MISSILES!
                     stopTourConfirmed()
-                })
+                }
                 .setNegativeButton(R.string.no, null).show()
     }
 
@@ -566,16 +620,15 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         //TODO : stop tour afwerken...
         //update coords
         lifecycleScope.launch {
-            locationService.stopService()
-
-            val token = preferences.getString("TOKEN", null).toString()
+            //val token = preferences.getString("TOKEN", null).toString()
             try {
 
                 locationService.updateWalkApi()
+                locationService.stopService()
                 //TODO(not yet totally implemented in backend could crash backend if called)
                 //nodejs mail service
                 //apiService.stopWalk(token)
-            }catch (e:Exception){
+            }catch (e: Exception){
                 println(e.localizedMessage)
             }
 
