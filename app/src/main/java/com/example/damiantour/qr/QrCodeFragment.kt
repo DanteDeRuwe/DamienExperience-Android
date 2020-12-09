@@ -25,41 +25,25 @@ class QrCodeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-
-
-
     ): View? {
-
         val root = inflater.inflate(R.layout.fragment_qr_code, container, false)
-        val bottomNavigationView : BottomNavigationView = root.findViewById(R.id.nav_bar)
+        val bottomNavigationView: BottomNavigationView = root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
 
+        val scanQRBtn: Button = root.findViewById(R.id.btn_scan)
 
-        val scanQRBtn : Button = root.findViewById(R.id.btn_scan)
-
-        scanQRBtn.setOnClickListener(){
+        scanQRBtn.setOnClickListener() {
             scanQr();
-
-
         }
         return root
-
-
     }
 
-    fun scanQr(){
+    /**
+     * @author Jonas Haenebalcke
+     */
+    fun scanQr() {
+        //Calls scanQR from mainActivity
         (activity as MainActivity).scanQr();
-    }
-
-    fun startQrActivity(){// https://www.tutorialkart.com/kotlin-android/android-start-another-activity/
-//        val intent = Intent(this, ScanQRActivity::class.java)
-//
-//        startActivity(intent)
-
-//        val am = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-//        val cn = am.getRunningTasks(1)[0].topActivity
-
-
     }
 }
