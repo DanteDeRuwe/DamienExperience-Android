@@ -108,8 +108,8 @@ class LoginFragment : Fragment() {
             //Navigate to map
             navigateToStartRoute()
         } catch (e: Exception){
-
-
+            binding.loginErrorfield.text = getString(R.string.login_error)
+            binding.loginErrorfield.visibility = View.VISIBLE
         }
     }
 
@@ -117,7 +117,7 @@ class LoginFragment : Fragment() {
      * @author Jonas Haenebalcke en Jordy Van Kerkvoorde
      */
     private suspend fun navigateToStartRoute(){
-        val token = preferences.getString("TOKEN", null).toString()
+        val token = preferences.getString("TOKEN", null)
         if(token!=null){
             try{
                 val hasRegistration = apiService.isRegistered(token)
