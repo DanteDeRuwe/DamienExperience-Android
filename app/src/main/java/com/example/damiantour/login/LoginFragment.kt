@@ -73,12 +73,14 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
+
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if(preferences.getString("TOKEN", null) != null){
+        //if(preferences.getString("TOKEN", null) != null){
             lifecycleScope.launch {
                 navigateToStartRoute()
             }
-        }
+        //}
         super.onActivityCreated(savedInstanceState)
     }
 
