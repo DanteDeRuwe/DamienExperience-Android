@@ -1,10 +1,8 @@
 package com.example.damiantour.login
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +15,7 @@ import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
 import com.example.damiantour.network.Connection
 import com.example.damiantour.network.DamianApiService
-import com.example.damiantour.network.LoginData
+import com.example.damiantour.network.model.LoginData
 import kotlinx.coroutines.launch
 
 

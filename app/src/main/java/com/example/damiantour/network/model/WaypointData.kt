@@ -1,6 +1,9 @@
-package com.example.damiantour.network
+package com.example.damiantour.network.model
 
-import java.util.*
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 /**
  * @author Simon Bettens & Jordy Van Kerkvoorde

@@ -1,4 +1,4 @@
-package com.example.damiantour.network
+package com.example.damiantour.network.model
 
 class PathData(
     val lineColor: String,

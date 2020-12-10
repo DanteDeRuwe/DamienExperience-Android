@@ -4,4 +4,5 @@
     <dimen name="margin_left">40dp</dimen>
     <dimen name="separtor">370dp</dimen>
     <dimen name="stop_button_width">70dp</dimen>
+    <dimen name="stop_walk_item_margin">50dp</dimen>
 </resources>

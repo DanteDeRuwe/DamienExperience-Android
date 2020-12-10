@@ -1,24 +1,21 @@
 package com.example.damiantour.network
 
-import com.example.damiantour.login.model.LoginFields
+import com.example.damiantour.network.model.LoginData
+import com.example.damiantour.network.model.ProfileData
+import com.example.damiantour.network.model.RegistrationData
+import com.example.damiantour.network.model.RouteData
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.Deferred
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 import java.util.*
-import java.util.logging.XMLFormatter
 import com.squareup.moshi.Rfc3339DateJsonAdapter
-import org.json.JSONArray
 
 
 /**
@@ -29,7 +26,7 @@ interface DamianApiService {
 
     @POST("login")
     suspend fun login(
-        @Body login : LoginData,
+            @Body login : LoginData,
     ) : String
 
     @GET("profile")
@@ -42,11 +39,23 @@ interface DamianApiService {
             @Header("Authorization") token : String
     ): String
 
-    @GET("route/{routeName}")
-    suspend fun getRoute(
+    @GET("route/getroutebyname/{routeName}")
+    suspend fun getRouteByName(
         @Header("Authorization") token: String,
         @Path("routeName") routeName : String
     ) : RouteData
+
+    @GET("route/getroutebyid/{routeId}")
+    suspend fun getRouteById(
+            @Header("Authorization") token: String,
+            @Path("routeId") routeId : String
+    ) : RouteData
+
+
+    @GET("routeregistration/getlast")
+    suspend fun getLastRegistration(
+            @Header("Authorization") token: String
+    ) : RegistrationData
 
     @GET("routeregistration/checkcurrentregistered")
     suspend fun isRegistered(

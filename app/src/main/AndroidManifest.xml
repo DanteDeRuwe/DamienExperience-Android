@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".mapBox.LocationService"
+            android:name=".mapBox.service.LocationService"
             android:enabled="true"
             android:exported="false" />
         <activity

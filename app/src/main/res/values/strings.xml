@@ -67,5 +67,8 @@
     <string name="chatSocketURI">https://damienexperience-chat.herokuapp.com/</string>
     <string name="testSendBtn">Button</string>
 
+    <!-- error meldingingen -->
+    <string name="fout_ophalen_route">Er is probleem met het ophalen van de route </string>
+    <string name="fout_ophalen_registration">Kon de registratie niet ophalen</string>
 
 </resources>

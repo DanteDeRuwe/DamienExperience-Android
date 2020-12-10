@@ -1,11 +1,10 @@
-package com.example.damiantour.database
+package com.example.damiantour.database.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
-import com.example.damiantour.mapBox.Tuple
+import com.example.damiantour.mapBox.model.Tuple
 
 @Dao
 interface TupleDatabaseDao {
@@ -21,7 +20,7 @@ interface TupleDatabaseDao {
      *
      * sorted by start time in descending order.
      */
-    @Query("SELECT * FROM tuple_table ORDER BY tupleId")
+    @Query("SELECT * FROM tuple_table ORDER BY tuple_Id")
     fun getAllTuplesLiveData(): LiveData<List<Tuple>>
 
     /**
@@ -29,7 +28,7 @@ interface TupleDatabaseDao {
      *
      * sorted by start time in descending order.
      */
-    @Query("SELECT * FROM tuple_table ORDER BY tupleId")
+    @Query("SELECT * FROM tuple_table ORDER BY tuple_Id")
     fun getAllTuples(): List<Tuple>
 
 
