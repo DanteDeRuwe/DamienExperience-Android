@@ -1,16 +1,15 @@
 package com.example.damiantour
 
-import android.R.attr
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.damiantour.databinding.ActivityMainBinding
 import com.google.zxing.integration.android.IntentIntegrator
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_qr_code.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -23,15 +22,23 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     }
 
+    /**
+     * @author Jonas Haenebalcke & Lucas Van der Haegen
+     */
     fun scanQr() {
-    IntentIntegrator(this).initiateScan();
+        val integrator = IntentIntegrator(this)
+        integrator.setBeepEnabled(false)
+//        integrator.setOrientationLocked(false)
+//        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+//        integrator.setPrompt("Scan a barcode");
+        integrator.initiateScan();
     }
 
     /**
      * @author Jonas Haenebalcke
      * source https://www.youtube.com/watch?v=NqFVqLqbw_g&ab_channel=CodeAndroid
      */
-    
+
     //Result of scanning qr code
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
@@ -40,11 +47,22 @@ class MainActivity : AppCompatActivity() {
                 if (result.contents == null) {
                     Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
                 } else {
-                    Toast.makeText(this, "Scanned: " + result.contents, Toast.LENGTH_LONG).show()
+//                    Toast.makeText(this, "Scanned: " + result.contents, Toast.LENGTH_LONG).show()
+                    openLink(result.contents)
                 }
             } else {
                 super.onActivityResult(requestCode, resultCode, data)
             }
+        }
+    }
+
+    private fun openLink(url: String) {
+        if (URLUtil.isValidUrl(url)) {
+            val uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            this.startActivity(intent)
+        } else {
+            Toast.makeText(this, "This is not a valid link!", Toast.LENGTH_LONG).show()
         }
     }
 }
