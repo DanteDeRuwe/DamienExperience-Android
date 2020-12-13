@@ -64,6 +64,8 @@
     <string name="gewandeld">gewandeld.</string>
     <string name="je_gemiddelde_snelheid_was">Je gemiddelde snelheid was</string>
     <string name="go_back_button">Ga Terug</string>
+    <string name="chatSocketURI">https://damienexperience-chat.herokuapp.com/</string>
+    <string name="testSendBtn">Button</string>
 
     <!-- error meldingingen -->
     <string name="fout_ophalen_route">Er is probleem met het ophalen van de route </string>
