@@ -6,12 +6,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wip_text"
-            />
-
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav_bar"
             android:layout_width="match_parent"
@@ -19,6 +13,18 @@
             android:layout_alignParentBottom="true"
             android:background="?android:attr/windowBackground"
             app:menu="@menu/menu" />
+
+        <Button
+            android:id="@+id/testSendBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="162dp"
+            android:layout_marginEnd="161dp"
+            android:layout_marginBottom="356dp"
+            android:text="@string/testSendBtn" />
     </RelativeLayout>
 
 </layout>

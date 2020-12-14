@@ -11,7 +11,7 @@ android {
     ndkVersion "21.3.6528147"
     defaultConfig {
         applicationId "com.example.damiantour"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -48,7 +48,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation "android.arch.navigation:navigation-fragment-ktx:$version_navigation"
-
+    implementation "com.github.nkzawa:socket.io-client:0.6.0"
 
 
     //Room
@@ -89,5 +89,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01"
     implementation "com.google.android.gms:play-services-location:17.1.0"
     implementation "com.karumi:dexter:5.0.0"
+
+    //QR
+    implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
 
 }
