@@ -1,14 +1,15 @@
 package com.example.damiantour
-
-import android.app.Activity
 import android.content.Intent
+import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
 import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.example.damiantour.databinding.ActivityMainBinding
+import com.example.damiantour.network.NetworkConnection
 import com.google.zxing.integration.android.IntentIntegrator
 
 
@@ -20,6 +21,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //set the view of the activity
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val networkConnection = NetworkConnection(applicationContext)
+        networkConnection.observe(this, Observer { isConnected ->
+            if(isConnected){
+                print("----------------------------------------------------------------------------")
+                print("CONNECTED")
+                print("----------------------------------------------------------------------------")
+            }else{
+                print("----------------------------------------------------------------------------")
+                print("NOT CONNECTED")
+                print("----------------------------------------------------------------------------")
+            }
+        })
+    }
+
+    override fun onBackPressed() {
+        val a = Intent(Intent.ACTION_MAIN)
+        a.addCategory(Intent.CATEGORY_HOME)
+        a.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(a)
     }
 
     /**
