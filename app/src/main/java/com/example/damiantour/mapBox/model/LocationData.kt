@@ -3,9 +3,12 @@ package com.example.damiantour.mapBox.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.mapbox.geojson.Point
+
+
 /**
  * used to record the location
- * @author Simon Bettens
+ * @author Simon Bettens & Jordy Van Kerkvoorde
  */
 @Entity(tableName = "locationData_table")
 class LocationData(
@@ -26,5 +29,9 @@ class LocationData(
         tuple.add(longitude)
         tuple.add(latitude)
         return tuple
+    }
+
+    fun mapToPoint(): Point {
+        return Point.fromLngLat(longitude, latitude);
     }
 }
