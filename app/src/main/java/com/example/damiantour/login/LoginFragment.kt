@@ -91,7 +91,7 @@ class LoginFragment : Fragment() {
      * On succes: saves the token in the SharedPreferences and navigates
      * On faillure: shows message
      */
-    private suspend fun sendLoginRequest(loginData: LoginData){
+     suspend fun sendLoginRequest(loginData: LoginData){
         try {
             //Execute API Login request
             val token =  "Bearer " + apiService.login(loginData)
