@@ -46,11 +46,16 @@ class StoppedRouteFragment : Fragment() {
         }
 
         viewModel.locations.observe(viewLifecycleOwner, { listOfLocationData ->
-            val dist = viewModel.calculateDistance(listOfLocationData)
-            binding.distanceTextview.text = String.format("%.3f %s",dist,getString(R.string.distance_unit))
-
-            val speed = viewModel.calculateSpeed(preferences.getLong("starttime", 0L))
-            binding.speedTextview.text = String.format("%.2f %s",speed ,getString(R.string.speed_unit))
+            var dist= 0.00
+            var speed = 0.0
+            if(!listOfLocationData.isNullOrEmpty()) {
+                dist = viewModel.calculateDistance(listOfLocationData)
+                speed = viewModel.calculateSpeed(preferences.getLong("starttime", 0L))
+            }
+            binding.distanceTextview.text =
+                String.format("%.3f %s", dist, getString(R.string.distance_unit))
+            binding.speedTextview.text =
+                String.format("%.2f %s", speed, getString(R.string.speed_unit))
         })
 
         // Get name from shared preferences

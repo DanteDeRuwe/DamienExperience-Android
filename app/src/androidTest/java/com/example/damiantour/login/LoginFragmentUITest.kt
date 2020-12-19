@@ -21,17 +21,15 @@ internal class LoginFragmentUITest{
     private var email = "test@test.be"
     private var password = "testpass"
 
-    @Test fun testEventFragment() {
+    @Test fun testDataBinding() {
         val scenario = launchFragmentInContainer<LoginFragment>()
         onView(withId(R.id.email_input)).perform(typeText(email), closeSoftKeyboard())
         onView(withId(R.id.password_input)).perform(typeText(password), closeSoftKeyboard())
-
         scenario.onFragment { fragment ->
            val fields =  fragment.getLoginFields()
             Assert.assertEquals(email,fields.getEmail())
             Assert.assertEquals(password,fields.getPassword())
         }
-
     }
 
 }
