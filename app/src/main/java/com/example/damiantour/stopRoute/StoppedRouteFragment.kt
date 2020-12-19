@@ -53,9 +53,6 @@ class StoppedRouteFragment : Fragment() {
             binding.speedTextview.text = String.format("%.2f %s",speed ,getString(R.string.speed_unit))
         })
 
-        //binding.distanceTextview.text = String.format("%.3f %s",viewModel.getDistance(),getString(R.string.distance_unit))
-        //binding.speedTextview.text = String.format("%.2f %s",viewModel.getAverageSpeed() ,getString(R.string.speed_unit))
-
         // Get name from shared preferences
         val name = preferences.getString("fullName", null).toString()
 
