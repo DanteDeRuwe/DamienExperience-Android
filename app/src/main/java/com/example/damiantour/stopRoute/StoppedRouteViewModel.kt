@@ -13,6 +13,7 @@ import com.example.damiantour.mapBox.model.LocationData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  *@author: Ruben Naudts & Jordy Van Kerkvoorde
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao) : ViewModel() {
     private var averageSpeed : Double = 4.0
     private var distance: Double = 0.0
+    private lateinit var calender : Calendar;
 
     private var _locations = locationDatabaseDao.getAllLocationsLiveData()
     val locations: LiveData<List<LocationData>>
@@ -28,13 +30,20 @@ class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao
     fun getAverageSpeed(): Double {
         return averageSpeed
     }
-
-    /*fun getWalkData(): List<LocationData> {
-        return locationDatabaseDao.getAllLocations()
-    }*/
-
+    fun setCalender(c : Calendar){
+        calender = c
+    }
+    fun getCalender():Calendar{
+        if(calender==null){
+            setCalender(Calendar.getInstance())
+        }
+        return calender
+    }
     fun getDistance(): Double {
         return distance
+    }
+    fun setDistance(dist : Double){
+        distance = dist
     }
 
     suspend fun clearDataLocation(){
@@ -47,7 +56,7 @@ class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao
     }
 
     fun calculateSpeed(starttime: Long): Double{
-        val endtime = java.util.Calendar.getInstance().timeInMillis
+        val endtime = getCalender().timeInMillis
 
         val endtimeInMinutes = (endtime - starttime) / 60000
         val speed = (distance /endtimeInMinutes)*60
