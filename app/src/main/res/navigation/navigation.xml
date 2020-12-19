@@ -63,11 +63,18 @@
             android:id="@+id/action_startRouteSuccess_to_mapFragment"
             app:destination="@id/mapFragment"
             app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_startRouteSuccess_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/startRouteNotRegistered"
         android:name="com.example.damiantour.startRoute.StartRouteNotRegisteredFragment"
-        android:label="StartRouteNotRegistered" />
+        android:label="StartRouteNotRegistered" >
+        <action
+            android:id="@+id/action_startRouteNotRegistered_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
     <fragment
         android:id="@+id/noConnection"
         android:name="com.example.damiantour.noConnection.NoConnectionFragment"

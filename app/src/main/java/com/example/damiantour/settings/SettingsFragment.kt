@@ -21,6 +21,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
+/**
+ *  author: Simon Bettens & Lucas Van der Haegen
+ */
 class SettingsFragment :Fragment(){
     private lateinit var preferences: SharedPreferences
     private lateinit var binding: FragmentSettingsBinding

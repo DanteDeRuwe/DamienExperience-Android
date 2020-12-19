@@ -48,6 +48,11 @@ class StartRouteSuccessFragment : Fragment() {
         binding.startRouteButton.setOnClickListener {
             navigateToMapFragment()
         }
+
+        binding.logoutButtonSRS.setOnClickListener{
+            logout()
+        }
+
         binding.startTV.setText(R.string.start_route_success_wait)
 
         return binding.root
@@ -122,5 +127,10 @@ class StartRouteSuccessFragment : Fragment() {
             }
         }
         timer.start()
+    }
+
+    private fun logout(){
+        preferences.edit().remove("TOKEN").apply()
+        view?.findNavController()?.navigate(R.id.action_startRouteSuccess_to_loginFragment)
     }
 }
