@@ -44,13 +44,17 @@ class StoppedRouteFragment : Fragment() {
         binding.goBackButton.setOnClickListener {
             findNavController().navigate(R.id.action_stoppedRouteFragment_to_startRouteNotRegistered)
         }
+
         viewModel.locations.observe(viewLifecycleOwner, { listOfLocationData ->
             val dist = viewModel.calculateDistance(listOfLocationData)
             binding.distanceTextview.text = String.format("%.3f %s",dist,getString(R.string.distance_unit))
+
+            val speed = viewModel.calculateSpeed(preferences.getLong("starttime", 0L))
+            binding.speedTextview.text = String.format("%.2f %s",speed ,getString(R.string.speed_unit))
         })
 
-        binding.distanceTextview.text = String.format("%.3f %s",viewModel.getDistance(),getString(R.string.distance_unit))
-        binding.speedTextview.text = String.format("%.2f %s",viewModel.getAverageSpeed() ,getString(R.string.speed_unit))
+        //binding.distanceTextview.text = String.format("%.3f %s",viewModel.getDistance(),getString(R.string.distance_unit))
+        //binding.speedTextview.text = String.format("%.2f %s",viewModel.getAverageSpeed() ,getString(R.string.speed_unit))
 
         // Get name from shared preferences
         val name = preferences.getString("fullName", null).toString()

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
  */
 class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao) : ViewModel() {
     private var averageSpeed : Double = 4.0
+    private var distance: Double = 0.0
 
     private var _locations = locationDatabaseDao.getAllLocationsLiveData()
     val locations: LiveData<List<LocationData>>
@@ -33,12 +34,24 @@ class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao
     }*/
 
     fun getDistance(): Double {
-        return 0.0
+        return distance
     }
+
     suspend fun clearDataLocation(){
         locationDatabaseDao.clear()
     }
+
     fun calculateDistance(list: List<LocationData>): Double{
-        return calculateWalkedDistance(list)
+        distance = calculateWalkedDistance(list)
+        return distance
+    }
+
+    fun calculateSpeed(starttime: Long): Double{
+        val endtime = java.util.Calendar.getInstance().timeInMillis
+
+        val endtimeInMinutes = (endtime - starttime) / 60000
+        val speed = (distance /endtimeInMinutes)*60
+
+        return speed
     }
 }

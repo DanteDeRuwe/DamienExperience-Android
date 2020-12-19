@@ -26,6 +26,7 @@ import com.example.damiantour.network.model.RegistrationData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 
 /**
@@ -82,6 +83,10 @@ class StartRouteSuccessFragment : Fragment() {
                println(e)
            }
        }
+
+       val starttime = java.util.Calendar.getInstance().timeInMillis
+       preferences.edit().putLong("starttime", starttime).apply()
+
        //check date en location
        val action = StartRouteSuccessFragmentDirections.actionStartRouteSuccessToMapFragment()
        view?.findNavController()?.navigate(action)
