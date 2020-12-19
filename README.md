@@ -10,6 +10,8 @@ git clone git@github.com:HoGent-Projecten3/projecten3-2021-android-d4.git
 ## Downloads
 APK downloads for the application can be found [here](https://damienexperience.vankerkvoorde.me/)
 
+The app was also submitted to the Google Play Store (and approved). Currently it can only be downloaded if you are submitted to the Alpha testing phase.
+
 ### Credetials
 ```
 email: google@test.com
