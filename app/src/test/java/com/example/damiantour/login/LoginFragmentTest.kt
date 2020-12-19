@@ -19,19 +19,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import java.util.stream.Stream
 
-
-@RunWith(Parameterized::class)
 internal class LoginFragmentTest {
-    @Rule
-    @JvmField
-    var mockitoRule: MockitoRule = MockitoJUnit.rule()
-
-    @Mock
-    private lateinit var apiService: DamianApiService
-
-    val loginFragment: LoginFragment = LoginFragment()
-    private lateinit var context: Context
-
 
     @Test
     fun loginFieldsTest(){
@@ -41,41 +29,5 @@ internal class LoginFragmentTest {
 
         assertEquals("test@test.com", loginFields.getEmail())
         assertEquals("P@ssword1", loginFields.getPassword())
-    }
-
-
-    @ParameterizedTest
-    @MethodSource("provideLoginData")
-    suspend fun sendLoginRequestTest(loginData: LoginData, expectedAssertion: Boolean){
-        var loginData = loginData
-        `when`(apiService.login(loginData)).then {
-            provideApiLogin(loginData)
-        }
-        loginFragment.sendLoginRequest(loginData)
-        val sharedPreferences = context.getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("TOKEN", null)
-        assertEquals(expectedAssertion, token != "")
-    }
-
-    fun provideApiLogin(loginData: LoginData): String{
-        var userData: HashMap<LoginData, String> = hashMapOf(
-                LoginData("test@test.com", "testpass") to "poqzkdpqzodk",
-                LoginData("jonas@test.com", "testpass") to "euhdfiszsef",
-                LoginData("dante@test.com", "testpass") to "foisuhyfife",
-        )
-
-        var token = userData.getOrDefault(loginData, "")
-
-        return token
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters
-        fun provideLoginData(): Collection<Array<Any>>
-        = listOf(
-                arrayOf(LoginData("test@test.com", "testpass"), true),
-                arrayOf(LoginData("test@test.com", "testtass"), false)
-        )
     }
 }
