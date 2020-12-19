@@ -66,9 +66,12 @@
     <string name="go_back_button">Ga Terug</string>
     <string name="chatSocketURI">https://damienexperience-chat.herokuapp.com/</string>
     <string name="testSendBtn">Button</string>
+    <string name="comingSoon">Coming soon!</string>
 
     <!-- error meldingingen -->
     <string name="fout_ophalen_route">Er is probleem met het ophalen van de route </string>
     <string name="fout_ophalen_registration">Kon de registratie niet ophalen</string>
+
+
 
 </resources>

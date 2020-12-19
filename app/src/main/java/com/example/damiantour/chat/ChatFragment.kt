@@ -30,25 +30,6 @@ class ChatFragment : Fragment() {
     private lateinit var mSocket: Socket
     private var url: String = "https://localhost:3000/"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        try {
-            val options = IO.Options()
-            options.transports = arrayOf(WebSocket.NAME)
-            mSocket = IO.socket(url, options)
-            mSocket.connect()
-            if (mSocket.connected()){
-                val toast =  Toast.makeText(context, "CONNECTED", Toast.LENGTH_LONG);
-                toast.show()
-            }else{
-                val toast =  Toast.makeText(context, "FAILED", Toast.LENGTH_LONG);
-                toast.show()
-            }
-        }catch (e: Exception){
-            throw Exception(e)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
