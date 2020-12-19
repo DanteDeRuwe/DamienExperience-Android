@@ -21,12 +21,13 @@ Author: Ruben Naudts
         >
 
         <ImageView
+            android:id="@+id/imageView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
 
+            android:layout_height="match_parent"
+            android:contentDescription="@string/login_background_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/login_background"
-            android:contentDescription="@string/login_background_description" />
+            android:src="@drawable/login_background" />
 
         <ImageView
             android:id="@+id/damiaan_logo_login"
@@ -114,24 +115,6 @@ Author: Ruben Naudts
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/password_input" />
-
-        <Button
-            android:id="@+id/lost_password_button"
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/transparent_button_shape"
-            android:fontFamily="@font/akkuratpro"
-            android:onClick="@{() -> loginViewModel.forgotPassword()}"
-            android:text="@string/lost_password"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/login_errorfield"
-            app:layout_constraintVertical_bias="0.956" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
