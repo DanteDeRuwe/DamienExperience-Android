@@ -33,10 +33,12 @@ class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao
     }*/
 
     fun getDistance(): Double {
-        var distance :Double = 0.0
-        GlobalScope.launch(Dispatchers.IO) {
-            distance = calculateWalkedDistance(locations.value!!)
-        }
-        return distance
+        return 0.0
+    }
+    suspend fun clearDataLocation(){
+        locationDatabaseDao.clear()
+    }
+    fun calculateDistance(list: List<LocationData>): Double{
+        return calculateWalkedDistance(list)
     }
 }

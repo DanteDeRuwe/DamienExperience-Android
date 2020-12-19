@@ -617,10 +617,8 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * Shows confirm dialog when user presses stop tour button
      */
     private fun stopTourConfirmed(){
-        //TODO : stop tour afwerken...
-        //update coords
+
         lifecycleScope.launch {
-            //val token = preferences.getString("TOKEN", null).toString()
             try {
 
                 locationService.updateWalkApi()
@@ -632,7 +630,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 println(e.localizedMessage)
             }
 
-            mapViewModel.deleteDatabaseLocations()
             findNavController().navigate(R.id.action_mapFragment_to_stoppedRouteFragment)
         }
     }
