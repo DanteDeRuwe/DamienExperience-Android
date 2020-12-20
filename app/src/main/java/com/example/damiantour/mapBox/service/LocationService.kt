@@ -134,8 +134,8 @@ class LocationService : Service() {
     @SuppressLint("MissingPermission")
     fun startService() {
         if (isServiceStarted) return
-        println("Starting the foreground service task")
-        Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show()
+        //println("Starting the foreground service task")
+        //Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show()
         isServiceStarted = true
 
         // we need this lock so our service gets not affected by Doze Mode
@@ -161,66 +161,13 @@ class LocationService : Service() {
                     getFusedLocationProviderClient(context)
 
         }
-        /*
-        if (locationRequest == null) {
-            locationRequest = LocationRequest().apply {
-                // Sets the desired interval for active location updates. This interval is inexact. You
-                // may not receive updates at all if no location sources are available, or you may
-                // receive them less frequently than requested. You may also receive updates more
-                // frequently than requested if other applications are requesting location at a more
-                // frequent interval.
-                //
-                // IMPORTANT NOTE: Apps running on Android 8.0 and higher devices (regardless of
-                // targetSdkVersion) may receive updates less frequently than this interval when the app
-                // is no longer in the foreground.
-                interval = TimeUnit.SECONDS.toMillis(2)
-
-                // Sets the fastest rate for active location updates. This interval is exact, and your
-                // application will never receive updates more frequently than this value.
-                fastestInterval = TimeUnit.SECONDS.toMillis(1)
-
-                // Sets the maximum time when batched location updates are delivered. Updates may be
-                // delivered sooner than this interval.
-                maxWaitTime = TimeUnit.MINUTES.toMillis(1)
-
-                smallestDisplacement = 5F
-
-                priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-            }
-        }
-
-        if(locationCallback == null){
-            locationCallback = object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult?) {
-                    super.onLocationResult(locationResult)
-                    if (locationResult?.lastLocation != null) {
-                        // save to local list
-                        /*
-                        println("write")
-                        postNewLocation(locationResult.lastLocation)
-                        if(tempLocationsSize()==30){
-                            println("database")
-                            postLocation()
-                        }
-                        */
-                        println("update")
-                    } else {
-                        Timber.d("Location information isn't available.")
-                    }
-                }
-            }
-        }
-
-        fusedLocationProviderClient?.requestLocationUpdates(
-                locationRequest,locationCallback, Looper.myLooper()
-        )*/
         job = GlobalScope.launch {
             writeLocationCoRoutine()
         }
     }
 
     fun stopService() {
-        println("Stopping the foreground service")
+        //println("Stopping the foreground service")
         try {
             wakeLock?.let {
                 if (it.isHeld) {
@@ -229,11 +176,10 @@ class LocationService : Service() {
             }
             GlobalScope.launch(Dispatchers.IO) {
                 routeDataSource?.clear()
-                deleteDatabaseLocations()
+
             }
             cancellationSource?.cancel()
             stopForeground(true)
-            //fusedLocationProviderClient?.removeLocationUpdates(locationCallback)
             job?.cancel("Stop record location")
             stopSelf()
         } catch (e: Exception) {
@@ -277,25 +223,25 @@ class LocationService : Service() {
         while (timer) {
             var counter = 0
             while (counter <= 60) {
-                println("How many secs passed : $counter")
                 delay(2000)
                 fusedLocationProviderClient?.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationSource?.token)?.addOnSuccessListener {
                     val loc = it
-                    println("${loc.latitude},${loc.longitude}")
                     postNewLocation(loc)
                 }?.addOnCanceledListener {
                     println("cancel")
                 }
                 counter += 2
-                println("counter $counter")
+                //println(counter)
             }
-            if (tempLocationsSize() == 30) {
+            if (tempLocationsSize() >= 30) {
                 println("database")
                 postLocation()
             }
             time += 1
             val sendWhen = preferences.getInt("send_route_call_api", 5)
+            //println("time : $time  sendWhen : $sendWhen")
             if (time == sendWhen) {
+                //println("callApi")
                 updateWalkApi()
                 time = 0
             }
@@ -334,23 +280,21 @@ class LocationService : Service() {
         GlobalScope.launch {
             val tupelsList: List<LocationData> = dataSource?.getAllLocations()!!
             var size = tupelsList.size
-            println("size $size")
             val startIndex = size - howManyItemsToSend
-            println("startIndex $startIndex")
             val allTuples = ArrayList<ArrayList<Double>>()
             size -= 1
-            if(startIndex>0){
+            if(howManyItemsToSend!=0 && startIndex>=0){
                 for (x in startIndex..size) {
-                    println("x $x")
                     val tuple = tupelsList[x]
                     allTuples.add(tuple.getLocationTuple())
                 }
                 try {
                     apiService.updateWalk(token, allTuples)
-                    howManyItemsToSend = 0
+
                 } catch (e: java.lang.Exception) {
                     println(e.localizedMessage)
                 }
+                howManyItemsToSend = 0
             }
         }
     }
@@ -363,13 +307,6 @@ class LocationService : Service() {
         LocationUtils.resetCurrentTempLocations()
     }
 
-    /**
-     * @author Simon
-     * clear both the local database
-     */
-    suspend fun deleteDatabaseLocations() {
-        dataSource?.clear()
-    }
 
     /**
      * @author Simon

@@ -1,16 +1,16 @@
 package com.example.damiantour
 
-import com.example.damiantour.mapBox.model.LanguagesText
-import com.example.damiantour.mapBox.model.Route
-import com.example.damiantour.mapBox.model.Tuple
-import com.example.damiantour.mapBox.model.Waypoint
+import com.example.damiantour.database.DamianDatabase
+import com.example.damiantour.mapBox.model.*
 import com.example.damiantour.network.model.RouteData
 import com.example.damiantour.network.model.WaypointData
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.*
 
 /**
- * @author Simon
+ * @author Simon & Jordy Van Kerkvoorde
  * finds the closest point in a list and within a 500m
  * http://turfjs.org/docs/#distance
  */
@@ -62,4 +62,15 @@ fun getCoordinatesFromRoute(routeData: RouteData) : List<Tuple>{
 }
 fun mapRouteDataToRoute(routeData: RouteData): Route {
     return Route(tourName = routeData.tourName,date = routeData.date,distanceInMeters = routeData.distanceInMeters)
+}
+
+fun calculateWalkedDistance(walkdata: List<LocationData>): Double {
+    var walkpointsList = ArrayList<Point>()
+    for(tuple in walkdata){
+        walkpointsList.add(tuple.mapToPoint())
+    }
+    var walkLine = LineString.fromLngLats(walkpointsList)
+    val distance = TurfMeasurement.length(walkLine, "kilometers")
+
+    return distance
 }

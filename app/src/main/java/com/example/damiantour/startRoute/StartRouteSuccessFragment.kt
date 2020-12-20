@@ -26,6 +26,7 @@ import com.example.damiantour.network.model.RegistrationData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 
 /**
@@ -47,6 +48,11 @@ class StartRouteSuccessFragment : Fragment() {
         binding.startRouteButton.setOnClickListener {
             navigateToMapFragment()
         }
+
+        binding.logoutButtonSRS.setOnClickListener{
+            logout()
+        }
+
         binding.startTV.setText(R.string.start_route_success_wait)
 
         return binding.root
@@ -78,13 +84,17 @@ class StartRouteSuccessFragment : Fragment() {
            val token = preferences.getString("TOKEN", null).toString()
            try{
                apiService.startWalk(token)
+               val starttime = java.util.Calendar.getInstance().timeInMillis
+               preferences.edit().putLong("starttime", starttime).apply()
+
+               //check date en location
+               val action = StartRouteSuccessFragmentDirections.actionStartRouteSuccessToMapFragment()
+               view?.findNavController()?.navigate(action)
            }catch(e : Exception){
                println(e)
+               Toast.makeText(context,R.string.fout_start_wandeling,Toast.LENGTH_LONG).show()
            }
        }
-       //check date en location
-       val action = StartRouteSuccessFragmentDirections.actionStartRouteSuccessToMapFragment()
-       view?.findNavController()?.navigate(action)
    }
 
     private fun toggleButton(bool: Boolean){
@@ -117,5 +127,10 @@ class StartRouteSuccessFragment : Fragment() {
             }
         }
         timer.start()
+    }
+
+    private fun logout(){
+        preferences.edit().remove("TOKEN").apply()
+        view?.findNavController()?.navigate(R.id.action_startRouteSuccess_to_loginFragment)
     }
 }

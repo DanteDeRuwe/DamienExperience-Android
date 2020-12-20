@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<layout xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -12,15 +12,15 @@
             android:id="@+id/startRouteButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="172dp"
+            android:layout_marginBottom="24dp"
             android:width="175dp"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/primary_button_shape"
             android:text="@string/start_route"
             android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/logoutButtonSRS"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/startTV"
@@ -150,6 +150,18 @@
             app:layout_constraintStart_toEndOf="@+id/minutesTV"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.996" />
+
+        <Button
+            android:id="@+id/logoutButtonSRS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/primary_button_shape"
+            android:text="@string/text_logout"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

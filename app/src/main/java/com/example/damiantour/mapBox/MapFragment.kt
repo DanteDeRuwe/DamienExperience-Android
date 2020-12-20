@@ -178,8 +178,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         mapViewModel.tempLocations.observe(viewLifecycleOwner, { templocationList ->
             val last = templocationList.size - 1
             if (last >= 0) {
-                val location = templocationList[last]
-                println("Temp location : " + location.latitude.toString() + " , " + location.longitude.toString())
                 drawWalkedLine()
             }
         })
@@ -230,7 +228,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         }
         if (!coroutinesActive) {
             coroutinesActive = true
-            println("cocourtine gestart")
             getRouteAndDraw()
         }
     }
@@ -263,7 +260,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
         val routeResult : RouteData?
         try {
             routeResult = apiService.getRouteById(JWTtoken, routeId)
-            println(routeResult)
             mapViewModel.addPath(routeResult)
             drawRouteLayer()
             drawWaypointsLayer()
@@ -290,7 +286,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 style.removeSource("line-source")
             }
             val list =  mapViewModel.getRoute()
-            println(list)
+
             if(list.isNotEmpty()) {
                 style.addSource(
                         GeoJsonSource(
@@ -335,8 +331,6 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
             //Loops over all the coordinates
 
             for (wp in list) {
-                //get properties
-                println(wp)
                 //get coords
                 val lon: Double = wp.longitude
                 val lat: Double = wp.latitude
@@ -617,22 +611,19 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
      * Shows confirm dialog when user presses stop tour button
      */
     private fun stopTourConfirmed(){
-        //TODO : stop tour afwerken...
-        //update coords
+
         lifecycleScope.launch {
-            //val token = preferences.getString("TOKEN", null).toString()
             try {
 
                 locationService.updateWalkApi()
                 locationService.stopService()
                 //TODO(not yet totally implemented in backend could crash backend if called)
                 //nodejs mail service
-                //apiService.stopWalk(token)
+                apiService.stopWalk(JWTtoken)
             }catch (e: Exception){
                 println(e.localizedMessage)
             }
 
-            mapViewModel.deleteDatabaseLocations()
             findNavController().navigate(R.id.action_mapFragment_to_stoppedRouteFragment)
         }
     }

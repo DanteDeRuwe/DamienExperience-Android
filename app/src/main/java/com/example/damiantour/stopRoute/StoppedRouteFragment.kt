@@ -8,12 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
+import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.databinding.FragmentStoppedRouteBinding
+import com.example.damiantour.mapBox.MapViewModel
+import com.example.damiantour.mapBox.MapViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
- * @author: Ruben Naudts & Jordy Van Kerkvoorde <3
+ * @author: Ruben Naudts & Jordy Van Kerkvoorde
  */
 class StoppedRouteFragment : Fragment() {
 
@@ -28,16 +34,33 @@ class StoppedRouteFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentStoppedRouteBinding.inflate(inflater, container, false)
 
-        viewModel = ViewModelProvider(this).get(StoppedRouteViewModel::class.java)
+        //viewModel = ViewModelProvider(this).get(StoppedRouteViewModel::class.java)
+
+        val application = requireNotNull(this.activity).application
+        val locationDataSource = DamianDatabase.getInstance(application).locationDatabaseDao
+
+        val viewModelFactory = StoppedRouteViewModelFactory(locationDataSource)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(StoppedRouteViewModel::class.java)
 
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
 
         binding.goBackButton.setOnClickListener {
+            clearLocationData()
             findNavController().navigate(R.id.action_stoppedRouteFragment_to_startRouteNotRegistered)
         }
 
-        binding.distanceTextview.text = String.format("%.3f %s",viewModel.getDistanceWalked() ,getString(R.string.distance_unit))
-        binding.speedTextview.text = String.format("%.2f %s",viewModel.getAverageSpeed() ,getString(R.string.speed_unit))
+        viewModel.locations.observe(viewLifecycleOwner, { listOfLocationData ->
+            var dist= 0.00
+            var speed = 0.0
+            if(!listOfLocationData.isNullOrEmpty()) {
+                dist = viewModel.calculateDistance(listOfLocationData)
+                speed = viewModel.calculateSpeed(preferences.getLong("starttime", 0L))
+            }
+            binding.distanceTextview.text =
+                String.format("%.3f %s", dist, getString(R.string.distance_unit))
+            binding.speedTextview.text =
+                String.format("%.2f %s", speed, getString(R.string.speed_unit))
+        })
 
         // Get name from shared preferences
         val name = preferences.getString("fullName", null).toString()
@@ -46,6 +69,11 @@ class StoppedRouteFragment : Fragment() {
 
 
         return binding.root
+    }
+    private fun clearLocationData(){
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.clearDataLocation()
+        }
     }
 
 

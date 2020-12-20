@@ -14,17 +14,19 @@
             android:background="?android:attr/windowBackground"
             app:menu="@menu/menu" />
 
-        <Button
-            android:id="@+id/testSendBtn"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/nav_bar"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="162dp"
-            android:layout_marginEnd="161dp"
-            android:layout_marginBottom="356dp"
-            android:text="@string/testSendBtn" />
+            android:layout_marginStart="60dp"
+            android:layout_marginEnd="60dp"
+            android:layout_marginBottom="346dp"
+            android:text="@string/comingSoon"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/comingSoon" />
     </RelativeLayout>
 
 </layout>

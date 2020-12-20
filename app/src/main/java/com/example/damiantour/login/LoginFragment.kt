@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.databinding.FragmentLoginBinding
+import com.example.damiantour.login.model.LoginFields
 import com.example.damiantour.network.Connection
 import com.example.damiantour.network.DamianApiService
 import com.example.damiantour.network.model.LoginData
@@ -91,7 +92,7 @@ class LoginFragment : Fragment() {
      * On succes: saves the token in the SharedPreferences and navigates
      * On faillure: shows message
      */
-    private suspend fun sendLoginRequest(loginData: LoginData){
+     suspend fun sendLoginRequest(loginData: LoginData){
         try {
             //Execute API Login request
             val token =  "Bearer " + apiService.login(loginData)
@@ -148,6 +149,10 @@ class LoginFragment : Fragment() {
         val profiledata = apiService.getProfile(token)
         val fullname = profiledata.firstName + " " + profiledata.lastName
         preferences.edit().putString("fullName",fullname).apply()
+        preferences.edit().putString("email",profiledata.email).apply()
+    }
+    fun getLoginFields() : LoginFields{
+        return viewModel.getLogin()!!
     }
 
 }
