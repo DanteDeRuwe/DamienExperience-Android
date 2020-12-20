@@ -10,7 +10,7 @@ git clone git@github.com:HoGent-Projecten3/projecten3-2021-android-d4.git
 ## Downloads
 APK downloads for the application can be found [here](https://damienexperience.vankerkvoorde.me/)
 
-### Credetials
+### Credentials
 ```
 email: google@test.com
 password: P@ssword1
