@@ -27,7 +27,6 @@ import java.lang.Exception
 class SettingsFragment :Fragment(){
     private lateinit var preferences: SharedPreferences
     private lateinit var binding: FragmentSettingsBinding
-    private var text_deelnemerscode : String = "Deelnemerscode"
 
     private val apiService : DamianApiService = DamianApiService.create()
 
@@ -68,10 +67,12 @@ class SettingsFragment :Fragment(){
         binding.buttonShareDeelnemerscode.setOnClickListener {
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, text_deelnemerscode)
+                putExtra(Intent.EXTRA_SUBJECT, R.string.text_deellink)
+                putExtra(Intent.EXTRA_TEXT, "http://www.url.com")
                 type = "text/plain"
+
             }
-            val shareIntent = Intent.createChooser(sendIntent, "Share deelnemerscode")
+            val shareIntent = Intent.createChooser(sendIntent, "Share URL")
             startActivity(shareIntent)
         }
         binding.btnHowItWork.setOnClickListener {
@@ -86,17 +87,6 @@ class SettingsFragment :Fragment(){
 
         return binding.root
 
-    }
-
-    private fun getDeelnemerscode(){
-        var deelnemerscode = preferences.getString("deelnemerscode", null)
-        if (deelnemerscode == null){
-            lifecycleScope.launch {
-                deelnemerscode = setDeelnemerscode()
-            }
-        }
-
-        binding.textDeelnemerscode.text = deelnemerscode
     }
 
     private suspend fun setDeelnemerscode() : String {

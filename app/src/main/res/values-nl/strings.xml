@@ -69,7 +69,7 @@
     <string name="text_locatieDelen">Om de hoeveel minuten wenst u uw locatie te delen?</string>
     <string name="text_logout">Logout</string>
     <string name="text_notifications">Notificaties</string>
-    <string name="text_deelnemerscode">Deelnemerscode</string>
+    <string name="text_deelnemerscode">Deelnemer link</string>
     <string name="text_aanUitZetten">Aan of uit zetten</string>
     <string name="text_deelnemerscodeGenerated">DeelnemerscodeDummy</string>
     <string name="text_appWerking">Hoe werkt de app?</string>
@@ -78,6 +78,7 @@
     <string name="text_gebruikersnaam">Jonas Haenebalcke</string>
     <string name="text_maxSeekbar">25</string>
     <string name="text_minSeekbar">5</string>
+    <string name="text_deellink">Ik doe mee aan de Damien Experience wandeling. Volg me hier via deze link!</string>
 
     <!-- error meldingingen -->
     <string name="fout_ophalen_route">Er is probleem met het ophalen van de route</string>

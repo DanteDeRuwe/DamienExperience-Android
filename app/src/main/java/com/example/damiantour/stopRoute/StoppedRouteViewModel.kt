@@ -21,7 +21,7 @@ import java.util.*
 class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao) : ViewModel() {
     private var averageSpeed : Double = 4.0
     private var distance: Double = 0.0
-    private lateinit var calender : Calendar;
+    private var calender : Calendar?=null
 
     private var _locations = locationDatabaseDao.getAllLocationsLiveData()
     val locations: LiveData<List<LocationData>>
@@ -37,7 +37,7 @@ class StoppedRouteViewModel(private val locationDatabaseDao: LocationDatabaseDao
         if(calender==null){
             setCalender(Calendar.getInstance())
         }
-        return calender
+        return calender!!
     }
     fun getDistance(): Double {
         return distance
