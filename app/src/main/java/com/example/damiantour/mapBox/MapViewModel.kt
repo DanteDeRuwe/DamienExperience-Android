@@ -70,19 +70,14 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
         val listTempLoc = _tempLocations.value
         val listLoc = _locations.value
         if (listLoc != null && listLoc.isNotEmpty()) {
-            println("listLoc : " + listLoc.size)
             return if (listTempLoc != null && listTempLoc.isNotEmpty()) {
-                println("extra listTempLoc : " + listTempLoc.size)
                 val mix = listLoc + listTempLoc
-                println("mix list : " + mix.size)
                 mix
-
             } else {
                 listLoc
             }
         } else {
             if (listTempLoc != null && listTempLoc.isNotEmpty()) {
-                println("listTempLoc : " + listTempLoc.size)
                 return listTempLoc
             }
             return ArrayList()
@@ -165,7 +160,7 @@ class MapViewModel(private val tupleDatabaseDao: TupleDatabaseDao,
             waypointDatabaseDao.clear()
             for (waypointdata in waypoints) {
                 val waypoint = mapWaypointDataToWaypoint(waypointdata)
-                println(waypoint)
+
                 waypointDatabaseDao.insert(waypoint)
             }
         }

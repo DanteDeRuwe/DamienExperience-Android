@@ -8,12 +8,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.damiantour.R
 import com.example.damiantour.database.DamianDatabase
 import com.example.damiantour.databinding.FragmentStoppedRouteBinding
 import com.example.damiantour.mapBox.MapViewModel
 import com.example.damiantour.mapBox.MapViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * @author: Ruben Naudts & Jordy Van Kerkvoorde
@@ -42,6 +45,7 @@ class StoppedRouteFragment : Fragment() {
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
 
         binding.goBackButton.setOnClickListener {
+            clearLocationData()
             findNavController().navigate(R.id.action_stoppedRouteFragment_to_startRouteNotRegistered)
         }
 
@@ -65,6 +69,11 @@ class StoppedRouteFragment : Fragment() {
 
 
         return binding.root
+    }
+    private fun clearLocationData(){
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.clearDataLocation()
+        }
     }
 
 

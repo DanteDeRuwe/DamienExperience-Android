@@ -223,19 +223,17 @@ class LocationService : Service() {
         while (timer) {
             var counter = 0
             while (counter <= 60) {
-
                 delay(2000)
                 fusedLocationProviderClient?.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationSource?.token)?.addOnSuccessListener {
                     val loc = it
-
                     postNewLocation(loc)
                 }?.addOnCanceledListener {
                     println("cancel")
                 }
                 counter += 2
-
+                //println(counter)
             }
-            if (tempLocationsSize() == 30) {
+            if (tempLocationsSize() >= 30) {
                 println("database")
                 postLocation()
             }
@@ -282,15 +280,11 @@ class LocationService : Service() {
         GlobalScope.launch {
             val tupelsList: List<LocationData> = dataSource?.getAllLocations()!!
             var size = tupelsList.size
-            println("size $size")
-            println("howManyItemsToSend $howManyItemsToSend")
             val startIndex = size - howManyItemsToSend
-            println("startIndex $startIndex")
             val allTuples = ArrayList<ArrayList<Double>>()
             size -= 1
             if(howManyItemsToSend!=0 && startIndex>=0){
                 for (x in startIndex..size) {
-                    println("x $x")
                     val tuple = tupelsList[x]
                     allTuples.add(tuple.getLocationTuple())
                 }

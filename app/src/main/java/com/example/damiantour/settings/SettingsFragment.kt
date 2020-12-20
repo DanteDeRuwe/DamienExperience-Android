@@ -1,10 +1,9 @@
 package com.example.damiantour.settings
 
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,9 +14,16 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.damiantour.R
+import com.example.damiantour.database.DamianDatabase
+import com.example.damiantour.database.dao.LocationDatabaseDao
+import com.example.damiantour.database.dao.RouteDatabaseDao
 import com.example.damiantour.databinding.FragmentSettingsBinding
+import com.example.damiantour.mapBox.service.LocationService
+import com.example.damiantour.mapBox.service.LocationServiceBinder
 import com.example.damiantour.network.DamianApiService
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
@@ -25,13 +31,35 @@ import java.lang.Exception
  *  author: Simon Bettens & Lucas Van der Haegen
  */
 class SettingsFragment :Fragment(){
+    private lateinit var routeDataSource: RouteDatabaseDao
+    private lateinit var locationDataSource: LocationDatabaseDao
     private lateinit var preferences: SharedPreferences
     private lateinit var binding: FragmentSettingsBinding
+    //the service
+    private lateinit var locationService : LocationService
+    //there is a service bound on the object
+    private var mBound: Boolean = false
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as LocationServiceBinder
+            locationService = binder.getService()
+            mBound = true
+        }
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
 
     private val apiService : DamianApiService = DamianApiService.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val serviceStart = Intent(context, LocationService::class.java)
+        serviceStart.action = "START"
+        context?.startService(serviceStart)
+        context?.bindService(serviceStart, connection, Context.BIND_AUTO_CREATE)
     }
 
     //on the create view
@@ -39,9 +67,11 @@ class SettingsFragment :Fragment(){
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val application = requireNotNull(this.activity).application
         preferences = requireActivity().getSharedPreferences("damian-tours", Context.MODE_PRIVATE)
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
-
+        locationDataSource = DamianDatabase.getInstance(application).locationDatabaseDao
+        routeDataSource = DamianDatabase.getInstance(application).routeDatabaseDao
         val bottomNavigationView : BottomNavigationView = binding.root.findViewById(R.id.nav_bar)
         val navController = findNavController()
         bottomNavigationView.setupWithNavController(navController)
@@ -106,7 +136,12 @@ class SettingsFragment :Fragment(){
 
     private fun logout(){
         preferences.edit().remove("TOKEN").apply()
-        //wip
+        GlobalScope.launch(Dispatchers.IO) {
+            locationService.updateWalkApi()
+            locationService.stopService()
+            routeDataSource.clear()
+            locationDataSource.clear()
+        }
         view?.findNavController()?.navigate(R.id.action_settingsFragment2_to_loginFragment)
     }
 
