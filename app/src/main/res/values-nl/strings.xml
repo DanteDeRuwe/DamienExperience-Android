@@ -83,4 +83,5 @@
     <!-- error meldingingen -->
     <string name="fout_ophalen_route">Er is probleem met het ophalen van de route</string>
     <string name="fout_ophalen_registration">Kon de registratie niet ophalen</string>
+    <string name="fout_start_wandeling">Je kan deze wandeling niet starten</string>
 </resources>

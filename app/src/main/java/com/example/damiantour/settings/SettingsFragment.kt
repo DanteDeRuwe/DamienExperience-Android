@@ -95,10 +95,15 @@ class SettingsFragment :Fragment(){
             preferences.edit().putBoolean("notifications",isChecked).apply()
         }
         binding.buttonShareDeelnemerscode.setOnClickListener {
+            var url = "https://damianexperience.netlify.app/track"
+            val mail = preferences.getString("email", null)
+            if(mail!=null){
+                url+="?email=${mail}"
+            }
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_SUBJECT, R.string.text_deellink)
-                putExtra(Intent.EXTRA_TEXT, "http://www.url.com")
+                putExtra(Intent.EXTRA_TEXT, url)
                 type = "text/plain"
 
             }
@@ -107,7 +112,7 @@ class SettingsFragment :Fragment(){
         }
         binding.btnHowItWork.setOnClickListener {
             //enter the real link
-            val uris = Uri.parse("https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO")
+            val uris = Uri.parse("https://damianexperience.netlify.app/about")
             val intents = Intent(Intent.ACTION_VIEW, uris)
             val b = Bundle()
             b.putBoolean("new_window", true)

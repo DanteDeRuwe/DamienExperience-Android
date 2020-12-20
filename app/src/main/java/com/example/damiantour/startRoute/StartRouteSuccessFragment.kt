@@ -84,17 +84,17 @@ class StartRouteSuccessFragment : Fragment() {
            val token = preferences.getString("TOKEN", null).toString()
            try{
                apiService.startWalk(token)
+               val starttime = java.util.Calendar.getInstance().timeInMillis
+               preferences.edit().putLong("starttime", starttime).apply()
+
+               //check date en location
+               val action = StartRouteSuccessFragmentDirections.actionStartRouteSuccessToMapFragment()
+               view?.findNavController()?.navigate(action)
            }catch(e : Exception){
                println(e)
+               Toast.makeText(context,R.string.fout_start_wandeling,Toast.LENGTH_LONG).show()
            }
        }
-
-       val starttime = java.util.Calendar.getInstance().timeInMillis
-       preferences.edit().putLong("starttime", starttime).apply()
-
-       //check date en location
-       val action = StartRouteSuccessFragmentDirections.actionStartRouteSuccessToMapFragment()
-       view?.findNavController()?.navigate(action)
    }
 
     private fun toggleButton(bool: Boolean){

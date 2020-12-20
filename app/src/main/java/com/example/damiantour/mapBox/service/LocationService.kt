@@ -134,8 +134,8 @@ class LocationService : Service() {
     @SuppressLint("MissingPermission")
     fun startService() {
         if (isServiceStarted) return
-        println("Starting the foreground service task")
-        Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show()
+        //println("Starting the foreground service task")
+        //Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show()
         isServiceStarted = true
 
         // we need this lock so our service gets not affected by Doze Mode
@@ -167,7 +167,7 @@ class LocationService : Service() {
     }
 
     fun stopService() {
-        println("Stopping the foreground service")
+        //println("Stopping the foreground service")
         try {
             wakeLock?.let {
                 if (it.isHeld) {

@@ -149,6 +149,7 @@ class LoginFragment : Fragment() {
         val profiledata = apiService.getProfile(token)
         val fullname = profiledata.firstName + " " + profiledata.lastName
         preferences.edit().putString("fullName",fullname).apply()
+        preferences.edit().putString("email",profiledata.email).apply()
     }
     fun getLoginFields() : LoginFields{
         return viewModel.getLogin()!!

@@ -619,7 +619,7 @@ class MapFragment : Fragment(), PermissionsListener, OnMapReadyCallback {
                 locationService.stopService()
                 //TODO(not yet totally implemented in backend could crash backend if called)
                 //nodejs mail service
-                //apiService.stopWalk(token)
+                apiService.stopWalk(JWTtoken)
             }catch (e: Exception){
                 println(e.localizedMessage)
             }

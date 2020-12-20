@@ -83,4 +83,5 @@
     <!-- error meldingingen -->
     <string name="fout_ophalen_route">Un problème est survenu lors de la récupération de l\'itinéraire</string>
     <string name="fout_ophalen_registration">Impossible de récupérer l\'enregistrement</string>
+    <string name="fout_start_wandeling">Vous ne pouvez pas commencer cette promenade</string>
 </resources>
